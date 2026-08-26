@@ -25,6 +25,7 @@ ignore = ["E501"]
 [dependency-groups]
 dev = [
     "ipykernel>=7.3.0",
+    "playwright>=1.62.0",
     "ruff>=0.16.4",
     "ty>=0.0.74",
 ]

@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
     load_database()
     yield
 
+
 # Tags metadata for better API documentation
 tags_metadata = [
     {
