@@ -26,6 +26,8 @@ class Session(BaseModel):
 
     @model_validator(mode="after")
     def end_after_start(self) -> Self:
+        if any(value.second or value.microsecond for value in (self.start_time, self.end_time)):
+            raise ValueError("Os horários devem ter precisão de minutos")
         if self.end_time <= self.start_time:
             raise ValueError("O horário final deve ser posterior ao inicial")
         return self

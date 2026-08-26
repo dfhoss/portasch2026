@@ -15,11 +15,10 @@ logger.configure(
         {
             "sink": sys.stderr,
             "level": "DEBUG",
-            "format": "[{level}] {time} | {message}\n{exception}",
+            "format": brazil_time_formatter,
         }
     ]
 )
-logger = logger.patch(lambda record: record.update(time=brazil_time_formatter(record)))
 
 
 @asynccontextmanager

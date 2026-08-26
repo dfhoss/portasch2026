@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from models.schedule import ScheduleDocument, slugify_id
+from models.schedule import ScheduleDocument, Session, slugify_id
 from pydantic import ValidationError
 
 
@@ -39,6 +39,18 @@ def test_rejects_session_when_end_is_not_after_start():
 
     with pytest.raises(ValidationError, match="posterior ao inicial"):
         ScheduleDocument.model_validate(payload)
+
+
+def test_rejects_second_precision_session_times():
+    """Removing minute-precision validation must make this test fail."""
+    with pytest.raises(ValidationError, match="precisão de minutos"):
+        Session.model_validate(
+            {
+                "startTime": "09:00:30",
+                "endTime": "10:00:30",
+                "location": "Sala",
+            }
+        )
 
 
 def test_slugify_id_uses_portuguese_text_without_accents():
