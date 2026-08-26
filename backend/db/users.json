@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "user_type": "admin",
+      "hashed_password": "$2b$12$Gl7RmB4HEeCJ.6YMHTKkgeMPgED1yEZy68ZTxezighY16Lbu3sUe2"
+    }
+  ]
+}

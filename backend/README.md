@@ -1,1 +1,1 @@
-back-end
+uvicorn app:app --reload --env-file .env
