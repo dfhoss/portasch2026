@@ -1,65 +1,65 @@
-# Painel administrativo da agenda Implementation Plan
+# Administrative Schedule Panel Implementation Plan
 
-> **Para agentes executores:** SUB-SKILL OBRIGATÓRIA: use `superpowers:subagent-driven-development` (recomendado) ou `superpowers:executing-plans` para executar este plano tarefa por tarefa. Os passos usam caixas de seleção (`- [ ]`) para acompanhamento.
+> **For executing agents:** REQUIRED SUB-SKILL: use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to execute this plan task by task. The steps use checkboxes (`- [ ]`) for tracking.
 
-**Objetivo:** Entregar em `/admin` um painel autenticado, independente do frontend público, para editar a agenda, os locais e os eixos armazenados em JSON.
+**Objective:** Deliver an authenticated panel at `/admin`, independent of the public frontend, for editing the schedule, locations, and axes stored in JSON.
 
-**Arquitetura:** O FastAPI servirá HTML, CSS e JavaScript puro e exporá APIs administrativas protegidas por `CurrentTokenData`. Modelos Pydantic validarão a agenda; clientes focados encapsularão leitura e escrita atômica dos três JSONs. Testes de API usarão diretórios temporários e Playwright validará os fluxos reais no navegador.
+**Architecture:** FastAPI will serve plain HTML, CSS, and JavaScript and expose administrative APIs protected by `CurrentTokenData`. Pydantic models will validate the schedule; focused clients will encapsulate atomic reading and writing of the three JSON files. API tests will use temporary directories, and Playwright will validate real browser flows.
 
-**Stack técnica:** Python 3.14, FastAPI 0.141+, Pydantic, pytest, TestClient, Playwright para Python, HTML5, CSS e JavaScript sem framework.
+**Technical stack:** Python 3.14, FastAPI 0.141+, Pydantic, pytest, TestClient, Playwright for Python, HTML5, CSS, and framework-free JavaScript.
 
-**Especificação:** `docs/superpowers/specs/2026-08-26-painel-administrativo-agenda-design.md`
+**Specification:** `docs/superpowers/specs/2026-08-26-painel-administrativo-agenda-design.md`
 
-## Restrições globais
+## Global constraints
 
-- Não modificar nem depender da pasta `frontend/`.
-- Preservar o formato público de `backend/db/schedule.json`, exceto pela migração aprovada dos eixos para identificadores em português.
-- Exigir JWT válido em todas as APIs de agenda, locais e eixos; o HTML estático não contém dados administrativos.
-- Manter o token somente em `sessionStorage`.
-- Gerar e ocultar IDs; locais aceitam somente `name` e recebem IDs `loc-NNN`.
-- Considerar uma única pessoa editando por vez; não adicionar bloqueios ou versionamento.
-- Gravar JSON de forma atômica e restaurar os dados anteriores se uma operação entre dois arquivos falhar.
-- Usar cópias temporárias dos JSONs em todos os testes.
-- Preservar alterações preexistentes do usuário em `backend/app.py`, `backend/routes/auth.py`, `backend/pyproject.toml` e `backend/uv.lock`.
-
----
-
-## Estrutura de arquivos
-
-- Criar `backend/models/schedule.py`: modelos Pydantic e validações estruturais da agenda.
-- Criar `backend/clients/json_store.py`: leitura e substituição atômica reutilizável.
-- Criar `backend/clients/schedule.py`: acesso à agenda e busca/propagação de referências.
-- Criar `backend/clients/locations.py`: CRUD do catálogo simples de locais.
-- Criar `backend/clients/knowledge_axes.py`: CRUD e migração dos eixos.
-- Criar `backend/routes/admin.py`: entrega do documento HTML.
-- Criar `backend/routes/schedule.py`, `locations.py` e `knowledge_axes.py`: APIs autenticadas.
-- Criar `backend/static/admin/index.html`, `admin.css` e `admin.js`: painel sem build.
-- Criar `backend/db/locations.json` e `knowledge_axes.json`: dados iniciais normalizados.
-- Criar `backend/tests/`: testes isolados de modelos, clientes, rotas e navegador.
-- Modificar `backend/clients/db.py`: resolver `DATABASE_PATH` no momento da chamada para isolar autenticação nos testes.
-- Modificar `backend/app.py`: registrar roteadores e montar `/admin/static`.
-- Modificar `backend/pyproject.toml` e `backend/uv.lock`: acrescentar pytest sem remover o Playwright já adicionado.
-- Modificar `backend/ARCHITECTURE.md` e `backend/README.md`: documentar responsabilidades e execução.
+- Do not modify or depend on the `frontend/` directory.
+- Preserve the public format of `backend/db/schedule.json`, except for the approved migration of axes to Portuguese identifiers.
+- Require a valid JWT for all schedule, location, and axis APIs; static HTML contains no administrative data.
+- Keep the token only in `sessionStorage`.
+- Generate and hide IDs; locations accept only `name` and receive `loc-NNN` IDs.
+- Assume only one person edits at a time; do not add locking or versioning.
+- Write JSON atomically and restore the previous data if an operation spanning two files fails.
+- Use temporary copies of the JSON files in every test.
+- Preserve the user's pre-existing changes in `backend/app.py`, `backend/routes/auth.py`, `backend/pyproject.toml`, and `backend/uv.lock`.
 
 ---
 
-### Tarefa 1: Infraestrutura de testes e modelos da agenda
+## File structure
 
-**Arquivos:**
-- Modificar: `backend/pyproject.toml`
-- Modificar mecanicamente: `backend/uv.lock`
-- Criar: `backend/models/__init__.py`
-- Criar: `backend/models/schedule.py`
-- Criar: `backend/tests/conftest.py`
-- Criar: `backend/tests/test_schedule_models.py`
+- Create `backend/models/schedule.py`: Pydantic models and structural schedule validation.
+- Create `backend/clients/json_store.py`: reusable atomic reading and replacement.
+- Create `backend/clients/schedule.py`: schedule access and reference lookup/propagation.
+- Create `backend/clients/locations.py`: CRUD for the simple location catalog.
+- Create `backend/clients/knowledge_axes.py`: axis CRUD and migration.
+- Create `backend/routes/admin.py`: serves the HTML document.
+- Create `backend/routes/schedule.py`, `locations.py`, and `knowledge_axes.py`: authenticated APIs.
+- Create `backend/static/admin/index.html`, `admin.css`, and `admin.js`: build-free panel.
+- Create `backend/db/locations.json` and `knowledge_axes.json`: normalized initial data.
+- Create `backend/tests/`: isolated model, client, route, and browser tests.
+- Modify `backend/clients/db.py`: resolve `DATABASE_PATH` at call time to isolate authentication in tests.
+- Modify `backend/app.py`: register routers and mount `/admin/static`.
+- Modify `backend/pyproject.toml` and `backend/uv.lock`: add pytest without removing the already added Playwright.
+- Modify `backend/ARCHITECTURE.md` and `backend/README.md`: document responsibilities and execution.
+
+---
+
+### Task 1: Test infrastructure and schedule models
+
+**Files:**
+- Modify: `backend/pyproject.toml`
+- Mechanically modify: `backend/uv.lock`
+- Create: `backend/models/__init__.py`
+- Create: `backend/models/schedule.py`
+- Create: `backend/tests/conftest.py`
+- Create: `backend/tests/test_schedule_models.py`
 
 **Interfaces:**
-- Consome: formato atual de `db/schedule.json`.
-- Produz: `ScheduleDocument`, `Section`, `ScheduleGroup`, `Activity`, `Session` e `slugify_id(value: str) -> str`.
+- Consumes: the current `db/schedule.json` format.
+- Produces: `ScheduleDocument`, `Section`, `ScheduleGroup`, `Activity`, `Session`, and `slugify_id(value: str) -> str`.
 
-- [ ] **Passo 1: adicionar pytest ao grupo de desenvolvimento**
+- [ ] **Step 1: add pytest to the development group**
 
-Preservar `playwright>=1.62.0` já presente e acrescentar:
+Preserve the existing `playwright>=1.62.0` and add:
 
 ```toml
 [dependency-groups]
@@ -72,9 +72,9 @@ dev = [
 ]
 ```
 
-Executar: `uv lock`
+Run: `uv lock`
 
-- [ ] **Passo 2: escrever testes que expressem o contrato da agenda**
+- [ ] **Step 2: write tests that express the schedule contract**
 
 ```python
 from pydantic import ValidationError
@@ -98,13 +98,13 @@ def test_slugify_id_uses_portuguese_text_without_accents():
     assert slugify_id("Saúde e bem-estar") == "saude-e-bem-estar"
 ```
 
-- [ ] **Passo 3: executar os testes e confirmar a falha**
+- [ ] **Step 3: run the tests and confirm the failure**
 
-Executar: `uv run pytest tests/test_schedule_models.py -v`
+Run: `uv run pytest tests/test_schedule_models.py -v`
 
-Esperado: falha de importação de `models.schedule`.
+Expected: an import failure for `models.schedule`.
 
-- [ ] **Passo 4: implementar modelos com aliases do JSON**
+- [ ] **Step 4: implement models with JSON aliases**
 
 ```python
 class Session(BaseModel):
@@ -129,11 +129,11 @@ class ScheduleDocument(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 ```
 
-Implementar os modelos intermediários com os campos opcionais existentes e uma validação de IDs únicos em todo o documento. `slugify_id` usa `unicodedata.normalize`, letras minúsculas, hífens e sufixo numérico quando o chamador detectar colisão.
+Implement the intermediate models with the existing optional fields and validation of unique IDs throughout the document. `slugify_id` uses `unicodedata.normalize`, lowercase letters, hyphens, and a numeric suffix when the caller detects a collision.
 
-- [ ] **Passo 5: executar testes, lint e tipos**
+- [ ] **Step 5: run tests, lint, and type checks**
 
-Executar:
+Run:
 
 ```powershell
 uv run pytest tests/test_schedule_models.py -v
@@ -141,9 +141,9 @@ uv run ruff check models tests/test_schedule_models.py
 uv run ty check
 ```
 
-Esperado: todos passam.
+Expected: all pass.
 
-- [ ] **Passo 6: commit**
+- [ ] **Step 6: commit**
 
 ```powershell
 git add pyproject.toml uv.lock models tests/conftest.py tests/test_schedule_models.py
@@ -152,23 +152,23 @@ git commit -m "Adiciona modelos validados da agenda"
 
 ---
 
-### Tarefa 2: Persistência atômica e catálogos iniciais
+### Task 2: Atomic persistence and initial catalogs
 
-**Arquivos:**
-- Criar: `backend/clients/json_store.py`
-- Criar: `backend/clients/schedule.py`
-- Criar: `backend/clients/locations.py`
-- Criar: `backend/clients/knowledge_axes.py`
-- Criar: `backend/db/locations.json`
-- Criar: `backend/db/knowledge_axes.json`
-- Modificar: `backend/db/schedule.json`
-- Criar: `backend/tests/test_json_clients.py`
+**Files:**
+- Create: `backend/clients/json_store.py`
+- Create: `backend/clients/schedule.py`
+- Create: `backend/clients/locations.py`
+- Create: `backend/clients/knowledge_axes.py`
+- Create: `backend/db/locations.json`
+- Create: `backend/db/knowledge_axes.json`
+- Modify: `backend/db/schedule.json`
+- Create: `backend/tests/test_json_clients.py`
 
 **Interfaces:**
-- Consome: `ScheduleDocument` e `slugify_id` da Tarefa 1.
-- Produz: `read_json(path: Path) -> dict`, `atomic_write_json(path: Path, payload: dict) -> None`, `load_schedule(path: Path) -> ScheduleDocument`, `save_schedule(document: ScheduleDocument, path: Path) -> None`, `get_schedule_path() -> Path`, `get_locations_path() -> Path`, `get_knowledge_axes_path() -> Path`, `LocationRepository` e `KnowledgeAxisRepository`.
+- Consumes: `ScheduleDocument` and `slugify_id` from Task 1.
+- Produces: `read_json(path: Path) -> dict`, `atomic_write_json(path: Path, payload: dict) -> None`, `load_schedule(path: Path) -> ScheduleDocument`, `save_schedule(document: ScheduleDocument, path: Path) -> None`, `get_schedule_path() -> Path`, `get_locations_path() -> Path`, `get_knowledge_axes_path() -> Path`, `LocationRepository`, and `KnowledgeAxisRepository`.
 
-- [ ] **Passo 1: escrever testes de gravação e CRUD isolados**
+- [ ] **Step 1: write isolated persistence and CRUD tests**
 
 ```python
 def test_location_ids_are_generated_and_not_reused(tmp_path):
@@ -191,15 +191,15 @@ def test_atomic_write_keeps_original_when_replace_fails(tmp_path, monkeypatch):
     assert read_json(path) == {"value": "original"}
 ```
 
-Adicionar testes para nomes duplicados, exclusão em uso, propagação exata de nome e renomeação de eixo sem alterar o ID.
+Add tests for duplicate names, deletion while in use, exact name propagation, and axis renaming without changing the ID.
 
-- [ ] **Passo 2: executar e confirmar falhas**
+- [ ] **Step 2: run and confirm failures**
 
-Executar: `uv run pytest tests/test_json_clients.py -v`
+Run: `uv run pytest tests/test_json_clients.py -v`
 
-Esperado: falha porque os clientes ainda não existem.
+Expected: failure because the clients do not exist yet.
 
-- [ ] **Passo 3: implementar escrita atômica**
+- [ ] **Step 3: implement atomic writes**
 
 ```python
 def atomic_write_json(path: Path, payload: dict) -> None:
@@ -218,19 +218,20 @@ def atomic_write_json(path: Path, payload: dict) -> None:
         raise
 ```
 
-- [ ] **Passo 4: implementar repositórios e consistência entre arquivos**
 
-`LocationRepository.__init__(path: Path, schedule_path: Path)`, `list() -> list[dict]`, `create(name: str) -> dict`, `rename(location_id: str, name: str) -> dict` e `delete(location_id: str) -> None` formam a interface do catálogo. `rename` valida ambos os documentos antes da escrita, salva cópias em memória, grava o catálogo, grava a agenda propagada e restaura o catálogo se a segunda gravação falhar. `delete` coleta títulos das atividades que usam o nome e levanta `ResourceInUseError(references: list[str])`.
+- [ ] **Step 4: implement repositories and cross-file consistency**
 
-`KnowledgeAxisRepository.__init__(path: Path, schedule_path: Path)` expõe os mesmos cinco métodos. Ele mantém o ID estável após criação, recusa exclusão em uso e gera slug em português com sufixos `-2`, `-3` em colisões.
+`LocationRepository.__init__(path: Path, schedule_path: Path)`, `list() -> list[dict]`, `create(name: str) -> dict`, `rename(location_id: str, name: str) -> dict`, and `delete(location_id: str) -> None` comprise the catalog interface. `rename` validates both documents before writing, saves in-memory copies, writes the catalog, writes the propagated schedule, and restores the catalog if the second write fails. `delete` collects the titles of activities that use the name and raises `ResourceInUseError(references: list[str])`.
 
-As funções de caminho leem, no momento da chamada, `SCHEDULE_PATH`, `LOCATIONS_PATH` e `KNOWLEDGE_AXES_PATH`, usando os arquivos de `db/` como padrão. Isso permite que rotas e testes usem os mesmos repositórios sem tocar nos dados reais.
+`KnowledgeAxisRepository.__init__(path: Path, schedule_path: Path)` exposes the same five methods. It keeps the ID stable after creation, rejects deletion while in use, and generates a Portuguese slug with `-2`, `-3` suffixes on collisions.
 
-- [ ] **Passo 5: gerar os catálogos iniciais e migrar eixos**
+At call time, the path functions read `SCHEDULE_PATH`, `LOCATIONS_PATH`, and `KNOWLEDGE_AXES_PATH`, defaulting to the files under `db/`. This lets routes and tests use the same repositories without touching real data.
 
-Criar `locations.json` com `nextId` e todos os nomes únicos atuais, ordenados alfabeticamente. Criar `knowledge_axes.json` com os dez IDs em português especificados no design. Substituir em `schedule.json` todas as dez referências inglesas pelos IDs portugueses; manter grupos sem `knowledgeAxis` inalterados.
+- [ ] **Step 5: generate the initial catalogs and migrate axes**
 
-- [ ] **Passo 6: verificar os dados e testes**
+Create `locations.json` with `nextId` and every current unique name, alphabetically sorted. Create `knowledge_axes.json` with the ten Portuguese IDs specified in the design. Replace all ten English references in `schedule.json` with the Portuguese IDs; leave groups without `knowledgeAxis` unchanged.
+
+- [ ] **Step 6: verify data and tests**
 
 ```powershell
 uv run pytest tests/test_json_clients.py tests/test_schedule_models.py -v
@@ -241,7 +242,7 @@ uv run ruff check clients models tests
 uv run ty check
 ```
 
-- [ ] **Passo 7: commit**
+- [ ] **Step 7: commit**
 
 ```powershell
 git add clients/json_store.py clients/schedule.py clients/locations.py clients/knowledge_axes.py db tests/test_json_clients.py
@@ -250,19 +251,19 @@ git commit -m "Adiciona persistência da agenda e catálogos"
 
 ---
 
-### Tarefa 3: APIs administrativas autenticadas
+### Task 3: Authenticated administrative APIs
 
-**Arquivos:**
-- Criar: `backend/routes/schedule.py`
-- Criar: `backend/routes/locations.py`
-- Criar: `backend/routes/knowledge_axes.py`
-- Criar: `backend/tests/test_admin_api.py`
+**Files:**
+- Create: `backend/routes/schedule.py`
+- Create: `backend/routes/locations.py`
+- Create: `backend/routes/knowledge_axes.py`
+- Create: `backend/tests/test_admin_api.py`
 
 **Interfaces:**
-- Consome: repositórios da Tarefa 2 e `CurrentTokenData` de `dependencies.py`.
-- Produz: endpoints em `/admin/api/schedule`, `/admin/api/locations` e `/admin/api/knowledge-axes`.
+- Consumes: repositories from Task 2 and `CurrentTokenData` from `dependencies.py`.
+- Produces: endpoints at `/admin/api/schedule`, `/admin/api/locations`, and `/admin/api/knowledge-axes`.
 
-- [ ] **Passo 1: escrever testes de autenticação e contratos HTTP**
+- [ ] **Step 1: write authentication and HTTP contract tests**
 
 ```python
 def test_schedule_requires_authentication(client):
@@ -284,15 +285,15 @@ def test_delete_location_in_use_returns_references(client, auth_headers):
     assert response.json()["detail"]["references"]
 ```
 
-Sobrescrever as dependências que fornecem caminhos/repositórios no fixture `client`, apontando para os JSONs temporários.
+Override the dependencies that provide paths/repositories in the `client` fixture, pointing them to the temporary JSON files.
 
-- [ ] **Passo 2: executar e confirmar falhas**
+- [ ] **Step 2: run and confirm failures**
 
-Executar: `uv run pytest tests/test_admin_api.py -v`
+Run: `uv run pytest tests/test_admin_api.py -v`
 
-Esperado: `404` porque os roteadores ainda não foram registrados no app de teste.
+Expected: `404` because the routers are not yet registered in the test app.
 
-- [ ] **Passo 3: implementar modelos de entrada e handlers finos**
+- [ ] **Step 3: implement input models and thin handlers**
 
 ```python
 router = APIRouter(prefix="/admin/api/locations", tags=["admin-locations"])
@@ -314,9 +315,9 @@ def create_location(payload: LocationInput, _: CurrentTokenData, repository: Loc
     return repository.create(payload.name.strip())
 ```
 
-Mapear `ResourceInUseError` e duplicidade para `409`, ausentes para `404` e deixar Pydantic produzir `422`. O `PUT /schedule` recebe `ScheduleDocument` e serializa com `model_dump(by_alias=True, mode="json", exclude_none=True)`.
+Map `ResourceInUseError` and duplicates to `409`, missing resources to `404`, and let Pydantic produce `422`. `PUT /schedule` accepts `ScheduleDocument` and serializes it with `model_dump(by_alias=True, mode="json", exclude_none=True)`.
 
-- [ ] **Passo 4: executar suíte de API e verificações estáticas**
+- [ ] **Step 4: run the API suite and static checks**
 
 ```powershell
 uv run pytest tests/test_admin_api.py -v
@@ -324,7 +325,7 @@ uv run ruff check routes tests/test_admin_api.py
 uv run ty check
 ```
 
-- [ ] **Passo 5: commit**
+- [ ] **Step 5: commit**
 
 ```powershell
 git add routes/schedule.py routes/locations.py routes/knowledge_axes.py tests/test_admin_api.py tests/conftest.py
@@ -333,22 +334,22 @@ git commit -m "Adiciona APIs administrativas autenticadas"
 
 ---
 
-### Tarefa 4: Página administrativa e fluxo de autenticação
+### Task 4: Administrative page and authentication flow
 
-**Arquivos:**
-- Criar: `backend/routes/admin.py`
-- Criar: `backend/static/admin/index.html`
-- Criar: `backend/static/admin/admin.css`
-- Criar: `backend/static/admin/admin.js`
-- Modificar: `backend/clients/db.py`
-- Modificar: `backend/app.py`
-- Criar: `backend/tests/test_admin_page.py`
+**Files:**
+- Create: `backend/routes/admin.py`
+- Create: `backend/static/admin/index.html`
+- Create: `backend/static/admin/admin.css`
+- Create: `backend/static/admin/admin.js`
+- Modify: `backend/clients/db.py`
+- Modify: `backend/app.py`
+- Create: `backend/tests/test_admin_page.py`
 
 **Interfaces:**
-- Consome: `/auth/token`, `/auth/users/me/` e APIs da Tarefa 3.
-- Produz: `/admin`, `/admin/static/admin.css`, `/admin/static/admin.js` e funções JS `apiFetch`, `showLogin`, `showEditor`, `loadAdminData`, `logout`.
+- Consumes: `/auth/token`, `/auth/users/me/`, and the Task 3 APIs.
+- Produces: `/admin`, `/admin/static/admin.css`, `/admin/static/admin.js`, and the JS functions `apiFetch`, `showLogin`, `showEditor`, `loadAdminData`, `logout`.
 
-- [ ] **Passo 1: escrever teste da página e montagem estática**
+- [ ] **Step 1: write the page and static mounting test**
 
 ```python
 def test_admin_page_is_served_without_embedding_schedule(client):
@@ -364,17 +365,17 @@ def test_admin_javascript_is_served(client):
     assert "sessionStorage" in response.text
 ```
 
-- [ ] **Passo 2: confirmar falhas**
+- [ ] **Step 2: confirm failures**
 
-Executar: `uv run pytest tests/test_admin_page.py -v`
+Run: `uv run pytest tests/test_admin_page.py -v`
 
-Esperado: `404` para a página e o JavaScript.
+Expected: `404` for the page and JavaScript.
 
-- [ ] **Passo 3: criar HTML sem dados administrativos e CSS responsivo**
+- [ ] **Step 3: create HTML without administrative data and responsive CSS**
 
-O HTML contém `#login-view`, `#editor-view`, formulário de login, navegação Programação/Locais/Eixos/Minha conta, regiões `aria-live`, modal acessível e templates `<template>` para grupos, atividades e sessões. O CSS implementa a navegação lateral aprovada e colapsa para navegação superior abaixo de 750 px.
+The HTML contains `#login-view`, `#editor-view`, a login form, `Programação`/`Locais`/`Eixos`/`Minha conta` navigation, `aria-live` regions, an accessible modal, and `<template>` templates for groups, activities, and sessions. The CSS implements the approved side navigation and collapses to top navigation below 750 px.
 
-- [ ] **Passo 4: tornar o banco de usuários configurável para testes isolados**
+- [ ] **Step 4: make the user database configurable for isolated tests**
 
 ```python
 def get_database_path() -> Path:
@@ -387,9 +388,9 @@ def load_database(db_path: str | Path | None = None) -> dict:
         return json.load(database_file)
 ```
 
-Remover argumentos padrão vinculados a `DATABASE_PATH` na importação; `get_user` e `database_connection` aceitam `None` e resolvem o caminho dentro da função. Manter `DATABASE_PATH` exportado para compatibilidade com `dependencies.py`.
+Remove default arguments bound to `DATABASE_PATH` at import time; `get_user` and `database_connection` accept `None` and resolve the path inside the function. Keep `DATABASE_PATH` exported for compatibility with `dependencies.py`.
 
-- [ ] **Passo 5: implementar autenticação no navegador**
+- [ ] **Step 5: implement browser authentication**
 
 ```javascript
 async function apiFetch(path, options = {}) {
@@ -406,13 +407,13 @@ async function apiFetch(path, options = {}) {
 }
 ```
 
-O submit do login usa `URLSearchParams` para `/auth/token`, guarda apenas `access_token` em `sessionStorage`, valida `/auth/users/me/` e então chama `loadAdminData()`.
+Login submission uses `URLSearchParams` for `/auth/token`, stores only `access_token` in `sessionStorage`, validates `/auth/users/me/`, and then calls `loadAdminData()`.
 
-- [ ] **Passo 6: registrar rotas preservando mudanças existentes**
+- [ ] **Step 6: register routes while preserving existing changes**
 
-Em `app.py`, importar os quatro novos roteadores, montar `StaticFiles(directory=ADMIN_STATIC_DIR)` em `/admin/static` e chamar `include_router` para cada roteador. Não reformatar nem sobrescrever trechos modificados pelo usuário.
+In `app.py`, import the four new routers, mount `StaticFiles(directory=ADMIN_STATIC_DIR)` at `/admin/static`, and call `include_router` for each router. Do not reformat or overwrite sections modified by the user.
 
-- [ ] **Passo 7: executar testes e lint**
+- [ ] **Step 7: run tests and lint**
 
 ```powershell
 uv run pytest tests/test_admin_page.py tests/test_admin_api.py -v
@@ -420,7 +421,7 @@ uv run ruff check app.py routes
 uv run ty check
 ```
 
-- [ ] **Passo 8: commit**
+- [ ] **Step 8: commit**
 
 ```powershell
 git add app.py clients/db.py routes/admin.py static/admin tests/test_admin_page.py
@@ -429,19 +430,19 @@ git commit -m "Serve painel administrativo autenticado"
 
 ---
 
-### Tarefa 5: Editor amigável da programação
+### Task 5: User-friendly schedule editor
 
-**Arquivos:**
-- Modificar: `backend/static/admin/index.html`
-- Modificar: `backend/static/admin/admin.css`
-- Modificar: `backend/static/admin/admin.js`
-- Criar: `backend/tests/test_admin_editor_js.py`
+**Files:**
+- Modify: `backend/static/admin/index.html`
+- Modify: `backend/static/admin/admin.css`
+- Modify: `backend/static/admin/admin.js`
+- Create: `backend/tests/test_admin_editor_js.py`
 
 **Interfaces:**
-- Consome: documento retornado por `GET /admin/api/schedule` e catálogos das APIs.
-- Produz: funções JS `renderSections`, `renderGroups`, `openActivityEditor`, `addSession`, `validateDraft` e `saveSchedule`.
+- Consumes: the document returned by `GET /admin/api/schedule` and API catalogs.
+- Produces: JS functions `renderSections`, `renderGroups`, `openActivityEditor`, `addSession`, `validateDraft`, and `saveSchedule`.
 
-- [ ] **Passo 1: escrever testes de contrato do editor**
+- [ ] **Step 1: write editor contract tests**
 
 ```python
 def test_editor_contains_every_required_control(client):
@@ -457,15 +458,15 @@ def test_editor_script_uses_portuguese_error_messages(client):
     assert "Não foi possível salvar a programação" in script
 ```
 
-- [ ] **Passo 2: confirmar falhas**
+- [ ] **Step 2: confirm failures**
 
-Executar: `uv run pytest tests/test_admin_editor_js.py -v`
+Run: `uv run pytest tests/test_admin_editor_js.py -v`
 
-- [ ] **Passo 3: implementar o rascunho e edição hierárquica**
+- [ ] **Step 3: implement the draft and hierarchical editing**
 
-Manter `state = {schedule, locations, knowledgeAxes, selectedSectionId}`. Toda ação altera somente `state.schedule` até salvar. Novos IDs usam o slug do título e acrescentam `-2`, `-3` quando necessário. Locais aparecem por `name`; eixos aparecem por `name` e gravam `id` em `knowledgeAxis`.
+Maintain `state = {schedule, locations, knowledgeAxes, selectedSectionId}`. Every action changes only `state.schedule` until saving. New IDs use the title slug and append `-2`, `-3` as necessary. Locations appear by `name`; axes appear by `name` and store `id` in `knowledgeAxis`.
 
-- [ ] **Passo 4: implementar validação e salvamento**
+- [ ] **Step 4: implement validation and saving**
 
 ```javascript
 async function saveSchedule() {
@@ -482,18 +483,18 @@ async function saveSchedule() {
 }
 ```
 
-Todos os botões visíveis recebem listeners; exclusões usam confirmação; após fechar modal, o foco retorna ao controle que o abriu.
+All visible buttons receive listeners; deletions use confirmation; after closing a modal, focus returns to the control that opened it.
 
-- [ ] **Passo 5: executar testes e verificação manual curta**
+- [ ] **Step 5: run tests and a short manual check**
 
 ```powershell
 uv run pytest tests/test_admin_editor_js.py tests/test_admin_page.py -v
 uv run uvicorn app:app --env-file .env
 ```
 
-Verificar em `/admin`: teclado alcança todos os controles, grupos expandem, modal abre/fecha, horários são adicionados e mensagens aparecem.
+Verify at `/admin`: the keyboard reaches every control, groups expand, the modal opens/closes, times are added, and messages appear.
 
-- [ ] **Passo 6: commit**
+- [ ] **Step 6: commit**
 
 ```powershell
 git add static/admin tests/test_admin_editor_js.py
@@ -502,19 +503,19 @@ git commit -m "Adiciona editor amigável da programação"
 
 ---
 
-### Tarefa 6: Telas de locais e eixos
+### Task 6: Location and axis screens
 
-**Arquivos:**
-- Modificar: `backend/static/admin/index.html`
-- Modificar: `backend/static/admin/admin.css`
-- Modificar: `backend/static/admin/admin.js`
-- Criar: `backend/tests/test_catalog_ui_contract.py`
+**Files:**
+- Modify: `backend/static/admin/index.html`
+- Modify: `backend/static/admin/admin.css`
+- Modify: `backend/static/admin/admin.js`
+- Create: `backend/tests/test_catalog_ui_contract.py`
 
 **Interfaces:**
-- Consome: APIs de locais e eixos da Tarefa 3.
-- Produz: funções JS `renderLocations`, `saveLocation`, `deleteLocation`, `renderKnowledgeAxes`, `saveKnowledgeAxis`, `deleteKnowledgeAxis`.
+- Consumes: the location and axis APIs from Task 3.
+- Produces: JS functions `renderLocations`, `saveLocation`, `deleteLocation`, `renderKnowledgeAxes`, `saveKnowledgeAxis`, and `deleteKnowledgeAxis`.
 
-- [ ] **Passo 1: escrever testes dos controles e mensagens**
+- [ ] **Step 1: write tests for controls and messages**
 
 ```python
 def test_location_form_only_asks_for_name(client):
@@ -530,26 +531,26 @@ def test_catalog_script_handles_resource_in_use(client):
     assert "Este registro ainda está em uso" in script
 ```
 
-- [ ] **Passo 2: confirmar falhas**
+- [ ] **Step 2: confirm failures**
 
-Executar: `uv run pytest tests/test_catalog_ui_contract.py -v`
+Run: `uv run pytest tests/test_catalog_ui_contract.py -v`
 
-- [ ] **Passo 3: implementar CRUD de locais**
+- [ ] **Step 3: implement location CRUD**
 
-A lista exibe somente o nome e ações. O formulário contém somente `name`; não mostra ID. Após renomear, recarrega agenda e locais para refletir a propagação. Em `409`, lista as atividades retornadas por `detail.references`.
+The list displays only the name and actions. The form contains only `name`; it does not show the ID. After renaming, reload the schedule and locations to reflect propagation. On `409`, list the activities returned by `detail.references`.
 
-- [ ] **Passo 4: implementar CRUD de eixos**
+- [ ] **Step 4: implement axis CRUD**
 
-A lista exibe o nome português, quantidade de grupos e ações. O formulário contém somente o nome. O ID não é editável; grupos sem eixo usam a opção “Sem eixo”. Em `409`, mostrar os grupos que impedem a exclusão.
+The list displays the Portuguese name, number of groups, and actions. The form contains only the name. The ID is not editable; groups without an axis use the “Sem eixo” option. On `409`, show the groups that prevent deletion.
 
-- [ ] **Passo 5: executar testes**
+- [ ] **Step 5: run tests**
 
 ```powershell
 uv run pytest tests/test_catalog_ui_contract.py tests/test_admin_editor_js.py -v
 uv run ruff check tests
 ```
 
-- [ ] **Passo 6: commit**
+- [ ] **Step 6: commit**
 
 ```powershell
 git add static/admin tests/test_catalog_ui_contract.py
@@ -558,19 +559,19 @@ git commit -m "Adiciona gestão de locais e eixos"
 
 ---
 
-### Tarefa 7: Playwright, documentação e verificação final
+### Task 7: Playwright, documentation, and final verification
 
-**Arquivos:**
-- Criar: `backend/tests/e2e/conftest.py`
-- Criar: `backend/tests/e2e/test_admin_panel.py`
-- Modificar: `backend/README.md`
-- Modificar: `backend/ARCHITECTURE.md`
+**Files:**
+- Create: `backend/tests/e2e/conftest.py`
+- Create: `backend/tests/e2e/test_admin_panel.py`
+- Modify: `backend/README.md`
+- Modify: `backend/ARCHITECTURE.md`
 
 **Interfaces:**
-- Consome: aplicação completa das Tarefas 1–6.
-- Produz: suíte E2E reproduzível e instruções operacionais.
+- Consumes: the complete application from Tasks 1–6.
+- Produces: a reproducible E2E suite and operational instructions.
 
-- [ ] **Passo 1: criar fixtures E2E isoladas**
+- [ ] **Step 1: create isolated E2E fixtures**
 
 ```python
 @pytest.fixture(scope="session")
@@ -589,9 +590,9 @@ def admin_page(browser, live_server):
     page.close()
 ```
 
-O fixture `temporary_databases(tmp_path, monkeypatch)` copia `users.json`, `schedule.json`, `locations.json` e `knowledge_axes.json`, depois define `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH` e `KNOWLEDGE_AXES_PATH`. O fixture `live_server(temporary_databases, monkeypatch)` define `TOKEN_JWT`, reserva uma porta com `socket.bind(("127.0.0.1", 0))`, inicia `uvicorn.Server` em uma `threading.Thread`, espera `server.started`, fornece a URL e define `server.should_exit = True` no `finally` antes de chamar `thread.join(timeout=5)`.
+The `temporary_databases(tmp_path, monkeypatch)` fixture copies `users.json`, `schedule.json`, `locations.json`, and `knowledge_axes.json`, then sets `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH`, and `KNOWLEDGE_AXES_PATH`. The `live_server(temporary_databases, monkeypatch)` fixture sets `TOKEN_JWT`, reserves a port with `socket.bind(("127.0.0.1", 0))`, starts `uvicorn.Server` in a `threading.Thread`, waits for `server.started`, provides the URL, and sets `server.should_exit = True` in `finally` before calling `thread.join(timeout=5)`.
 
-- [ ] **Passo 2: escrever fluxos Playwright antes de executá-los**
+- [ ] **Step 2: write Playwright flows before running them**
 
 ```python
 def test_admin_can_create_location_and_use_it_in_session(admin_page):
@@ -608,22 +609,22 @@ def test_admin_can_create_location_and_use_it_in_session(admin_page):
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible()
 ```
 
-Adicionar casos separados para login inválido, sessão expirada, criação de eixo, bloqueio de exclusão em uso, edição de atividade/horário e persistência após recarregar.
+Add separate cases for invalid login, expired session, axis creation, blocking deletion while in use, activity/time editing, and persistence after reloading.
 
-- [ ] **Passo 3: instalar Chromium e confirmar falhas úteis**
+- [ ] **Step 3: install Chromium and confirm useful failures**
 
 ```powershell
 uv run playwright install chromium
 uv run pytest tests/e2e/test_admin_panel.py -v
 ```
 
-Corrigir somente problemas reais revelados pelos fluxos; não enfraquecer seletores ou asserções para ocultar falhas.
+Fix only real problems revealed by the flows; do not weaken selectors or assertions to hide failures.
 
-- [ ] **Passo 4: documentar uso e arquitetura**
+- [ ] **Step 4: document usage and architecture**
 
-No README, registrar instalação, `uv run playwright install chromium`, inicialização, URL `/admin` e comandos de teste. Em `ARCHITECTURE.md`, registrar modelos, clientes, roteadores, arquivos estáticos, catálogos e o fluxo navegador → API autenticada → cliente JSON.
+In the README, document installation, `uv run playwright install chromium`, startup, the `/admin` URL, and test commands. In `ARCHITECTURE.md`, document models, clients, routers, static files, catalogs, and the browser → authenticated API → JSON client flow.
 
-- [ ] **Passo 5: executar verificação completa**
+- [ ] **Step 5: run complete verification**
 
 ```powershell
 uv run pytest -v
@@ -632,9 +633,9 @@ uv run ruff format --check .
 uv run ty check
 ```
 
-Esperado: todos os testes e verificações passam. Confirmar também que `git diff -- frontend` não mostra alterações.
+Expected: all tests and checks pass. Also confirm that `git diff -- frontend` shows no changes.
 
-- [ ] **Passo 6: commit final da entrega**
+- [ ] **Step 6: final delivery commit**
 
 ```powershell
 git add tests/e2e README.md ARCHITECTURE.md

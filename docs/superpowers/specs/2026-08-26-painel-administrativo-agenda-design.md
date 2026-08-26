@@ -1,94 +1,93 @@
-# Painel administrativo da agenda
+# Administrative schedule panel
 
-## Objetivo
+## Objective
 
-Criar um painel administrativo em HTML, CSS e JavaScript puro, servido pelo FastAPI e
-independente do frontend público. O painel permitirá que uma pessoa autenticada edite a
-programação, os locais e os eixos de conhecimento usados em `backend/db/schedule.json`.
+Create an administrative panel in plain HTML, CSS, and JavaScript, served by FastAPI and
+independent of the public frontend. The panel will allow an authenticated person to edit the
+schedule, locations, and knowledge axes used in `backend/db/schedule.json`.
 
-O frontend público continuará consumindo `schedule.json` no formato atual. A implementação não
-modificará a pasta `frontend/`.
+The public frontend will continue consuming `schedule.json` in its current format. The
+implementation will not modify the `frontend/` directory.
 
-## Escopo
+## Scope
 
-O painel permitirá:
+The panel will allow users to:
 
-- autenticar com o fluxo JWT existente;
-- editar a data, a versão, as seções, os grupos, as atividades e as sessões da agenda;
-- cadastrar, renomear e excluir locais;
-- cadastrar, renomear e excluir eixos de conhecimento;
-- selecionar locais nas sessões e eixos nos grupos;
-- salvar um rascunho completo após validação do backend.
+- authenticate with the existing JWT flow;
+- edit the schedule date, version, sections, groups, activities, and sessions;
+- create, rename, and delete locations;
+- create, rename, and delete knowledge axes;
+- select locations in sessions and axes in groups;
+- save a complete draft after backend validation.
 
-O sistema considera apenas uma pessoa editando por vez. Controle de concorrência, histórico de
-versões e resolução de conflitos não fazem parte deste escopo.
+The system assumes only one person edits at a time. Concurrency control, version history, and
+conflict resolution are not part of this scope.
 
-## Arquitetura
+## Architecture
 
-O painel será uma aplicação sem processo de build, composta por arquivos estáticos mantidos no
-backend:
+The panel will be a no-build application composed of static files kept in the backend:
 
-- `backend/static/admin/index.html`: estrutura do login e do editor;
-- `backend/static/admin/admin.css`: estilos isolados do painel;
-- `backend/static/admin/admin.js`: autenticação, navegação, rascunho e chamadas à API;
-- `backend/routes/admin.py`: entrega da página administrativa;
-- `backend/routes/schedule.py`: API autenticada da programação;
-- `backend/routes/locations.py`: API autenticada dos locais;
-- `backend/routes/knowledge_axes.py`: API autenticada dos eixos;
-- `backend/clients/schedule.py`: leitura, validação e gravação da agenda;
-- `backend/clients/locations.py`: leitura e gravação dos locais;
-- `backend/clients/knowledge_axes.py`: leitura e gravação dos eixos;
-- `backend/db/locations.json`: catálogo de locais;
-- `backend/db/knowledge_axes.json`: catálogo de eixos.
+- `backend/static/admin/index.html`: login and editor structure;
+- `backend/static/admin/admin.css`: panel-scoped styles;
+- `backend/static/admin/admin.js`: authentication, navigation, draft state, and API calls;
+- `backend/routes/admin.py`: serves the administrative page;
+- `backend/routes/schedule.py`: authenticated schedule API;
+- `backend/routes/locations.py`: authenticated location API;
+- `backend/routes/knowledge_axes.py`: authenticated axis API;
+- `backend/clients/schedule.py`: schedule reading, validation, and writing;
+- `backend/clients/locations.py`: location reading and writing;
+- `backend/clients/knowledge_axes.py`: axis reading and writing;
+- `backend/db/locations.json`: location catalog;
+- `backend/db/knowledge_axes.json`: axis catalog.
 
-O `backend/app.py` registrará os novos roteadores e servirá somente os recursos estáticos do
-painel. As responsabilidades seguirão o fluxo existente: composição em `app.py`, HTTP em
-`routes/` e persistência em `clients/`.
+`backend/app.py` will register the new routers and serve only the panel's static resources.
+Responsibilities will follow the existing flow: composition in `app.py`, HTTP in `routes/`, and
+persistence in `clients/`.
 
-## Autenticação
+## Authentication
 
-A rota `/admin` exibirá inicialmente o formulário de login. O formulário enviará as credenciais
-ao endpoint `/auth/token` existente. O token ficará apenas em `sessionStorage`, portanto será
-descartado ao encerrar a sessão do navegador.
+The `/admin` route will initially display the login form. The form will submit credentials to the
+existing `/auth/token` endpoint. The token will remain only in `sessionStorage`, so it will be
+discarded when the browser session ends.
 
-Antes de mostrar o editor, o JavaScript validará o token em `/auth/users/me/`. Todas as APIs de
-agenda, locais e eixos usarão `CurrentTokenData` e responderão com `401` para chamadas sem token
-válido. Ao receber `401`, o painel descartará o token e voltará ao formulário de login.
+Before showing the editor, JavaScript will validate the token at `/auth/users/me/`. All schedule,
+location, and axis APIs will use `CurrentTokenData` and return `401` for calls without a valid
+token. On receiving `401`, the panel will discard the token and return to the login form.
 
-O documento HTML e seus recursos estáticos não conterão dados administrativos. A proteção dos
-dados e das alterações ocorrerá nas APIs autenticadas.
+The HTML document and its static resources will contain no administrative data. Data and change
+protection will occur in the authenticated APIs.
 
-## Interface administrativa
+## Administrative interface
 
-A interface seguirá o layout aprovado no protótipo:
+The interface will follow the approved prototype layout:
 
-- navegação lateral para Programação, Locais, Eixos de conhecimento e Minha conta;
-- lista de seções ao lado da programação;
-- grupos expansíveis e atividades abertas individualmente em formulário;
-- sessões editáveis com início, fim e seleção de local;
-- cadastros de locais e eixos em telas simples;
-- ações com resposta visual, confirmações para exclusões e mensagens de erro claras.
+- side navigation for `Programação`, `Locais`, `Eixos de conhecimento`, and `Minha conta`;
+- a section list beside the schedule;
+- expandable groups and activities individually opened in a form;
+- editable sessions with start, end, and location selection;
+- simple screens for location and axis management;
+- actions with visual feedback, deletion confirmations, and clear error messages.
 
-O painel será responsivo e utilizável com teclado. Campos terão rótulos associados, mensagens de
-erro serão textuais e o foco será direcionado ao formulário ou erro relevante.
+The panel will be responsive and keyboard-usable. Fields will have associated labels, error
+messages will be textual, and focus will be directed to the relevant form or error.
 
-## Modelo da agenda
+## Schedule model
 
-O formato de `schedule.json` será preservado. O painel editará os campos já presentes:
+The `schedule.json` format will be preserved. The panel will edit the fields already present:
 
-- `version` e `eventDate`;
-- `sections` com `id`, `title`, `description` e `groups`;
-- grupos com `id`, `title`, `knowledgeAxis` opcional e `items`;
-- atividades com `id`, `title`, `description`, `sessions` e `link`;
-- sessões com `startTime`, `endTime` e `location`.
+- `version` and `eventDate`;
+- `sections` with `id`, `title`, `description`, and `groups`;
+- groups with `id`, `title`, optional `knowledgeAxis`, and `items`;
+- activities with `id`, `title`, `description`, `sessions`, and `link`;
+- sessions with `startTime`, `endTime`, and `location`.
 
-Campos opcionais continuarão opcionais. As sessões não ganharão ID. IDs de novas seções, grupos e
-atividades serão gerados pelo backend, não serão exibidos no formulário e evitarão colisões com
-registros existentes. Os IDs atuais serão preservados.
+Optional fields will remain optional. Sessions will not gain an ID. IDs for new sections, groups,
+and activities will be generated by the backend, not shown in the form, and will avoid collisions
+with existing records. Current IDs will be preserved.
 
-## Locais
+## Locations
 
-`locations.json` terá um catálogo simples:
+`locations.json` will have a simple catalog:
 
 ```json
 {
@@ -101,17 +100,18 @@ registros existentes. Os IDs atuais serão preservados.
 }
 ```
 
-O usuário informará somente o nome. O backend gerará IDs sequenciais no formato `loc-NNN`, sem
-reutilizar IDs removidos. A carga inicial conterá os nomes únicos encontrados nas sessões atuais
-de `schedule.json`, preservando inclusive locais especiais e nomes compostos.
+The user will provide only the name. The backend will generate sequential IDs in the `loc-NNN`
+format without reusing deleted IDs. The initial load will contain the unique names found in the
+current `schedule.json` sessions, including special locations and compound names.
 
-O `schedule.json` continuará armazenando o nome no campo `location`, e não o ID. Ao renomear um
-local, o backend atualizará as ocorrências que correspondam exatamente ao nome anterior. A
-exclusão de um local em uso será recusada e indicará as atividades que ainda o referenciam.
+`schedule.json` will continue storing the name in the `location` field, not the ID. When a
+location is renamed, the backend will update occurrences that exactly match the previous name.
+Deleting a location in use will be refused and will identify the activities that still reference
+it.
 
-## Eixos de conhecimento
+## Knowledge axes
 
-`knowledge_axes.json` conterá os eixos disponíveis:
+`knowledge_axes.json` will contain the available axes:
 
 ```json
 {
@@ -124,111 +124,111 @@ exclusão de um local em uso será recusada e indicará as atividades que ainda 
 }
 ```
 
-O usuário informará somente o nome. O backend gerará e ocultará o ID. Grupos poderão ficar sem
-eixo, como já ocorre com Programação cultural e Equipes participantes.
+The user will provide only the name. The backend will generate and hide the ID. Groups may remain
+without an axis, as already occurs with `Programação cultural` and `Equipes participantes`.
 
-Os identificadores ingleses existentes serão migrados para estes termos em português:
+The existing English identifiers will be migrated to these Portuguese terms:
 
-- `general` para `geral`;
-- `agriculture-forestry-fisheries-and-veterinary` para
+- `general` to `geral`;
+- `agriculture-forestry-fisheries-and-veterinary` to
   `agricultura-silvicultura-pesca-e-veterinaria`;
-- `business-administration-and-law` para `administracao-negocios-e-direito`;
-- `computing-and-ict` para `computacao-e-tecnologia-da-informacao`;
-- `education` para `educacao`;
-- `arts-and-humanities` para `artes-e-humanidades`;
-- `engineering-manufacturing-and-construction` para `engenharia-industria-e-construcao`;
-- `natural-sciences-mathematics-and-statistics` para
+- `business-administration-and-law` to `administracao-negocios-e-direito`;
+- `computing-and-ict` to `computacao-e-tecnologia-da-informacao`;
+- `education` to `educacao`;
+- `arts-and-humanities` to `artes-e-humanidades`;
+- `engineering-manufacturing-and-construction` to `engenharia-industria-e-construcao`;
+- `natural-sciences-mathematics-and-statistics` to
   `ciencias-naturais-matematica-e-estatistica`;
-- `health-and-welfare` para `saude-e-bem-estar`;
-- `social-sciences-communication-and-information` para
+- `health-and-welfare` to `saude-e-bem-estar`;
+- `social-sciences-communication-and-information` to
   `ciencias-sociais-comunicacao-e-informacao`.
 
-O frontend público deverá consumir esses valores em português. Depois da migração, renomear o
-nome visível de um eixo não alterará seu ID. A exclusão de um eixo em uso será recusada.
+The public frontend must consume these Portuguese values. After migration, renaming an axis's
+visible name will not change its ID. Deletion of an axis in use will be refused.
 
-## Fluxo de edição e persistência
+## Editing and persistence flow
 
-Após autenticar, o navegador carregará agenda, locais e eixos pelas APIs. As alterações serão
-mantidas como rascunho no navegador até a ação explícita de salvar.
+After authentication, the browser will load the schedule, locations, and axes through the APIs.
+Changes will be kept as a browser draft until the explicit save action.
 
-Antes de persistir, o backend validará o documento completo, incluindo:
+Before persisting, the backend will validate the complete document, including:
 
-- campos obrigatórios e data no formato esperado;
-- unicidade dos IDs;
-- horário inicial anterior ao horário final;
-- locais cadastrados para todas as sessões que possuam local;
-- eixos cadastrados para todos os grupos que possuam eixo;
-- estrutura compatível com o contrato de `schedule.json`.
+- required fields and date in the expected format;
+- ID uniqueness;
+- start time before end time;
+- registered locations for every session that has a location;
+- registered axes for every group that has an axis;
+- a structure compatible with the `schedule.json` contract.
 
-Os clientes de persistência escreverão primeiro em um arquivo temporário no mesmo diretório,
-forçarão a conclusão da escrita e substituirão o arquivo de destino de forma atômica. Se a
-validação ou a escrita falhar, o JSON anterior permanecerá intacto.
+Persistence clients will first write to a temporary file in the same directory, force the write to
+complete, and atomically replace the destination file. If validation or writing fails, the prior
+JSON will remain intact.
 
-As operações que afetam dois arquivos, como renomear um local e atualizar a agenda, validarão
-ambos antes de escrever. Como JSON não oferece transação entre arquivos, a implementação manterá
-cópias temporárias dos conteúdos anteriores e fará restauração imediata se a segunda substituição
-falhar. Erros de restauração serão registrados com nível crítico e informados como falha de
-persistência, sem afirmar sucesso ao cliente.
+Operations affecting two files, such as renaming a location and updating the schedule, will
+validate both before writing. Because JSON does not provide a transaction across files, the
+implementation will retain temporary copies of the prior contents and immediately restore them if
+the second replacement fails. Restoration errors will be logged at critical level and reported as
+a persistence failure, without reporting success to the client.
 
 ## API
 
-As rotas administrativas usarão modelos Pydantic explícitos:
+Administrative routes will use explicit Pydantic models:
 
-- `GET /admin/api/schedule`: obter a agenda;
-- `PUT /admin/api/schedule`: substituir a agenda completa após validação;
-- `GET /admin/api/locations`: listar locais;
-- `POST /admin/api/locations`: criar um local;
-- `PUT /admin/api/locations/{location_id}`: renomear um local e propagar seu nome;
-- `DELETE /admin/api/locations/{location_id}`: excluir um local que não esteja em uso;
-- `GET /admin/api/knowledge-axes`: listar eixos;
-- `POST /admin/api/knowledge-axes`: criar um eixo;
-- `PUT /admin/api/knowledge-axes/{axis_id}`: renomear um eixo sem alterar seu ID;
-- `DELETE /admin/api/knowledge-axes/{axis_id}`: excluir um eixo que não esteja em uso.
+- `GET /admin/api/schedule`: get the schedule;
+- `PUT /admin/api/schedule`: replace the complete schedule after validation;
+- `GET /admin/api/locations`: list locations;
+- `POST /admin/api/locations`: create a location;
+- `PUT /admin/api/locations/{location_id}`: rename a location and propagate its name;
+- `DELETE /admin/api/locations/{location_id}`: delete a location that is not in use;
+- `GET /admin/api/knowledge-axes`: list axes;
+- `POST /admin/api/knowledge-axes`: create an axis;
+- `PUT /admin/api/knowledge-axes/{axis_id}`: rename an axis without changing its ID;
+- `DELETE /admin/api/knowledge-axes/{axis_id}`: delete an axis that is not in use.
 
-Erros de entrada retornarão `422`; referências ou exclusões inválidas retornarão `409`; recursos
-inexistentes retornarão `404`; falta de autenticação retornará `401`; falhas inesperadas de
-persistência retornarão `500`. As respostas de erro terão uma mensagem apropriada para exibição
-no painel e, quando aplicável, a lista de referências que impedem a operação.
+Input errors will return `422`; invalid references or deletions will return `409`; nonexistent
+resources will return `404`; missing authentication will return `401`; unexpected persistence
+failures will return `500`. Error responses will include a message appropriate for display in the
+panel and, where applicable, the list of references that prevent the operation.
 
-## Testes
+## Tests
 
-A estratégia combinará testes de API com testes de navegador.
+The strategy will combine API tests with browser tests.
 
-`pytest` e `TestClient` usarão diretórios temporários e cobrirão:
+`pytest` and `TestClient` will use temporary directories and cover:
 
-- acesso sem JWT e com JWT válido;
-- leitura e substituição validada da agenda;
-- criação, renomeação e exclusão de locais e eixos;
-- geração automática e unicidade de IDs;
-- migração completa dos eixos para português;
-- recusa de referências inválidas e exclusões em uso;
-- propagação de nomes de locais;
-- preservação ou restauração dos arquivos em falhas de validação e escrita;
-- entrega básica da página administrativa.
+- access without a JWT and with a valid JWT;
+- validated reading and replacement of the schedule;
+- creating, renaming, and deleting locations and axes;
+- automatic ID generation and uniqueness;
+- complete migration of axes to Portuguese;
+- rejection of invalid references and deletion while in use;
+- propagation of location names;
+- preservation or restoration of files on validation and write failures;
+- basic delivery of the administrative page.
 
-Playwright para Python executará os fluxos completos em navegador real:
+Playwright for Python will run the complete flows in a real browser:
 
-- login válido e inválido;
-- retorno ao login quando a sessão não for válida;
-- navegação entre Programação, Locais, Eixos e Minha conta;
-- criação e edição de atividades e sessões;
-- cadastro e seleção de locais;
-- cadastro e seleção de eixos;
-- mensagens de validação e confirmações;
-- bloqueio de exclusões em uso;
-- salvamento seguido de recarregamento dos dados.
+- valid and invalid login;
+- return to login when the session is invalid;
+- navigation among `Programação`, `Locais`, `Eixos`, and `Minha conta`;
+- creating and editing activities and sessions;
+- creating and selecting locations;
+- creating and selecting axes;
+- validation messages and confirmations;
+- blocking deletion while in use;
+- saving followed by data reload.
 
-Os testes sempre apontarão para cópias temporárias dos JSONs e nunca alterarão os dados reais do
-repositório.
+Tests will always point to temporary copies of the JSON files and will never change the
+repository's real data.
 
-## Critérios de aceite
+## Acceptance criteria
 
-- `/admin` oferece login e editor sem depender da pasta `frontend/`.
-- Nenhum dado ou alteração administrativa é acessível sem JWT válido.
-- Todos os controles visíveis do painel executam a ação correspondente ou exibem resposta clara.
-- A agenda completa pode ser editada sem manipular JSON bruto ou IDs.
-- Locais exigem somente um nome e podem representar qualquer tipo de espaço.
-- Eixos são apresentados e armazenados com termos em português.
-- `schedule.json` permanece consumível diretamente pelo frontend público.
-- Escritas inválidas ou incompletas não corrompem os arquivos existentes.
-- Testes de API e Playwright passam usando dados isolados.
+- `/admin` provides login and an editor without depending on the `frontend/` directory.
+- No administrative data or change is accessible without a valid JWT.
+- Every visible panel control performs its corresponding action or presents clear feedback.
+- The complete schedule can be edited without manipulating raw JSON or IDs.
+- Locations require only a name and can represent any type of space.
+- Axes are presented and stored using Portuguese terms.
+- `schedule.json` remains directly consumable by the public frontend.
+- Invalid or incomplete writes do not corrupt existing files.
+- API and Playwright tests pass using isolated data.

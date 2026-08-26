@@ -1,0 +1,3 @@
+# Local agent workspaces and scratch artifacts
+.worktrees/
+.superpowers/
