@@ -1,8 +1,197 @@
-<html>
-    <head>
-        
-    </head>
-    <body>
-        
-    </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFFS de Portas Abertas – Contraste</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #f8f8f0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* ===== HEADER FULL WIDTH ===== */
+    .banner {
+      position: relative;
+      width: 100%;
+      height: clamp(280px, 36vw, 480px);
+      background-color: #393ce4;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Padrão de círculos */
+    .banner::before,
+    .banner::after {
+      content: "";
+      position: absolute;
+      inset: -60px;
+      background-image: radial-gradient(
+        circle,
+        #4f52e8 0%,
+        #4f52e8 42%,
+        transparent 43%
+      );
+      background-size: 110px 110px;
+      pointer-events: none;
+    }
+    .banner::before { background-position: 0 0; }
+    .banner::after  { background-position: 55px 55px; }
+
+    /* Conteúdo centralizado */
+    .content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #ed54ce;
+      color: #ffffff;
+      font-family: "Courier New", "Lucida Console", monospace;
+      font-weight: 700;
+      font-size: clamp(16px, 2.2vw, 32px);
+      letter-spacing: 0.18em;
+      padding: 0.42em 0.85em 0.38em;
+      line-height: 1;
+      margin-bottom: 0.25em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 900;
+      color: #e3ff00;
+      font-size: clamp(48px, 9vw, 120px);
+      line-height: 0.88;
+      letter-spacing: -0.025em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    .title span { display: block; }
+
+    /* Óculos */
+    .glasses {
+      position: absolute;
+      top: 18%;
+      left: 58%;
+      width: clamp(100px, 16vw, 220px);
+      z-index: 3;
+      transform: rotate(-20deg);
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    .glasses img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Logo CONTRASTE */
+    .logo {
+      position: absolute;
+      bottom: clamp(18px, 3.5vw, 36px);
+      right: clamp(20px, 5vw, 70px);
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      z-index: 3;
+    }
+
+    .logo-icon {
+      width: clamp(28px, 3.5vw, 44px);
+      height: clamp(28px, 3.5vw, 44px);
+      border-radius: 50%;
+      border: 3px solid #e3ff00;
+      background: linear-gradient(
+        to right,
+        #e3ff00 0% 50%,
+        #00c853 50% 100%
+      );
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      font-size: clamp(13px, 1.7vw, 22px);
+      color: #e3ff00;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* Linha verde limão na base */
+    .banner-bottom-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: #c8ff00;
+      z-index: 4;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 48px auto;
+      padding: 0 24px;
+      color: #333;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .glasses {
+        left: auto;
+        right: 4%;
+        top: 12%;
+        width: 28vw;
+      }
+      .logo {
+        bottom: 14px;
+        right: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="banner" role="banner" aria-label="UFFS de Portas Abertas – Contraste">
+    <div class="content">
+      <div class="badge">UFFS DE</div>
+      <h1 class="title">
+        <span>PORTAS</span>
+        <span>ABERTAS</span>
+      </h1>
+    </div>
+
+    <div class="glasses">
+      <img src="assets/images/oculos.png" alt="">
+    </div>
+
+    <div class="logo">
+      <div class="logo-icon" aria-hidden="true"></div>
+      <span class="logo-text">CONTRASTE</span>
+    </div>
+
+    <div class="banner-bottom-line" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <p>Conteúdo da página abaixo do header...</p>
+  </main>
+
+</body>
 </html>
