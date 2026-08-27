@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from clients.json_store import (
+    InvalidResourceNameError,
     PersistenceError,
     ResourceInUseError,
     ResourceNotFoundError,
@@ -39,7 +40,7 @@ class KnowledgeAxisRepository:
         ensure_unique_name(axes, cleaned_name, "eixo de conhecimento")
         base_id = slugify_id(cleaned_name)
         if not base_id:
-            raise ValueError("Não foi possível gerar o ID do eixo de conhecimento")
+            raise InvalidResourceNameError("eixo de conhecimento")
         used_ids = {axis["id"] for axis in axes}
         axis_id = base_id
         suffix = 2

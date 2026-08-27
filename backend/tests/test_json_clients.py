@@ -355,6 +355,21 @@ def test_catalogs_reject_empty_cleaned_names(tmp_path: Path, name: str):
         LocationRepository(locations_path, schedule_path).create(name)
 
 
+def test_axis_create_rejects_nonempty_name_that_cannot_produce_slug(tmp_path: Path):
+    """Raising a generic ValueError for a non-sluggable axis name must make this test fail."""
+    axes_path = tmp_path / "axes.json"
+    schedule_path = tmp_path / "schedule.json"
+    original_catalog = {"knowledgeAxes": []}
+    write_json(axes_path, original_catalog)
+    write_json(schedule_path, empty_schedule())
+
+    with pytest.raises(InvalidResourceNameError) as error:
+        KnowledgeAxisRepository(axes_path, schedule_path).create("!!!")
+
+    assert error.value.resource == "eixo de conhecimento"
+    assert read_json(axes_path) == original_catalog
+
+
 def test_location_rename_propagates_exact_name_to_every_session(catalog_paths):
     """Updating only the catalog must make this test fail."""
     locations_path, _, schedule_path = catalog_paths
