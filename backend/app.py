@@ -7,7 +7,7 @@ from dependencies import validate_jwt_configured
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
-from routes import auth
+from routes import auth, knowledge_axes, locations, schedule
 from utils import brazil_time_formatter, get_brazil_time
 
 logger.configure(
@@ -52,6 +52,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(auth.router)
+app.include_router(schedule.router)
+app.include_router(locations.router)
+app.include_router(knowledge_axes.router)
 
 
 @app.get("/", tags=["Root"])
