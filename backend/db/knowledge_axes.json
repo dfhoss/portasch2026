@@ -1,0 +1,32 @@
+{
+  "knowledgeAxes": [
+    { "id": "geral", "name": "Geral" },
+    {
+      "id": "agricultura-silvicultura-pesca-e-veterinaria",
+      "name": "Agricultura, silvicultura, pesca e veterinária"
+    },
+    {
+      "id": "administracao-negocios-e-direito",
+      "name": "Administração, negócios e direito"
+    },
+    {
+      "id": "computacao-e-tecnologia-da-informacao",
+      "name": "Computação e tecnologia da informação"
+    },
+    { "id": "educacao", "name": "Educação" },
+    { "id": "artes-e-humanidades", "name": "Artes e humanidades" },
+    {
+      "id": "engenharia-industria-e-construcao",
+      "name": "Engenharia, indústria e construção"
+    },
+    {
+      "id": "ciencias-naturais-matematica-e-estatistica",
+      "name": "Ciências naturais, matemática e estatística"
+    },
+    { "id": "saude-e-bem-estar", "name": "Saúde e bem-estar" },
+    {
+      "id": "ciencias-sociais-comunicacao-e-informacao",
+      "name": "Ciências sociais, comunicação e informação"
+    }
+  ]
+}

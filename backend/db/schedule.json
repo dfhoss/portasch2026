@@ -10,7 +10,7 @@
         {
           "id": "general-activities",
           "title": "Atividades gerais",
-          "knowledgeAxis": "general",
+          "knowledgeAxis": "geral",
           "items": [
             {
               "id": "general-recepcao-nos-auditorios-dos-blocos-a-e-b-das-8h30-as-21h",
@@ -30,7 +30,7 @@
         {
           "id": "administracao",
           "title": "ADMINISTRAÇÃO",
-          "knowledgeAxis": "business-administration-and-law",
+          "knowledgeAxis": "administracao-negocios-e-direito",
           "items": [
             {
               "id": "administracao-voz-e-acao-conhecendo-o-curso-de-administracao",
@@ -106,7 +106,7 @@
         {
           "id": "agronomia",
           "title": "AGRONOMIA",
-          "knowledgeAxis": "agriculture-forestry-fisheries-and-veterinary",
+          "knowledgeAxis": "agricultura-silvicultura-pesca-e-veterinaria",
           "items": [
             {
               "id": "agronomia-apresentacao-do-curso-de-agronomia",
@@ -162,7 +162,7 @@
         {
           "id": "ciencia-da-computacao",
           "title": "CIÊNCIA DA COMPUTAÇÃO",
-          "knowledgeAxis": "computing-and-ict",
+          "knowledgeAxis": "computacao-e-tecnologia-da-informacao",
           "items": [
             {
               "id": "ciencia-da-computacao-oficina-de-circuitos",
@@ -195,7 +195,7 @@
         {
           "id": "ciencias-economicas",
           "title": "CIÊNCIAS ECONÔMICAS",
-          "knowledgeAxis": "social-sciences-communication-and-information",
+          "knowledgeAxis": "ciencias-sociais-comunicacao-e-informacao",
           "items": [
             {
               "id": "ciencias-economicas-apresentacao-do-curso-de-ciencias-economicas",
@@ -233,7 +233,7 @@
         {
           "id": "ciencias-sociais",
           "title": "CIÊNCIAS SOCIAIS",
-          "knowledgeAxis": "social-sciences-communication-and-information",
+          "knowledgeAxis": "ciencias-sociais-comunicacao-e-informacao",
           "items": [
             {
               "id": "ciencias-sociais-apresentacao-do-curso-de-ciencias-sociais",
@@ -276,7 +276,7 @@
         {
           "id": "enfermagem",
           "title": "ENFERMAGEM",
-          "knowledgeAxis": "health-and-welfare",
+          "knowledgeAxis": "saude-e-bem-estar",
           "items": [
             {
               "id": "enfermagem-oficina-sobre-atendimento-a-parada-cardiorrespiratoria",
@@ -319,7 +319,7 @@
         {
           "id": "engenharia-ambiental",
           "title": "ENGENHARIA AMBIENTAL",
-          "knowledgeAxis": "engineering-manufacturing-and-construction",
+          "knowledgeAxis": "engenharia-industria-e-construcao",
           "items": [
             {
               "id": "engenharia-ambiental-apresentacao-do-curso-de-engenharia-ambiental",
@@ -352,7 +352,7 @@
         {
           "id": "engenharia-civil",
           "title": "ENGENHARIA CIVIL",
-          "knowledgeAxis": "engineering-manufacturing-and-construction",
+          "knowledgeAxis": "engenharia-industria-e-construcao",
           "items": [
             {
               "id": "engenharia-civil-apresentacao-do-curso-de-engenharia-civil",
@@ -372,7 +372,7 @@
         {
           "id": "filosofia",
           "title": "FILOSOFIA",
-          "knowledgeAxis": "arts-and-humanities",
+          "knowledgeAxis": "artes-e-humanidades",
           "items": [
             {
               "id": "filosofia-apresentacao-do-curso-de-filosofia",
@@ -391,7 +391,7 @@
         {
           "id": "geografia",
           "title": "GEOGRAFIA",
-          "knowledgeAxis": "social-sciences-communication-and-information",
+          "knowledgeAxis": "ciencias-sociais-comunicacao-e-informacao",
           "items": [
             {
               "id": "geografia-experiencias-geografia-2025",
@@ -411,7 +411,7 @@
         {
           "id": "historia",
           "title": "HISTÓRIA",
-          "knowledgeAxis": "arts-and-humanities",
+          "knowledgeAxis": "artes-e-humanidades",
           "items": [
             {
               "id": "historia-exposicao-historia-em-movimento",
@@ -485,7 +485,7 @@
         {
           "id": "letras",
           "title": "LETRAS",
-          "knowledgeAxis": "arts-and-humanities",
+          "knowledgeAxis": "artes-e-humanidades",
           "items": [
             {
               "id": "letras-exposicao-do-curso-de-letras",
@@ -724,7 +724,7 @@
         {
           "id": "matematica",
           "title": "MATEMÁTICA",
-          "knowledgeAxis": "natural-sciences-mathematics-and-statistics",
+          "knowledgeAxis": "ciencias-naturais-matematica-e-estatistica",
           "items": [
             {
               "id": "matematica-apresentacao-do-curso-de-matematica",
@@ -754,7 +754,7 @@
         {
           "id": "medicina",
           "title": "MEDICINA",
-          "knowledgeAxis": "health-and-welfare",
+          "knowledgeAxis": "saude-e-bem-estar",
           "items": [
             {
               "id": "medicina-apresentacao-do-curso-de-medicina",
@@ -823,7 +823,7 @@
         {
           "id": "pedagogia",
           "title": "PEDAGOGIA",
-          "knowledgeAxis": "education",
+          "knowledgeAxis": "educacao",
           "items": [
             {
               "id": "pedagogia-visitacao-e-vivencia-com-fantasias-e-aderecos-contacao-de-historias-oficina-de-pintura-no-rosto",
