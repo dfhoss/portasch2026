@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 import re
+from datetime import datetime, timedelta, timezone
 
+import jwt
 from playwright.sync_api import Dialog, Page, expect
 
-from .conftest import TEST_PASSWORD, TEST_USERNAME
+from .conftest import TEST_JWT_SECRET, TEST_PASSWORD, TEST_USERNAME
 
 
 def login(page: Page, password: str = TEST_PASSWORD) -> None:
@@ -54,6 +57,24 @@ def test_valid_login_orders_identity_before_admin_requests_and_limits_storage(
 def test_malformed_token_is_removed_and_returns_to_login(live_server_url: str, browser) -> None:
     page = browser.new_page()
     page.add_init_script("sessionStorage.setItem('adminToken', 'malformed-token')")
+    requests: list[str] = []
+    page.on("request", lambda request: requests.append(request.url))
+    page.goto(f"{live_server_url}/admin", wait_until="networkidle")
+    expect(page.locator("#login-view")).to_be_visible()
+    expect(page.get_by_text("Sua sessão expirou. Entre novamente.")).to_be_visible()
+    assert page.evaluate("Object.keys(sessionStorage)") == []
+    assert not any("/admin/api/" in request for request in requests)
+    page.close()
+
+
+def test_expired_token_is_removed_and_never_loads_admin_data(live_server_url: str, browser) -> None:
+    expired_token = jwt.encode(
+        {"sub": TEST_USERNAME, "exp": datetime.now(timezone.utc) - timedelta(seconds=5)},
+        TEST_JWT_SECRET,
+        algorithm="HS256",
+    )
+    page = browser.new_page()
+    page.add_init_script(f"sessionStorage.setItem('adminToken', {json.dumps(expired_token)})")
     requests: list[str] = []
     page.on("request", lambda request: requests.append(request.url))
     page.goto(f"{live_server_url}/admin", wait_until="networkidle")
@@ -167,6 +188,27 @@ def test_created_location_can_be_selected_in_a_session(admin_page: Page) -> None
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
 
 
+def test_created_axis_can_be_selected_and_persists_after_reload(admin_page: Page) -> None:
+    login(admin_page)
+    admin_page.get_by_role("button", name="Eixos").click()
+    admin_page.get_by_role("button", name="Adicionar eixo").click()
+    admin_page.get_by_label("Nome do eixo").fill("Eixo de persistência E2E")
+    admin_page.get_by_role("button", name="Salvar").click()
+    expect(admin_page.get_by_text("Eixo de persistência E2E")).to_be_visible()
+
+    admin_page.get_by_role("button", name="Programação").click()
+    admin_page.locator("#add-group").click()
+    admin_page.get_by_label("Título").fill("Grupo com eixo E2E")
+    admin_page.get_by_label("Eixo de conhecimento").select_option(label="Eixo de persistência E2E")
+    apply_modal(admin_page)
+    admin_page.locator("#save-schedule").click()
+    expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
+
+    admin_page.reload(wait_until="networkidle")
+    group = admin_page.locator(".schedule-group").filter(has_text="Grupo com eixo E2E")
+    expect(group.get_by_role("button", name=re.compile("Eixo de persistência E2E"))).to_be_visible()
+
+
 def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: Page) -> None:
     def add_stale_reference(route) -> None:
         response = route.fetch()
@@ -228,6 +270,9 @@ def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page
     admin_page.once("dialog", accept_dialog)
     existing.get_by_role("button", name="Excluir").click()
     expect(admin_page.get_by_text("Este registro ainda está em uso.")).to_be_visible()
+    expect(
+        admin_page.get_by_text("Voz e Ação: conhecendo o curso de Administração")
+    ).to_be_visible()
     expect(admin_page.locator("body")).not_to_contain_text("loc-004")
     admin_page.get_by_role("button", name="Adicionar local").click()
     admin_page.get_by_label("Nome do local").fill("Cancelado")
@@ -259,8 +304,21 @@ def test_axis_in_use_delete_is_safe_and_null_axis_is_visible(admin_page: Page) -
         has_text="Administração, negócios e direito"
     ).get_by_role("button", name="Excluir").click()
     expect(admin_page.get_by_text("Este registro ainda está em uso.")).to_be_visible()
+    expect(
+        admin_page.get_by_text("Voz e Ação: conhecendo o curso de Administração")
+    ).to_be_visible()
     expect(admin_page.locator("body")).not_to_contain_text("administracao-negocios-e-direito")
     admin_page.get_by_role("button", name="Programação").click()
     admin_page.get_by_role("button", name="Adicionar grupo").click()
     admin_page.get_by_label("Título").fill("Grupo sem eixo")
     expect(admin_page.get_by_label("Eixo de conhecimento")).to_have_value("")
+
+
+def test_dismissed_delete_confirmation_preserves_location(admin_page: Page) -> None:
+    login(admin_page)
+    admin_page.get_by_role("button", name="Locais").click()
+    card = admin_page.locator(".catalog-card").filter(has_text="Bloco A - Sala 105")
+    admin_page.once("dialog", lambda dialog: dialog.dismiss())
+    card.get_by_role("button", name="Excluir").click()
+    expect(card).to_be_visible()
+    expect(admin_page.get_by_text("Bloco A - Sala 105")).to_be_visible()
