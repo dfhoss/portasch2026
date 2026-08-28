@@ -25,6 +25,8 @@ let modalContext = null;
 let modalWorkingActivity = null;
 const modalReferenceValues = new Map();
 let nextStaleReference = 1;
+const catalogKeys = new WeakMap();
+let nextCatalogKey = 1;
 
 function showLogin(message = "") {
   editorView.hidden = true;
@@ -34,6 +36,19 @@ function showLogin(message = "") {
 
 function announce(message) {
   editorMessage.textContent = message;
+}
+
+function catalogKey(record) {
+  if (!catalogKeys.has(record)) {
+    catalogKeys.set(record, `catalog-${nextCatalogKey}`);
+    nextCatalogKey += 1;
+  }
+  return catalogKeys.get(record);
+}
+
+function catalogRecord(kind, key) {
+  const records = kind === "location" ? state.locations : state.knowledgeAxes;
+  return records.find((record) => catalogKey(record) === key) || null;
 }
 
 function showErrors(errors) {
@@ -255,6 +270,63 @@ function renderSections() {
     <div id="schedule-sections">${sectionPanel}</div>`;
 }
 
+function renderLocations() {
+  const cards = state.locations.length
+    ? state.locations
+        .map((location) => {
+          const key = catalogKey(location);
+          return `<article class="catalog-card">
+            <strong>${escapeHtml(location.name)}</strong>
+            <div class="card-actions">
+              <button type="button" data-action="edit-location" data-key="${key}">Editar</button>
+              <button class="danger-action" type="button" data-action="delete-location" data-key="${key}">Excluir</button>
+            </div>
+          </article>`;
+        })
+        .join("")
+    : '<p class="empty-state">Nenhum local cadastrado.</p>';
+  editorContent.innerHTML = `
+    <header class="content-header">
+      <div><p class="eyebrow">Catálogo da agenda</p><h2>Locais</h2></div>
+      <button type="button" class="primary-action" data-action="add-location">Adicionar local</button>
+    </header>
+    <div class="catalog-list" id="locations-list">${cards}</div>`;
+}
+
+function axisGroupCount(axisId) {
+  let count = 0;
+  for (const section of state.schedule?.sections || []) {
+    for (const group of section.groups || []) {
+      if (group.knowledgeAxis === axisId) count += 1;
+    }
+  }
+  return count;
+}
+
+function renderKnowledgeAxes() {
+  const cards = state.knowledgeAxes.length
+    ? state.knowledgeAxes
+        .map((axis) => {
+          const key = catalogKey(axis);
+          const count = axisGroupCount(axis.id);
+          return `<article class="catalog-card">
+            <div><strong>${escapeHtml(axis.name)}</strong><span class="secondary-text">${count} ${count === 1 ? "grupo" : "grupos"}</span></div>
+            <div class="card-actions">
+              <button type="button" data-action="edit-axis" data-key="${key}">Editar</button>
+              <button class="danger-action" type="button" data-action="delete-axis" data-key="${key}">Excluir</button>
+            </div>
+          </article>`;
+        })
+        .join("")
+    : '<p class="empty-state">Nenhum eixo cadastrado.</p>';
+  editorContent.innerHTML = `
+    <header class="content-header">
+      <div><p class="eyebrow">Catálogo da agenda</p><h2>Eixos de conhecimento</h2></div>
+      <button type="button" class="primary-action" data-action="add-axis">Adicionar eixo</button>
+    </header>
+    <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
+}
+
 function selectOptions(items, selectedValue, emptyLabel) {
   const options = [`<option value="">${escapeHtml(emptyLabel)}</option>`];
   let selected = selectedValue == null || selectedValue === "";
@@ -329,6 +401,34 @@ function openGroupEditor(group = null, section = selectedSection(), opener = nul
   );
 }
 
+function openCatalogEditor(type, record = null, opener = null) {
+  modalReferenceValues.clear();
+  modalContext = {type, record};
+  modalWorkingActivity = null;
+  addSessionButton.hidden = true;
+  const location = type === "location";
+  const formId = location ? "location-form" : "knowledge-axis-form";
+  const fieldId = location ? "location-name" : "knowledge-axis-name";
+  const label = location ? "Nome do local" : "Nome do eixo";
+  showModal(
+    record ? `Editar ${location ? "local" : "eixo"}` : `Adicionar ${location ? "local" : "eixo"}`,
+    `<form id="${formId}" class="editor-form">
+      <label for="${fieldId}">${label}</label>
+      <input id="${fieldId}" name="name" required maxlength="200" autocomplete="off" value="${escapeHtml(record?.name)}">
+      <div class="dialog-actions"><button class="primary-action" type="submit">Salvar</button></div>
+    </form>`,
+    opener,
+  );
+}
+
+function openLocationEditor(record = null, opener = null) {
+  openCatalogEditor("location", record, opener);
+}
+
+function openKnowledgeAxisEditor(record = null, opener = null) {
+  openCatalogEditor("axis", record, opener);
+}
+
 function sessionEditorMarkup(session, index) {
   return `<div class="session-editor" data-session-index="${index}">
     <label>Início <input name="startTime" type="time" step="60" required value="${escapeHtml(session.startTime)}"></label>
@@ -391,12 +491,153 @@ function formValue(form, name) {
   return form.elements.namedItem(name)?.value.trim() || "";
 }
 
+function catalogErrorMessage(response, detail) {
+  const references = Array.isArray(detail?.references) ? detail.references : [];
+  if (response.status === 409 && references.length) {
+    return `Este registro ainda está em uso. ${references.map((reference) => escapeHtml(reference)).join(" · ")}`;
+  }
+  if (response.status === 409) return "Já existe um registro com esse nome.";
+  if (response.status === 404) return "Registro não encontrado.";
+  if (response.status === 422) return "Informe um nome válido.";
+  if (response.status >= 500) return "Não foi possível salvar as alterações.";
+  return "Não foi possível concluir a alteração.";
+}
+
+async function showCatalogApiError(response, fallback = "Não foi possível concluir a alteração.") {
+  let message = fallback;
+  try {
+    const payload = await response.json();
+    message = catalogErrorMessage(response, payload?.detail);
+  } catch (_error) {
+    // A resposta sem JSON mantém o texto seguro definido pelo editor.
+  }
+  announce(message);
+}
+
+async function reloadLocationDependencies() {
+  const [locationsResponse, scheduleResponse] = await Promise.all([
+    apiFetch("/admin/api/locations"),
+    apiFetch("/admin/api/schedule"),
+  ]);
+  if (!locationsResponse.ok || !scheduleResponse.ok) throw new Error("reload-failed");
+  const [locations, schedule] = await Promise.all([
+    locationsResponse.json(),
+    scheduleResponse.json(),
+  ]);
+  if (!Array.isArray(locations) || !schedule || typeof schedule !== "object") {
+    throw new Error("reload-failed");
+  }
+  return {locations, schedule};
+}
+
+function carryCatalogKeys(previous, next) {
+  const keysById = new Map(previous.map((record) => [record.id, catalogKey(record)]));
+  next.forEach((record) => {
+    const key = keysById.get(record.id);
+    if (key) catalogKeys.set(record, key);
+  });
+}
+
+async function saveLocation(form = modalContent.querySelector("#location-form")) {
+  const name = formValue(form, "name");
+  if (!name) {
+    announce("O nome é obrigatório.");
+    form.elements.namedItem("name")?.focus();
+    return;
+  }
+  const record = modalContext?.type === "location" ? modalContext.record : null;
+  const path = record ? `/admin/api/locations/${encodeURIComponent(record.id)}` : "/admin/api/locations";
+  try {
+    const response = await apiFetch(path, {
+      method: record ? "PUT" : "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name}),
+    });
+    if (!response.ok) return showCatalogApiError(response);
+    const canonical = await response.json();
+    if (record) {
+      const refreshed = await reloadLocationDependencies();
+      carryCatalogKeys(state.locations, refreshed.locations);
+      state.locations = refreshed.locations;
+      state.schedule = refreshed.schedule;
+    } else {
+      state.locations = [...state.locations, canonical];
+    }
+    renderLocations();
+    editorModal.close();
+    announce(record ? "Local renomeado com sucesso." : "Local criado com sucesso.");
+  } catch (error) {
+    if (error.message !== "unauthorized") announce("Não foi possível salvar as alterações.");
+  }
+}
+
+async function deleteLocation(record) {
+  if (!record || !confirmDeletion(`Excluir o local “${record.name}”?`)) return;
+  try {
+    const response = await apiFetch(`/admin/api/locations/${encodeURIComponent(record.id)}`, {method: "DELETE"});
+    if (!response.ok) return showCatalogApiError(response);
+    state.locations = state.locations.filter((item) => item !== record);
+    renderLocations();
+    announce("Local excluído com sucesso.");
+  } catch (error) {
+    if (error.message !== "unauthorized") announce("Não foi possível excluir o local.");
+  }
+}
+
+async function saveKnowledgeAxis(form = modalContent.querySelector("#knowledge-axis-form")) {
+  const name = formValue(form, "name");
+  if (!name) {
+    announce("O nome é obrigatório.");
+    form.elements.namedItem("name")?.focus();
+    return;
+  }
+  const record = modalContext?.type === "axis" ? modalContext.record : null;
+  const path = record
+    ? `/admin/api/knowledge-axes/${encodeURIComponent(record.id)}`
+    : "/admin/api/knowledge-axes";
+  try {
+    const response = await apiFetch(path, {
+      method: record ? "PUT" : "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name}),
+    });
+    if (!response.ok) return showCatalogApiError(response);
+    const canonical = await response.json();
+    if (record) {
+      catalogKeys.set(canonical, catalogKey(record));
+      state.knowledgeAxes = state.knowledgeAxes.map((item) => (item === record ? canonical : item));
+    } else {
+      state.knowledgeAxes = [...state.knowledgeAxes, canonical];
+    }
+    renderKnowledgeAxes();
+    editorModal.close();
+    announce(record ? "Eixo renomeado com sucesso." : "Eixo criado com sucesso.");
+  } catch (error) {
+    if (error.message !== "unauthorized") announce("Não foi possível salvar as alterações.");
+  }
+}
+
+async function deleteKnowledgeAxis(record) {
+  if (!record || !confirmDeletion(`Excluir o eixo “${record.name}”?`)) return;
+  try {
+    const response = await apiFetch(`/admin/api/knowledge-axes/${encodeURIComponent(record.id)}`, {method: "DELETE"});
+    if (!response.ok) return showCatalogApiError(response);
+    state.knowledgeAxes = state.knowledgeAxes.filter((item) => item !== record);
+    renderKnowledgeAxes();
+    announce("Eixo excluído com sucesso.");
+  } catch (error) {
+    if (error.message !== "unauthorized") announce("Não foi possível excluir o eixo.");
+  }
+}
+
 function catalogReferenceValue(value) {
   return modalReferenceValues.get(value) ?? value;
 }
 
 function applyModalDraft(form) {
   if (!modalContext) return;
+  if (modalContext.type === "location") return saveLocation(form);
+  if (modalContext.type === "axis") return saveKnowledgeAxis(form);
   const title = formValue(form, "title");
   if (!title) {
     announce("O título é obrigatório.");
@@ -589,6 +830,12 @@ async function handleEditorClick(event) {
   if (action === "add-section") return openSectionEditor(null, button);
   if (action === "add-group") return openGroupEditor(null, selectedSection(), button);
   if (action === "add-activity") return openActivityEditor(null, null, button);
+  if (action === "add-location") return openLocationEditor(null, button);
+  if (action === "edit-location") return openLocationEditor(catalogRecord("location", key), button);
+  if (action === "delete-location") return deleteLocation(catalogRecord("location", key));
+  if (action === "add-axis") return openKnowledgeAxisEditor(null, button);
+  if (action === "edit-axis") return openKnowledgeAxisEditor(catalogRecord("axis", key), button);
+  if (action === "delete-axis") return deleteKnowledgeAxis(catalogRecord("axis", key));
   if (action === "select-section") {
     const section = findSectionByKey(key);
     if (section) {
@@ -661,9 +908,11 @@ editorView.addEventListener("click", (event) => {
     renderSections();
     announce("Editor da programação.");
   } else if (section === "locations") {
-    announce("A administração de locais estará disponível na próxima etapa.");
+    renderLocations();
+    announce("Editor de locais.");
   } else if (section === "axes") {
-    announce("A administração de eixos estará disponível na próxima etapa.");
+    renderKnowledgeAxes();
+    announce("Editor de eixos.");
   } else {
     announce("Os dados da conta são gerenciados pelo serviço de autenticação.");
   }

@@ -69,6 +69,18 @@
       <form class="dialog-footer" method="dialog"><button type="submit">Fechar</button></form>
     </dialog>
 
+    <template id="location-form-template">
+      <form id="location-form" class="editor-form">
+        <label for="location-name">Nome do local</label>
+        <input id="location-name" name="name" required maxlength="200" autocomplete="off">
+      </form>
+    </template>
+    <template id="knowledge-axis-form-template">
+      <form id="knowledge-axis-form" class="editor-form">
+        <label for="knowledge-axis-name">Nome do eixo</label>
+        <input id="knowledge-axis-name" name="name" required maxlength="200" autocomplete="off">
+      </form>
+    </template>
     <template id="group-template"><article class="schedule-group"></article></template>
     <template id="activity-template"><article class="schedule-activity"></article></template>
     <template id="session-template"><article class="schedule-session"></article></template>
