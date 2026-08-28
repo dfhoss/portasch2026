@@ -1,4 +1,6 @@
 import json
+import re
+from html.parser import HTMLParser
 from pathlib import Path
 
 
@@ -28,6 +30,48 @@ def test_admin_static_assets_are_public_and_data_free(client):
     assert script_response.status_code == 200
     assert "Auditórios dos Blocos A e B" not in script_response.text
     assert "Programação completa" not in script_response.text
+
+
+class EditorShellParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.stack: list[dict[str, str]] = []
+        self.sidebar_contents: list[dict[str, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = {name: value or "" for name, value in attrs}
+        self.stack.append({"tag": tag, **attributes})
+        if any(item.get("class") == "editor-sidebar" for item in self.stack):
+            self.sidebar_contents.append({"tag": tag, **attributes})
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.stack and self.stack[-1]["tag"] == tag:
+            self.stack.pop()
+
+
+def css_rule(css: str, selector: str, start: int = 0) -> str:
+    match = re.search(rf"{re.escape(selector)}\s*\{{([^}}]*)\}}", css[start:])
+    assert match, f"Missing CSS rule for {selector}"
+    return match.group(1)
+
+
+def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client):
+    """Placing the navigation beside the sidebar or keeping it horizontal on desktop must fail."""
+    page = client.get("/admin").text
+    css = client.get("/admin/static/admin.css").text
+    parser = EditorShellParser()
+    parser.feed(page)
+
+    sidebar_tags = [item for item in parser.sidebar_contents if item["tag"] == "aside"]
+    assert sidebar_tags
+    assert any(item["tag"] == "nav" for item in parser.sidebar_contents)
+    assert any(item.get("id") == "editor-title" for item in parser.sidebar_contents)
+    assert any(item.get("id") == "logout-button" for item in parser.sidebar_contents)
+
+    desktop_css, _, mobile_css = css.partition("@media (max-width: 749px)")
+    assert "grid-column: 1" in css_rule(desktop_css, ".editor-sidebar")
+    assert "flex-direction: column" in css_rule(desktop_css, ".editor-sidebar nav")
+    assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
 
 
 def test_browser_authentication_contract_validates_identity_before_loading_data(client):

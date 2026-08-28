@@ -22,16 +22,18 @@
       </section>
 
       <section id="editor-view" class="editor-view" hidden aria-labelledby="editor-title">
-        <header class="editor-header">
-          <h1 id="editor-title">Administração</h1>
-          <button id="logout-button" type="button">Sair</button>
-        </header>
-        <nav aria-label="Seções administrativas">
-          <button type="button" data-editor-section="schedule">Programação</button>
-          <button type="button" data-editor-section="locations">Locais</button>
-          <button type="button" data-editor-section="axes">Eixos</button>
-          <button type="button" data-editor-section="account">Minha conta</button>
-        </nav>
+        <aside class="editor-sidebar">
+          <header class="editor-header">
+            <h1 id="editor-title">Administração</h1>
+            <button id="logout-button" type="button">Sair</button>
+          </header>
+          <nav aria-label="Seções administrativas">
+            <button type="button" data-editor-section="schedule">Programação</button>
+            <button type="button" data-editor-section="locations">Locais</button>
+            <button type="button" data-editor-section="axes">Eixos</button>
+            <button type="button" data-editor-section="account">Minha conta</button>
+          </nav>
+        </aside>
         <div id="editor-message" role="status" aria-live="polite"></div>
         <section id="editor-content" aria-live="polite">
           <p>Selecione uma seção para começar.</p>

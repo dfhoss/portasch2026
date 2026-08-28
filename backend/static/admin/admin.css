@@ -17,18 +17,20 @@ button { cursor: pointer; }
 .login-card input { padding: .65rem; border: 1px solid #aab5c6; border-radius: .35rem; }
 .login-card button, .editor-header button, nav button { padding: .65rem .9rem; border: 0; border-radius: .35rem; background: #124e78; color: #fff; }
 .editor-view { display: grid; grid-template-columns: 15rem 1fr; min-height: 100vh; }
-.editor-header { grid-row: span 3; display: flex; flex-direction: column; align-items: stretch; gap: 1rem; padding: 1.5rem; color: #fff; background: #14213d; }
+.editor-sidebar { grid-column: 1; grid-row: 1 / -1; display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; color: #fff; background: #14213d; }
+.editor-header { display: flex; flex-direction: column; align-items: stretch; gap: 1rem; }
 .editor-header h1 { margin: 0; font-size: 1.3rem; }
 .editor-header button { background: #fff; color: #14213d; }
-.editor-view nav { display: flex; gap: .5rem; padding: 1rem; background: #fff; border-bottom: 1px solid #dbe2ea; }
-.editor-view nav button { background: transparent; color: #14213d; }
-#editor-message, #editor-content { padding: 1.5rem; }
+.editor-sidebar nav { display: flex; flex-direction: column; gap: .5rem; }
+.editor-sidebar nav button { background: transparent; color: #fff; text-align: left; }
+#editor-message, #editor-content { grid-column: 2; padding: 1.5rem; }
 #editor-message:not(:empty), #login-message:not(:empty) { padding: .65rem; border-radius: .35rem; background: #e8f2fa; }
 dialog { border: 0; border-radius: .75rem; box-shadow: 0 1rem 3rem #14213d40; }
 
 @media (max-width: 749px) {
   .editor-view { display: block; }
+  .editor-sidebar { display: block; padding: 0; }
   .editor-header { flex-direction: row; align-items: center; justify-content: space-between; }
-  .editor-view nav { overflow-x: auto; }
-  .editor-view nav button { white-space: nowrap; }
+  .editor-sidebar nav { flex-direction: row; overflow-x: auto; padding: 1rem; background: #fff; border-bottom: 1px solid #dbe2ea; }
+  .editor-sidebar nav button { color: #14213d; white-space: nowrap; }
 }
