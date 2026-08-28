@@ -18,6 +18,7 @@ class TemporaryDatabase:
     schedule: Path
     locations: Path
     knowledge_axes: Path
+    users: Path
 
 
 @pytest.fixture
@@ -26,11 +27,13 @@ def temporary_database(tmp_path: Path) -> TemporaryDatabase:
         schedule=tmp_path / "schedule.json",
         locations=tmp_path / "locations.json",
         knowledge_axes=tmp_path / "knowledge_axes.json",
+        users=tmp_path / "users.json",
     )
     for source_name, destination in (
         ("schedule.json", paths.schedule),
         ("locations.json", paths.locations),
         ("knowledge_axes.json", paths.knowledge_axes),
+        ("users.json", paths.users),
     ):
         shutil.copyfile(PROJECT_ROOT / "db" / source_name, destination)
     return paths
@@ -44,6 +47,7 @@ def configured_environment(
     monkeypatch.setenv("SCHEDULE_PATH", str(temporary_database.schedule))
     monkeypatch.setenv("LOCATIONS_PATH", str(temporary_database.locations))
     monkeypatch.setenv("KNOWLEDGE_AXES_PATH", str(temporary_database.knowledge_axes))
+    monkeypatch.setenv("DATABASE_PATH", str(temporary_database.users))
     return temporary_database
 
 

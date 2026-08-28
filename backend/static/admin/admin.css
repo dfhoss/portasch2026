@@ -1,0 +1,34 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  color: #14213d;
+  background: #f6f8fb;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.admin-shell { min-height: 100vh; }
+.login-view { display: grid; min-height: 100vh; place-items: center; padding: 1.5rem; }
+.login-card { display: grid; gap: .75rem; width: min(100%, 26rem); padding: 2rem; background: #fff; border-radius: .75rem; box-shadow: 0 1rem 3rem #14213d1a; }
+.login-card h1, .login-card p { margin: 0; }
+.login-card input { padding: .65rem; border: 1px solid #aab5c6; border-radius: .35rem; }
+.login-card button, .editor-header button, nav button { padding: .65rem .9rem; border: 0; border-radius: .35rem; background: #124e78; color: #fff; }
+.editor-view { display: grid; grid-template-columns: 15rem 1fr; min-height: 100vh; }
+.editor-header { grid-row: span 3; display: flex; flex-direction: column; align-items: stretch; gap: 1rem; padding: 1.5rem; color: #fff; background: #14213d; }
+.editor-header h1 { margin: 0; font-size: 1.3rem; }
+.editor-header button { background: #fff; color: #14213d; }
+.editor-view nav { display: flex; gap: .5rem; padding: 1rem; background: #fff; border-bottom: 1px solid #dbe2ea; }
+.editor-view nav button { background: transparent; color: #14213d; }
+#editor-message, #editor-content { padding: 1.5rem; }
+#editor-message:not(:empty), #login-message:not(:empty) { padding: .65rem; border-radius: .35rem; background: #e8f2fa; }
+dialog { border: 0; border-radius: .75rem; box-shadow: 0 1rem 3rem #14213d40; }
+
+@media (max-width: 749px) {
+  .editor-view { display: block; }
+  .editor-header { flex-direction: row; align-items: center; justify-content: space-between; }
+  .editor-view nav { overflow-x: auto; }
+  .editor-view nav button { white-space: nowrap; }
+}

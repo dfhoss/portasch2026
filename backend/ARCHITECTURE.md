@@ -21,6 +21,15 @@ The current authentication feature demonstrates this pattern:
 - `dependencies.py` exposes reusable FastAPI dependencies and annotated aliases.
 - `utils/` contains general-purpose time and logging helpers.
 
+The administrative shell follows the same boundary without embedding protected
+data in the initial document:
+
+- `routes/admin.py` serves the public `/admin` shell and defines its static directory.
+- `app.py` mounts that directory at `/admin/static` and registers the existing protected
+  schedule, locations, and knowledge-axis routers.
+- The browser validates its bearer token through `/auth/users/me/` before requesting
+  the protected `/admin/api/*` resources.
+
 ## Responsibilities by Module
 
 ### Application composition (`app.py`)

@@ -7,7 +7,7 @@ from dependencies import validate_jwt_configured
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
-from routes import auth, knowledge_axes, locations, schedule
+from routes import admin, auth, knowledge_axes, locations, schedule
 from utils import brazil_time_formatter, get_brazil_time
 
 logger.configure(
@@ -55,6 +55,10 @@ app.include_router(auth.router)
 app.include_router(schedule.router)
 app.include_router(locations.router)
 app.include_router(knowledge_axes.router)
+app.mount(
+    "/admin/static", admin.AdminStaticFiles(directory=admin.ADMIN_STATIC_DIR), name="admin-static"
+)
+app.include_router(admin.router)
 
 
 @app.get("/", tags=["Root"])
