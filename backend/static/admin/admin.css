@@ -7,8 +7,12 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; }
-button, input { font: inherit; }
+button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid #fca311;
+  outline-offset: 2px;
+}
 
 .admin-shell { min-height: 100vh; }
 .login-view { display: grid; min-height: 100vh; place-items: center; padding: 1.5rem; }
@@ -24,8 +28,67 @@ button { cursor: pointer; }
 .editor-sidebar nav { display: flex; flex-direction: column; gap: .5rem; }
 .editor-sidebar nav button { background: transparent; color: #fff; text-align: left; }
 #editor-message, #editor-content { grid-column: 2; padding: 1.5rem; }
+#editor-message { align-self: start; padding-bottom: 0; }
 #editor-message:not(:empty), #login-message:not(:empty) { padding: .65rem; border-radius: .35rem; background: #e8f2fa; }
-dialog { border: 0; border-radius: .75rem; box-shadow: 0 1rem 3rem #14213d40; }
+#editor-content { min-width: 0; padding-top: 1rem; }
+.content-header, .toolbar-actions, .section-toolbar, .card-actions, .session-summary {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  flex-wrap: wrap;
+}
+.content-header { justify-content: space-between; }
+.content-header h2, .content-header p, .section-heading h3, .section-heading p { margin: 0; }
+.eyebrow { color: #52637a; font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.toolbar-actions button, .section-toolbar button, .card-actions button, .dialog-actions button, #add-session {
+  padding: .58rem .8rem;
+  border: 1px solid #aab5c6;
+  border-radius: .4rem;
+  background: #fff;
+  color: #14213d;
+}
+.toolbar-actions .primary-action, .dialog-actions .primary-action { border-color: #124e78; background: #124e78; color: #fff; }
+.schedule-metadata { display: grid; grid-template-columns: max-content minmax(6rem, 8rem) max-content minmax(10rem, 13rem); gap: .5rem .75rem; align-items: center; margin: 1.25rem 0; padding: 1rem; border: 1px solid #dbe2ea; border-radius: .65rem; background: #fff; }
+.schedule-metadata input, .editor-form input, .editor-form select, .editor-form textarea {
+  width: 100%;
+  padding: .6rem;
+  border: 1px solid #aab5c6;
+  border-radius: .35rem;
+  background: #fff;
+  color: #14213d;
+}
+.section-list { display: flex; gap: .5rem; overflow-x: auto; padding: .25rem 0 .75rem; }
+.section-list button { flex: 0 0 auto; padding: .6rem .85rem; border: 1px solid #aab5c6; border-radius: 999px; background: #fff; color: #14213d; }
+.section-list button[aria-current="true"] { border-color: #124e78; background: #e8f2fa; font-weight: 700; }
+.section-toolbar { margin: .5rem 0 1rem; }
+.schedule-section { display: grid; gap: 1rem; }
+.section-heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; padding: 1rem; border-radius: .65rem; background: #dceaf5; }
+.schedule-groups { display: grid; gap: .85rem; }
+.schedule-group { overflow: hidden; border: 1px solid #dbe2ea; border-radius: .65rem; background: #fff; }
+.group-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: 1rem; }
+.group-toggle { display: grid; gap: .2rem; min-width: 0; padding: 0; border: 0; background: transparent; color: #14213d; text-align: left; }
+.group-toggle strong, .activity-copy strong { overflow-wrap: anywhere; }
+.secondary-text { color: #52637a; font-size: .9rem; }
+.group-body { display: grid; gap: .75rem; padding: 0 1rem 1rem; border-top: 1px solid #eef1f5; }
+.group-body[hidden] { display: none; }
+.activity-list { display: grid; gap: .65rem; padding-top: 1rem; }
+.schedule-activity { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; align-items: start; padding: .85rem; border: 1px solid #eef1f5; border-radius: .5rem; background: #f8fafc; }
+.activity-copy { display: grid; gap: .35rem; min-width: 0; }
+.activity-copy p { margin: 0; white-space: pre-line; }
+.session-summary { color: #34465e; font-size: .9rem; }
+.session-chip { padding: .2rem .45rem; border-radius: 999px; background: #e8f2fa; }
+.empty-state { margin: 0; padding: 1.25rem; border: 1px dashed #aab5c6; border-radius: .65rem; color: #52637a; text-align: center; }
+.danger-action { color: #9d1919 !important; }
+dialog { width: min(92vw, 42rem); max-height: 90vh; overflow: auto; padding: 1.25rem; border: 0; border-radius: .75rem; box-shadow: 0 1rem 3rem #14213d40; }
+dialog::backdrop { background: #14213d99; }
+dialog h2 { margin-top: 0; }
+.editor-form { display: grid; gap: .85rem; }
+.editor-form label { display: grid; gap: .35rem; font-weight: 650; }
+.editor-form textarea { min-height: 5rem; resize: vertical; }
+.session-editor-list { display: grid; gap: .75rem; }
+.session-editor { display: grid; grid-template-columns: 1fr 1fr minmax(10rem, 2fr) auto; gap: .5rem; align-items: end; padding: .75rem; border: 1px solid #dbe2ea; border-radius: .5rem; }
+.dialog-actions, .dialog-footer { display: flex; justify-content: flex-end; gap: .65rem; margin-top: 1rem; }
+.dialog-footer button { padding: .55rem .75rem; border: 0; background: transparent; color: #34465e; text-decoration: underline; }
 
 @media (max-width: 749px) {
   .editor-view { display: block; }
@@ -33,4 +96,9 @@ dialog { border: 0; border-radius: .75rem; box-shadow: 0 1rem 3rem #14213d40; }
   .editor-header { flex-direction: row; align-items: center; justify-content: space-between; }
   .editor-sidebar nav { flex-direction: row; overflow-x: auto; padding: 1rem; background: #fff; border-bottom: 1px solid #dbe2ea; }
   .editor-sidebar nav button { color: #14213d; white-space: nowrap; }
+  #editor-message, #editor-content { padding: 1rem; }
+  .schedule-metadata { grid-template-columns: 1fr; }
+  .section-heading, .schedule-activity { grid-template-columns: 1fr; display: grid; }
+  .session-editor { grid-template-columns: 1fr 1fr; }
+  .session-editor label:nth-child(3), .session-editor .danger-action { grid-column: 1 / -1; }
 }

@@ -36,7 +36,28 @@
         </aside>
         <div id="editor-message" role="status" aria-live="polite"></div>
         <section id="editor-content" aria-live="polite">
-          <p>Selecione uma seção para começar.</p>
+          <header class="content-header">
+            <div>
+              <p class="eyebrow">Agenda do evento</p>
+              <h2>Programação</h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="add-section" type="button" data-action="add-section">Adicionar seção</button>
+              <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule">Salvar programação</button>
+            </div>
+          </header>
+          <div class="schedule-metadata">
+            <label for="schedule-version">Versão</label>
+            <input id="schedule-version" name="version" type="number" min="1" inputmode="numeric">
+            <label for="schedule-date">Data do evento</label>
+            <input id="schedule-date" name="eventDate" type="date">
+          </div>
+          <nav id="section-list" class="section-list" aria-label="Seções da programação"></nav>
+          <div class="section-toolbar">
+            <button id="add-group" type="button" data-action="add-group">Adicionar grupo</button>
+            <button id="add-activity" type="button" data-action="add-activity">Adicionar atividade</button>
+          </div>
+          <div id="schedule-sections"></div>
         </section>
       </section>
     </main>
@@ -44,7 +65,8 @@
     <dialog id="editor-modal" aria-labelledby="modal-title">
       <h2 id="modal-title">Editar item</h2>
       <div id="modal-content"></div>
-      <form method="dialog"><button type="submit">Fechar</button></form>
+      <button id="add-session" type="button" hidden>Adicionar horário</button>
+      <form class="dialog-footer" method="dialog"><button type="submit">Fechar</button></form>
     </dialog>
 
     <template id="group-template"><article class="schedule-group"></article></template>
