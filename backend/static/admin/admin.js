@@ -20,8 +20,11 @@ const draftKeys = new WeakMap();
 let nextDraftKey = 1;
 let expandedGroups = new WeakSet();
 let modalOpener = null;
+let modalOpenerTarget = null;
 let modalContext = null;
 let modalWorkingActivity = null;
+const modalReferenceValues = new Map();
+let nextStaleReference = 1;
 
 function showLogin(message = "") {
   editorView.hidden = true;
@@ -42,7 +45,20 @@ async function showApiError(response, fallback) {
   let message = fallback;
   try {
     const payload = await response.json();
-    if (payload?.detail?.message) message = payload.detail.message;
+    const detail = payload?.detail;
+    const references = Array.isArray(detail?.references) ? detail.references : [];
+    const detailMessage = typeof detail?.message === "string" ? detail.message.trim() : "";
+    const knownAxisId = state.knowledgeAxes.some(
+      (axis) => axis.id && detailMessage.includes(axis.id),
+    );
+    if (references.length || knownAxisId || detailMessage.includes("Referências inválidas")) {
+      message = "A programação contém locais ou eixos não cadastrados.";
+    } else if (
+      detailMessage === "Não foi possível salvar as alterações" ||
+      detailMessage === "Falha controlada"
+    ) {
+      message = detailMessage;
+    }
   } catch (_error) {
     // A resposta sem JSON ainda recebe a mensagem segura definida pelo editor.
   }
@@ -241,18 +257,30 @@ function renderSections() {
 
 function selectOptions(items, selectedValue, emptyLabel) {
   const options = [`<option value="">${escapeHtml(emptyLabel)}</option>`];
+  let selected = selectedValue == null || selectedValue === "";
   for (const item of items) {
     const value = emptyLabel === "Sem local" ? item.name : item.id;
-    const selected = value === selectedValue ? " selected" : "";
+    const isSelected = value === selectedValue;
+    selected ||= isSelected;
     options.push(
-      `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(item.name)}</option>`,
+      `<option value="${escapeHtml(value)}"${isSelected ? " selected" : ""}>${escapeHtml(item.name)}</option>`,
     );
+  }
+  if (!selected && selectedValue != null) {
+    const token = `__stale-reference-${nextStaleReference}`;
+    nextStaleReference += 1;
+    modalReferenceValues.set(token, selectedValue);
+    const staleLabel = emptyLabel === "Sem local" ? "Local não cadastrado" : "Eixo não cadastrado";
+    options.push(`<option value="${token}" selected>${staleLabel}</option>`);
   }
   return options.join("");
 }
 
 function showModal(title, content, opener) {
   modalOpener = opener || document.activeElement;
+  modalOpenerTarget = modalOpener
+    ? {id: modalOpener.id, action: modalOpener.dataset?.action, key: modalOpener.dataset?.key}
+    : null;
   modalTitle.textContent = title;
   modalContent.innerHTML = content;
   editorModal.showModal();
@@ -260,6 +288,7 @@ function showModal(title, content, opener) {
 }
 
 function openSectionEditor(section = null, opener = null) {
+  modalReferenceValues.clear();
   modalContext = { type: "section", record: section };
   modalWorkingActivity = null;
   addSessionButton.hidden = true;
@@ -279,6 +308,7 @@ function openGroupEditor(group = null, section = selectedSection(), opener = nul
     announce("Adicione uma seção antes de criar um grupo.");
     return;
   }
+  modalReferenceValues.clear();
   modalContext = { type: "group", record: group, section };
   modalWorkingActivity = null;
   addSessionButton.hidden = true;
@@ -324,6 +354,7 @@ function openActivityEditor(activity = null, group = null, opener = null) {
     return;
   }
 
+  modalReferenceValues.clear();
   modalContext = { type: "activity", record: activity, group: targetGroup };
   modalWorkingActivity = {
     title: activity?.title || "",
@@ -360,6 +391,10 @@ function formValue(form, name) {
   return form.elements.namedItem(name)?.value.trim() || "";
 }
 
+function catalogReferenceValue(value) {
+  return modalReferenceValues.get(value) ?? value;
+}
+
 function applyModalDraft(form) {
   if (!modalContext) return;
   const title = formValue(form, "title");
@@ -378,7 +413,7 @@ function applyModalDraft(form) {
   } else if (modalContext.type === "group") {
     const group = modalContext.record || { title: "", knowledgeAxis: null, items: [] };
     group.title = title;
-    group.knowledgeAxis = formValue(form, "knowledgeAxis") || null;
+    group.knowledgeAxis = catalogReferenceValue(formValue(form, "knowledgeAxis")) || null;
     if (!modalContext.record) modalContext.section.groups.push(group);
     expandedGroups.add(group);
   } else if (modalContext.type === "activity") {
@@ -394,7 +429,7 @@ function applyModalDraft(form) {
     activity.sessions = Array.from(form.querySelectorAll(".session-editor")).map((row) => ({
       startTime: row.querySelector('[name="startTime"]').value,
       endTime: row.querySelector('[name="endTime"]').value,
-      location: row.querySelector('[name="location"]').value || null,
+      location: catalogReferenceValue(row.querySelector('[name="location"]').value) || null,
     }));
     if (!modalContext.record) {
       targetGroup.items.push(activity);
@@ -659,12 +694,31 @@ addSessionButton.addEventListener("click", () => {
   list?.querySelector(".session-editor:last-child input")?.focus();
 });
 
+function restoreModalFocus() {
+  if (modalOpener?.isConnected) {
+    modalOpener.focus();
+    return;
+  }
+  if (!modalOpenerTarget) return;
+  let selector = "";
+  if (modalOpenerTarget.action) {
+    selector = `button[data-action="${CSS.escape(modalOpenerTarget.action)}"]`;
+    if (modalOpenerTarget.key) {
+      selector += `[data-key="${CSS.escape(modalOpenerTarget.key)}"]`;
+    }
+  } else if (modalOpenerTarget.id) {
+    selector = `#${CSS.escape(modalOpenerTarget.id)}`;
+  }
+  if (selector) editorContent.querySelector(selector)?.focus();
+}
+
 editorModal.addEventListener("close", () => {
   addSessionButton.hidden = true;
   modalContext = null;
   modalWorkingActivity = null;
-  if (modalOpener?.isConnected) modalOpener.focus();
+  restoreModalFocus();
   modalOpener = null;
+  modalOpenerTarget = null;
 });
 
 loginForm.addEventListener("submit", async (event) => {

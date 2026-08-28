@@ -21,10 +21,13 @@ class FakeElement {
     this.dataset = {};
     this.isConnected = true;
     this.listeners = new Map();
+    this.children = [];
+    this.elements = {namedItem: () => null};
   }
   addEventListener(type, callback) { this.listeners.set(type, callback); }
-  append() {}
-  appendChild() {}
+  dispatchEvent(event) { return this.listeners.get(event.type)?.(event); }
+  append(...children) { this.children.push(...children); }
+  appendChild(child) { this.children.push(child); return child; }
   replaceChildren() {}
   setAttribute() {}
   removeAttribute() {}
@@ -33,7 +36,7 @@ class FakeElement {
   closest() { return null; }
   focus() { this.focused = true; }
   showModal() { this.open = true; }
-  close() { this.open = false; }
+  close() { this.open = false; this.dispatchEvent({type: "close"}); }
 }
 
 const elements = new Map();
@@ -43,13 +46,14 @@ function elementFor(selector) {
 }
 
 const storage = new Map();
+let confirmResult = true;
 const context = {
   console,
   URLSearchParams,
   Headers,
   setTimeout,
   clearTimeout,
-  confirm: () => true,
+  confirm: () => confirmResult,
   sessionStorage: {
     getItem: (key) => storage.has(key) ? storage.get(key) : null,
     setItem: (key, value) => storage.set(key, value),
@@ -72,7 +76,8 @@ vm.createContext(context);
 const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderSections, renderGroups, openActivityEditor,
-  addSession, validateDraft, saveSchedule
+  addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor,
+  openGroupEditor, handleEditorClick, showApiError
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
@@ -330,5 +335,116 @@ def test_save_schedule_lets_api_fetch_handle_unauthorized_without_save_error():
         assert.equal(storage.has("adminToken"), false);
         assert.equal(elementFor("#editor-message").textContent, "");
         assert.match(elementFor("#login-message").textContent, /sessão expirou/);
+        """
+    )
+
+
+def test_apply_restores_focus_to_equivalent_opener_after_rerender():
+    """Applying a modal must restore focus even when rerender disconnected its opener."""
+    run_node_case(
+        """
+        api.state.schedule = {version: 1, eventDate: "2026-10-26", sections: []};
+        const opener = new FakeElement("add-section");
+        const replacement = new FakeElement("add-section-replacement");
+        const content = elementFor("#editor-content");
+        content.querySelector = () => replacement;
+        api.openSectionEditor(null, opener);
+        opener.isConnected = false;
+        const fields = new Map([
+          ["title", {value: "Nova seção"}],
+          ["description", {value: ""}],
+        ]);
+        const form = {
+          elements: {namedItem: (name) => fields.get(name)},
+          querySelectorAll: () => [],
+        };
+        elementFor("#modal-content").dispatchEvent({
+          type: "submit",
+          target: form,
+          preventDefault() {},
+        });
+        assert.equal(replacement.focused, true);
+        """
+    )
+
+
+def test_footer_close_restores_focus_to_connected_opener():
+    """Closing a modal through its footer must return focus to its opener."""
+    run_node_case(
+        """
+        const opener = new FakeElement("add-section");
+        api.openSectionEditor(null, opener);
+        elementFor("#editor-modal").close();
+        assert.equal(opener.focused, true);
+        """
+    )
+
+
+def test_api_error_message_never_exposes_unknown_axis_identifier():
+    """Untrusted API detail text must not leak a persisted knowledge-axis identifier."""
+    run_node_case(
+        """
+        api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
+        await api.showApiError(
+          {json: async () => ({detail: {message: "Falha no eixo eixo-secreto"}})},
+          "Não foi possível salvar a programação",
+        );
+        assert.equal(elementFor("#editor-message").textContent.includes("eixo-secreto"), false);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
+
+
+def test_unknown_axis_is_preserved_privately_and_rejected_by_validation():
+    """Editing a stale axis must retain it for validation instead of converting it to null."""
+    run_node_case(
+        """
+        api.state.locations = [{id: "loc-1", name: "Auditório"}];
+        api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
+        const schedule = validSchedule();
+        const group = schedule.sections[0].groups[0];
+        group.knowledgeAxis = "eixo-secreto";
+        api.state.schedule = schedule;
+        api.state.selectedSectionId = "secao";
+        api.openGroupEditor(group, schedule.sections[0]);
+        assert.equal(elementFor("#modal-content").innerHTML.includes("eixo-secreto"), false);
+        const staleToken = elementFor("#modal-content").innerHTML.match(
+          /<option value="([^"]+)" selected>Eixo não cadastrado<\\/option>/,
+        )?.[1];
+        assert.ok(staleToken);
+        const fields = new Map([
+          ["title", {value: "Grupo"}],
+          ["knowledgeAxis", {value: staleToken}],
+        ]);
+        const form = {
+          elements: {namedItem: (name) => fields.get(name)},
+          querySelectorAll: () => [],
+        };
+        elementFor("#modal-content").dispatchEvent({
+          type: "submit",
+          target: form,
+          preventDefault() {},
+        });
+        assert.equal(group.knowledgeAxis, "eixo-secreto");
+        assert.ok(Array.from(api.validateDraft(schedule)).some((item) => item.includes("eixo")));
+        """
+    )
+
+
+def test_delegated_delete_confirmation_cancellation_preserves_schedule():
+    """A delegated delete action must honor cancellation without mutating the draft."""
+    run_node_case(
+        """
+        api.state.schedule = validSchedule();
+        api.renderSections();
+        const key = elementFor("#editor-content").innerHTML.match(
+          /data-action="delete-section" data-key="([^"]+)"/,
+        )[1];
+        const button = new FakeElement("delete-section");
+        button.dataset = {action: "delete-section", key};
+        button.closest = () => button;
+        confirmResult = false;
+        await elementFor("#editor-content").dispatchEvent({type: "click", target: button});
+        assert.equal(api.state.schedule.sections.length, 1);
         """
     )
