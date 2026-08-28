@@ -41,8 +41,11 @@ tags_metadata = [
 ]
 
 app = FastAPI(
-    title="Orchestrator do Backend de IA GeoGIS",
-    description="Orchestrator FastAPI para gerenciar tarefas de OCR Bedrock através de filas SQS",
+    title="Portas Abertas API",
+    description=(
+        "API do evento Portas Abertas para gerenciamento da programação, "
+        "locais, eixos de conhecimento e painel administrativo."
+    ),
     version="1.0.0",
     docs_url="/docs",  # Explicitly enable docs
     redoc_url="/redoc",  # Enable ReDoc as well
