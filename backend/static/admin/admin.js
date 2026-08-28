@@ -491,8 +491,11 @@ function formValue(form, name) {
   return form.elements.namedItem(name)?.value.trim() || "";
 }
 
-function catalogErrorMessage(response, detail) {
+function catalogErrorMessage(response, detail, operation = "save") {
   const references = Array.isArray(detail?.references) ? detail.references : [];
+  if (response.status === 409 && operation === "delete") {
+    return `Este registro ainda está em uso. ${references.map((reference) => escapeHtml(reference)).join(" · ")}`;
+  }
   if (response.status === 409 && references.length) {
     return `Este registro ainda está em uso. ${references.map((reference) => escapeHtml(reference)).join(" · ")}`;
   }
@@ -503,15 +506,36 @@ function catalogErrorMessage(response, detail) {
   return "Não foi possível concluir a alteração.";
 }
 
-async function showCatalogApiError(response, fallback = "Não foi possível concluir a alteração.") {
+async function showCatalogApiError(
+  response,
+  fallback = "Não foi possível concluir a alteração.",
+  operation = "save",
+) {
   let message = fallback;
   try {
     const payload = await response.json();
-    message = catalogErrorMessage(response, payload?.detail);
+    message = catalogErrorMessage(response, payload?.detail, operation);
   } catch (_error) {
     // A resposta sem JSON mantém o texto seguro definido pelo editor.
+    if (response.status === 409 && operation === "delete") {
+      message = "Este registro ainda está em uso.";
+    }
   }
   announce(message);
+}
+
+function isCanonicalCatalogRecord(record) {
+  return (
+    record &&
+    typeof record.id === "string" &&
+    record.id.trim() &&
+    typeof record.name === "string" &&
+    record.name.trim()
+  );
+}
+
+function isCanonicalCatalogList(records) {
+  return Array.isArray(records) && records.every((record) => isCanonicalCatalogRecord(record));
 }
 
 async function reloadLocationDependencies() {
@@ -524,7 +548,7 @@ async function reloadLocationDependencies() {
     locationsResponse.json(),
     scheduleResponse.json(),
   ]);
-  if (!Array.isArray(locations) || !schedule || typeof schedule !== "object") {
+  if (!isCanonicalCatalogList(locations) || !schedule || typeof schedule !== "object") {
     throw new Error("reload-failed");
   }
   return {locations, schedule};
@@ -555,6 +579,10 @@ async function saveLocation(form = modalContent.querySelector("#location-form"))
     });
     if (!response.ok) return showCatalogApiError(response);
     const canonical = await response.json();
+    if (!isCanonicalCatalogRecord(canonical)) {
+      announce("Não foi possível salvar as alterações.");
+      return;
+    }
     if (record) {
       const refreshed = await reloadLocationDependencies();
       carryCatalogKeys(state.locations, refreshed.locations);
@@ -575,7 +603,7 @@ async function deleteLocation(record) {
   if (!record || !confirmDeletion(`Excluir o local “${record.name}”?`)) return;
   try {
     const response = await apiFetch(`/admin/api/locations/${encodeURIComponent(record.id)}`, {method: "DELETE"});
-    if (!response.ok) return showCatalogApiError(response);
+    if (!response.ok) return showCatalogApiError(response, "Não foi possível excluir o local.", "delete");
     state.locations = state.locations.filter((item) => item !== record);
     renderLocations();
     announce("Local excluído com sucesso.");
@@ -603,6 +631,10 @@ async function saveKnowledgeAxis(form = modalContent.querySelector("#knowledge-a
     });
     if (!response.ok) return showCatalogApiError(response);
     const canonical = await response.json();
+    if (!isCanonicalCatalogRecord(canonical)) {
+      announce("Não foi possível salvar as alterações.");
+      return;
+    }
     if (record) {
       catalogKeys.set(canonical, catalogKey(record));
       state.knowledgeAxes = state.knowledgeAxes.map((item) => (item === record ? canonical : item));
@@ -621,7 +653,7 @@ async function deleteKnowledgeAxis(record) {
   if (!record || !confirmDeletion(`Excluir o eixo “${record.name}”?`)) return;
   try {
     const response = await apiFetch(`/admin/api/knowledge-axes/${encodeURIComponent(record.id)}`, {method: "DELETE"});
-    if (!response.ok) return showCatalogApiError(response);
+    if (!response.ok) return showCatalogApiError(response, "Não foi possível excluir o eixo.", "delete");
     state.knowledgeAxes = state.knowledgeAxes.filter((item) => item !== record);
     renderKnowledgeAxes();
     announce("Eixo excluído com sucesso.");
@@ -792,7 +824,9 @@ async function loadAdminData() {
     locationsResponse.json(),
     knowledgeAxesResponse.json(),
   ]);
-  if (!Array.isArray(locations) || !Array.isArray(knowledgeAxes)) throw new Error("load-failed");
+  if (!isCanonicalCatalogList(locations) || !isCanonicalCatalogList(knowledgeAxes)) {
+    throw new Error("load-failed");
+  }
   state.schedule = schedule;
   state.locations = locations;
   state.knowledgeAxes = knowledgeAxes;

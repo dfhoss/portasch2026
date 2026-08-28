@@ -195,3 +195,102 @@ def test_catalog_401_is_left_to_api_fetch_without_catalog_error():
         assert.equal(api.state.locations[0], location);
         """
     )
+
+
+def test_axis_crud_adopts_canonical_records_and_uses_private_id_for_paths():
+    run_node_case(
+        """
+        api.state.knowledgeAxes = [];
+        api.openKnowledgeAxisEditor(null);
+        const createForm = {elements: {namedItem: (name) => name === "name" ? {value: "  Novo eixo  "} : null}};
+        let request;
+        context.fetch = async (path, options) => {
+          request = {path, options};
+          return {ok: true, status: 201, json: async () => ({id: "axis-secret", name: "Novo eixo"})};
+        };
+        await api.saveKnowledgeAxis(createForm);
+        assert.equal(request.path, "/admin/api/knowledge-axes");
+        assert.equal(request.options.method, "POST");
+        assert.deepEqual(JSON.parse(request.options.body), {name: "Novo eixo"});
+        const record = api.state.knowledgeAxes[0];
+        api.openKnowledgeAxisEditor(record);
+        const renameForm = {elements: {namedItem: (name) => name === "name" ? {value: "Eixo atualizado"} : null}};
+        context.fetch = async (path, options) => {
+          request = {path, options};
+          return {ok: true, status: 200, json: async () => ({id: "axis-secret", name: "Eixo atualizado"})};
+        };
+        await api.saveKnowledgeAxis(renameForm);
+        assert.equal(request.path, "/admin/api/knowledge-axes/axis-secret");
+        assert.equal(request.options.method, "PUT");
+        assert.deepEqual(JSON.parse(request.options.body), {name: "Eixo atualizado"});
+        assert.equal(api.state.knowledgeAxes[0].name, "Eixo atualizado");
+        context.fetch = async (path, options) => { request = {path, options}; return {ok: true, status: 204}; };
+        await api.deleteKnowledgeAxis(api.state.knowledgeAxes[0]);
+        assert.equal(request.path, "/admin/api/knowledge-axes/axis-secret");
+        assert.equal(request.options.method, "DELETE");
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), []);
+        """
+    )
+
+
+def test_catalog_delete_409_without_references_is_still_reported_as_in_use():
+    run_node_case(
+        """
+        const axis = {id: "axis-secret", name: "Geral"};
+        api.state.knowledgeAxes = [axis];
+        context.fetch = async () => ({ok: false, status: 409, json: async () => ({detail: {
+          message: "O eixo axis-secret está em uso", references: []
+        }})});
+        await api.deleteKnowledgeAxis(axis);
+        assert.match(elementFor("#editor-message").textContent, /Este registro ainda está em uso/);
+        assert.equal(elementFor("#editor-message").textContent.includes("axis-secret"), false);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), [axis]);
+        """
+    )
+
+
+def test_malformed_successful_catalog_response_preserves_state_and_is_safe():
+    run_node_case(
+        """
+        api.state.locations = [];
+        api.openLocationEditor(null);
+        const createForm = {elements: {namedItem: (name) => name === "name" ? {value: "Novo"} : null}};
+        context.fetch = async () => ({ok: true, status: 201, json: async () => ({id: "", name: "Novo"})});
+        await api.saveLocation(createForm);
+        assert.deepEqual(api.state.locations, []);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+
+        const axis = {id: "axis-secret", name: "Geral"};
+        api.state.knowledgeAxes = [axis];
+        api.openKnowledgeAxisEditor(axis);
+        const renameForm = {elements: {namedItem: (name) => name === "name" ? {value: "Atualizado"} : null}};
+        context.fetch = async () => ({ok: true, status: 200, json: async () => ({id: "axis-secret"})});
+        await api.saveKnowledgeAxis(renameForm);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), [axis]);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
+
+
+def test_malformed_location_refresh_response_preserves_both_catalog_dependencies():
+    run_node_case(
+        """
+        const oldSchedule = {sections: [{groups: []}], version: 1};
+        const oldLocations = [{id: "loc-secret", name: "Antigo"}];
+        api.state.schedule = oldSchedule;
+        api.state.locations = oldLocations;
+        api.openLocationEditor(oldLocations[0]);
+        const form = {elements: {namedItem: (name) => name === "name" ? {value: "Novo"} : null}};
+        let call = 0;
+        context.fetch = async (path) => {
+          call += 1;
+          if (call === 1) return {ok: true, status: 200, json: async () => ({id: "loc-secret", name: "Novo"})};
+          if (path.endsWith("/locations")) return {ok: true, status: 200, json: async () => [{id: "loc-secret"}]};
+          return {ok: true, status: 200, json: async () => ({sections: [], version: 2})};
+        };
+        await api.saveLocation(form);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), oldSchedule);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), oldLocations);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
