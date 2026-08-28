@@ -66,7 +66,7 @@ const context = { console, URLSearchParams, Headers, setTimeout, clearTimeout, c
 };
 context.globalThis = context; vm.createContext(context);
 const source = fs.readFileSync(process.argv[2], "utf8");
-vm.runInContext(source + `\n;globalThis.editorUnderTest = {state, renderLocations, renderKnowledgeAxes, openLocationEditor, openKnowledgeAxisEditor, saveLocation, saveKnowledgeAxis, deleteLocation, deleteKnowledgeAxis, handleEditorClick};`, context, {filename: "admin.js"});
+vm.runInContext(source + `\n;globalThis.editorUnderTest = {state, loadAdminData, renderLocations, renderKnowledgeAxes, openLocationEditor, openKnowledgeAxisEditor, saveLocation, saveKnowledgeAxis, deleteLocation, deleteKnowledgeAxis, handleEditorClick};`, context, {filename: "admin.js"});
 const api = context.editorUnderTest;
 (async () => { __CASE__ })().catch((error) => { console.error(error); process.exitCode = 1; });
 """
@@ -118,12 +118,12 @@ def test_axis_group_counts_come_from_schedule_without_exposing_ids():
 def test_location_rename_refreshes_schedule_and_locations_atomically():
     run_node_case(
         """
-        const oldSchedule = {sections: [{groups: []}]};
+        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
         api.state.schedule = oldSchedule;
         api.state.locations = [{id: "loc-secret", name: "Antigo"}];
         api.openLocationEditor(api.state.locations[0]);
         const form = {elements: {namedItem: (name) => name === "name" ? {value: "Novo"} : null}};
-        const refreshedSchedule = {sections: [{groups: []}], version: 2};
+        const refreshedSchedule = {version: 2, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
         const refreshedLocations = [{id: "loc-secret", name: "Novo"}];
         const calls = [];
         context.fetch = async (path, options = {}) => {
@@ -275,7 +275,7 @@ def test_malformed_successful_catalog_response_preserves_state_and_is_safe():
 def test_malformed_location_refresh_response_preserves_both_catalog_dependencies():
     run_node_case(
         """
-        const oldSchedule = {sections: [{groups: []}], version: 1};
+        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
         const oldLocations = [{id: "loc-secret", name: "Antigo"}];
         api.state.schedule = oldSchedule;
         api.state.locations = oldLocations;
@@ -286,11 +286,121 @@ def test_malformed_location_refresh_response_preserves_both_catalog_dependencies
           call += 1;
           if (call === 1) return {ok: true, status: 200, json: async () => ({id: "loc-secret", name: "Novo"})};
           if (path.endsWith("/locations")) return {ok: true, status: 200, json: async () => [{id: "loc-secret"}]};
+        return {ok: true, status: 200, json: async () => ({version: 2, eventDate: "2026-10-26", sections: []})};
+        };
+        await api.saveLocation(form);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), oldSchedule);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), oldLocations);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
+
+
+def test_malformed_schedule_refresh_response_preserves_schedule_and_locations():
+    run_node_case(
+        """
+        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const oldLocations = [{id: "loc-secret", name: "Antigo"}];
+        api.state.schedule = oldSchedule;
+        api.state.locations = oldLocations;
+        api.openLocationEditor(oldLocations[0]);
+        const form = {elements: {namedItem: (name) => name === "name" ? {value: "Novo"} : null}};
+        let call = 0;
+        context.fetch = async (path) => {
+          call += 1;
+          if (call === 1) return {ok: true, status: 200, json: async () => ({id: "loc-secret", name: "Novo"})};
+          if (path.endsWith("/locations")) return {ok: true, status: 200, json: async () => oldLocations};
           return {ok: true, status: 200, json: async () => ({sections: [], version: 2})};
         };
         await api.saveLocation(form);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), oldSchedule);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), oldLocations);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
+
+
+def test_malformed_schedule_initial_response_preserves_existing_state():
+    run_node_case(
+        """
+        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const oldLocations = [{id: "loc-secret", name: "Antigo"}];
+        const oldAxes = [{id: "axis-secret", name: "Geral"}];
+        api.state.schedule = oldSchedule;
+        api.state.locations = oldLocations;
+        api.state.knowledgeAxes = oldAxes;
+        let call = 0;
+        context.fetch = async () => {
+          call += 1;
+          if (call === 1) return {ok: true, status: 200, json: async () => []};
+          if (call === 2) return {ok: true, status: 200, json: async () => oldLocations};
+          return {ok: true, status: 200, json: async () => oldAxes};
+        };
+        try { await api.loadAdminData(); } catch (_error) {}
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), oldSchedule);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), oldLocations);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), oldAxes);
+        """
+    )
+
+
+def test_axis_delete_cancellation_preserves_axis_without_request():
+    run_node_case(
+        """
+        const axis = {id: "axis-secret", name: "Geral"};
+        api.state.knowledgeAxes = [axis];
+        confirmResult = false;
+        let fetchCalls = 0;
+        context.fetch = async () => { fetchCalls += 1; };
+        await api.deleteKnowledgeAxis(axis);
+        assert.equal(fetchCalls, 0);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), [axis]);
+        """
+    )
+
+
+def test_axis_in_use_error_lists_escaped_references_without_raw_detail():
+    run_node_case(
+        """
+        const axis = {id: "axis-secret", name: "Geral"};
+        api.state.knowledgeAxes = [axis];
+        context.fetch = async () => ({ok: false, status: 409, json: async () => ({detail: {
+          message: "O eixo axis-secret está em uso", references: ["<Atividade> & roteiro"]
+        }})});
+        await api.deleteKnowledgeAxis(axis);
+        const message = elementFor("#editor-message").textContent;
+        assert.match(message, /Este registro ainda está em uso/);
+        assert.match(message, /&lt;Atividade&gt; &amp; roteiro/);
+        assert.equal(message.includes("axis-secret"), false);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), [axis]);
+        """
+    )
+
+
+def test_catalog_failures_are_safe_and_preserve_axis_state():
+    run_node_case(
+        """
+        const axis = {id: "axis-secret", name: "Geral"};
+        const failures = [
+          {status: 404, message: "Falha para axis-secret"},
+          {status: 422, message: "Detalhe privado axis-secret"},
+          {status: 500, message: "filesystem axis-secret"},
+        ];
+        for (const failure of failures) {
+          api.state.knowledgeAxes = [axis];
+          api.openKnowledgeAxisEditor(axis);
+          const form = {elements: {namedItem: (name) => name === "name" ? {value: "Atualizado"} : null}};
+          context.fetch = async () => ({ok: false, status: failure.status, json: async () => ({detail: {message: failure.message, references: []}})});
+          await api.saveKnowledgeAxis(form);
+          assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), [axis]);
+          assert.equal(elementFor("#editor-message").textContent.includes("axis-secret"), false);
+        }
+        api.state.knowledgeAxes = [axis];
+        api.openKnowledgeAxisEditor(axis);
+        context.fetch = async () => { throw new Error("offline axis-secret"); };
+        await api.saveKnowledgeAxis({elements: {namedItem: (name) => name === "name" ? {value: "Atualizado"} : null}});
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), [axis]);
+        assert.equal(elementFor("#editor-message").textContent.includes("axis-secret"), false);
         assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
         """
     )

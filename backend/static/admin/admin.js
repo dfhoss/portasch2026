@@ -538,6 +538,66 @@ function isCanonicalCatalogList(records) {
   return Array.isArray(records) && records.every((record) => isCanonicalCatalogRecord(record));
 }
 
+function nonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isCanonicalSchedule(schedule) {
+  if (
+    !schedule ||
+    typeof schedule !== "object" ||
+    !Number.isInteger(schedule.version) ||
+    schedule.version < 1 ||
+    !isValidDate(schedule.eventDate) ||
+    !Array.isArray(schedule.sections)
+  ) {
+    return false;
+  }
+  return schedule.sections.every((section) => {
+    if (
+      !section ||
+      typeof section !== "object" ||
+      !nonEmptyString(section.id) ||
+      !nonEmptyString(section.title) ||
+      !Array.isArray(section.groups)
+    ) {
+      return false;
+    }
+    return section.groups.every((group) => {
+      if (
+        !group ||
+        typeof group !== "object" ||
+        !nonEmptyString(group.id) ||
+        !nonEmptyString(group.title) ||
+        !Array.isArray(group.items)
+      ) {
+        return false;
+      }
+      if (group.knowledgeAxis != null && !nonEmptyString(group.knowledgeAxis)) return false;
+      return group.items.every((activity) => {
+        if (
+          !activity ||
+          typeof activity !== "object" ||
+          !nonEmptyString(activity.id) ||
+          !nonEmptyString(activity.title) ||
+          !Array.isArray(activity.sessions)
+        ) {
+          return false;
+        }
+        return activity.sessions.every(
+          (session) =>
+            session &&
+            typeof session === "object" &&
+            isMinuteTime(session.startTime) &&
+            isMinuteTime(session.endTime) &&
+            session.endTime > session.startTime &&
+            (session.location == null || nonEmptyString(session.location)),
+        );
+      });
+    });
+  });
+}
+
 async function reloadLocationDependencies() {
   const [locationsResponse, scheduleResponse] = await Promise.all([
     apiFetch("/admin/api/locations"),
@@ -548,7 +608,7 @@ async function reloadLocationDependencies() {
     locationsResponse.json(),
     scheduleResponse.json(),
   ]);
-  if (!isCanonicalCatalogList(locations) || !schedule || typeof schedule !== "object") {
+  if (!isCanonicalCatalogList(locations) || !isCanonicalSchedule(schedule)) {
     throw new Error("reload-failed");
   }
   return {locations, schedule};
@@ -824,7 +884,11 @@ async function loadAdminData() {
     locationsResponse.json(),
     knowledgeAxesResponse.json(),
   ]);
-  if (!isCanonicalCatalogList(locations) || !isCanonicalCatalogList(knowledgeAxes)) {
+  if (
+    !isCanonicalSchedule(schedule) ||
+    !isCanonicalCatalogList(locations) ||
+    !isCanonicalCatalogList(knowledgeAxes)
+  ) {
     throw new Error("load-failed");
   }
   state.schedule = schedule;
@@ -841,9 +905,9 @@ async function showEditor() {
     showLogin("Não foi possível validar sua sessão.");
     return;
   }
+  await loadAdminData();
   loginView.hidden = true;
   editorView.hidden = false;
-  await loadAdminData();
 }
 
 function logout() {
