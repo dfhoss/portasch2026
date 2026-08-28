@@ -32,6 +32,14 @@ def test_admin_static_assets_are_public_and_data_free(client):
     assert "Programação completa" not in script_response.text
 
 
+def test_hidden_admin_views_are_not_overridden_by_layout_css(client):
+    """A visible hidden login/editor view must make this fail."""
+    css = client.get("/admin/static/admin.css").text
+
+    hidden_rule = css_rule(css, "[hidden]")
+    assert "display: none !important" in hidden_rule
+
+
 class EditorShellParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()

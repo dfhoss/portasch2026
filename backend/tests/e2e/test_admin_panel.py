@@ -15,7 +15,7 @@ def login(page: Page, password: str = TEST_PASSWORD) -> None:
     page.get_by_label("Senha").fill(password)
     page.get_by_role("button", name="Entrar").click()
     expect(page.locator("#editor-view")).to_be_visible(timeout=10_000)
-    expect(page.get_by_role("heading", name="Programação")).to_be_visible()
+    expect(page.get_by_role("heading", name="Programação", exact=True)).to_be_visible()
     expect(page.locator("#schedule-sections")).to_contain_text(
         "Programação completa", timeout=10_000
     )
