@@ -27,7 +27,13 @@ ScheduleReplacer = Annotated[ScheduleReplacerFunction, Depends(get_schedule_repl
 
 @router.get("", response_model=ScheduleDocument, response_model_exclude_none=True)
 def read_schedule(_: CurrentTokenData, path: SchedulePath) -> dict:
-    document = load_schedule(path)
+    try:
+        document = load_schedule(path)
+    except (OSError, ValueError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"message": "Não foi possível carregar a agenda", "references": []},
+        ) from error
     return document.model_dump(by_alias=True, mode="json", exclude_none=True)
 
 

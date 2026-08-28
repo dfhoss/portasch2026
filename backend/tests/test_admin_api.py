@@ -55,6 +55,27 @@ def test_admin_api_prefixes_require_authentication(client, path: str):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+@pytest.mark.parametrize(
+    ("method", "path", "payload"),
+    [
+        ("PUT", "/admin/api/schedule", canonical_schedule()),
+        ("POST", "/admin/api/locations", {"name": "Novo local"}),
+        ("PUT", "/admin/api/locations/loc-001", {"name": "Novo local"}),
+        ("DELETE", "/admin/api/locations/loc-001", None),
+        ("POST", "/admin/api/knowledge-axes", {"name": "Novo eixo"}),
+        ("PUT", "/admin/api/knowledge-axes/geral", {"name": "Novo eixo"}),
+        ("DELETE", "/admin/api/knowledge-axes/geral", None),
+    ],
+)
+def test_admin_mutation_routes_require_authentication(
+    client, method: str, path: str, payload: dict | None
+):
+    """Removing authentication from any administrative write route must make this fail."""
+    response = client.request(method, path, json=payload)
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 def test_get_schedule_returns_public_json(client, auth_headers):
     """Failing to register or serialize the schedule route must make this fail."""
     response = client.get("/admin/api/schedule", headers=auth_headers)
@@ -64,6 +85,37 @@ def test_get_schedule_returns_public_json(client, auth_headers):
     assert payload["version"] == 1
     assert payload["eventDate"] == "2026-10-26"
     assert "event_date" not in payload
+    group = payload["sections"][0]["groups"][0]
+    assert group["knowledgeAxis"] == "geral"
+    assert "knowledge_axis" not in group
+    session = group["items"][0]["sessions"][0]
+    assert session["startTime"] == "08:30"
+    assert session["endTime"] == "21:00"
+
+
+@pytest.mark.parametrize("failure", ["missing", "malformed-json", "invalid-document"])
+def test_get_schedule_maps_read_failures_to_structured_non_leaking_500(
+    client, auth_headers, temporary_database, failure: str
+):
+    """Letting schedule read errors escape the HTTP boundary must make this fail."""
+    if failure == "missing":
+        temporary_database.schedule.unlink()
+    elif failure == "malformed-json":
+        temporary_database.schedule.write_text('{"private filesystem detail":', encoding="utf-8")
+    else:
+        temporary_database.schedule.write_text(
+            json.dumps({"version": 0, "eventDate": "not-a-date", "sections": []}),
+            encoding="utf-8",
+        )
+
+    response = client.get("/admin/api/schedule", headers=auth_headers)
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {
+        "detail": {"message": "Não foi possível carregar a agenda", "references": []}
+    }
+    assert "private filesystem detail" not in response.text
+    assert str(temporary_database.schedule) not in response.text
 
 
 def test_put_schedule_persists_and_returns_backend_generated_ids(
@@ -82,6 +134,12 @@ def test_put_schedule_persists_and_returns_backend_generated_ids(
     assert returned["sections"][0]["id"] == "secao"
     assert returned["sections"][0]["groups"][0]["id"] == "grupo"
     assert returned["sections"][0]["groups"][0]["items"][0]["id"] == "atividade"
+    returned_group = returned["sections"][0]["groups"][0]
+    assert returned_group["knowledgeAxis"] == "geral"
+    assert "knowledge_axis" not in returned_group
+    returned_session = returned_group["items"][0]["sessions"][0]
+    assert returned_session["startTime"] == "09:00"
+    assert returned_session["endTime"] == "10:00"
     assert read_json(temporary_database.schedule) == returned
 
 
