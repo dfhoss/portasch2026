@@ -150,7 +150,10 @@ function axisName(axisId) {
 }
 
 function locationName(location) {
-  return location || "Sem local";
+  if (!location) return "Sem local";
+  return state.locations.some((record) => record.name === location)
+    ? location
+    : "Local não cadastrado";
 }
 
 function renderSessions(activity) {
@@ -925,7 +928,13 @@ async function handleEditorClick(event) {
   const { action, key } = button.dataset;
 
   if (action === "save-schedule") return saveSchedule();
-  if (action === "add-section") return openSectionEditor(null, button);
+  if (action === "add-section") {
+    if (!state.schedule) {
+      announce("A programação ainda está carregando.");
+      return;
+    }
+    return openSectionEditor(null, button);
+  }
   if (action === "add-group") return openGroupEditor(null, selectedSection(), button);
   if (action === "add-activity") return openActivityEditor(null, null, button);
   if (action === "add-location") return openLocationEditor(null, button);

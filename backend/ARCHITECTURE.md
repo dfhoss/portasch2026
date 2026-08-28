@@ -29,6 +29,30 @@ data in the initial document:
   schedule, locations, and knowledge-axis routers.
 - The browser validates its bearer token through `/auth/users/me/` before requesting
   the protected `/admin/api/*` resources.
+- `models/schedule.py` owns the Pydantic schedule document, nested aliases, date/time
+  validation, and structural IDs.
+- `clients/json_store.py` provides atomic JSON replacement and domain errors. The schedule,
+  locations, and knowledge-axis clients validate references, propagate location renames, and
+  restore the first catalog if a two-file write fails.
+- `db/schedule.json`, `db/locations.json`, and `db/knowledge_axes.json` are the normalized
+  development catalogs. `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH`, and
+  `KNOWLEDGE_AXES_PATH` are resolved at call time so tests and deployments can isolate data.
+- `static/admin/index.html`, `admin.css`, and `admin.js` form the build-free responsive panel;
+  persisted catalog IDs remain private to API paths and in-memory maps.
+
+The browser request flow is:
+
+```text
+login form -> /auth/token -> sessionStorage.adminToken
+    -> /auth/users/me/ (identity validation)
+    -> /admin/api/* (Bearer JWT)
+    -> routers -> JSON clients -> atomic JSON files
+```
+
+The E2E fixtures generate a bcrypt password hash only at runtime in a temporary user database,
+configure all paths before importing the application, and start/stop a bounded local Uvicorn
+thread. They never install browsers automatically; install Chromium with
+`uv run playwright install chromium` before running browser tests.
 
 ## Responsibilities by Module
 
@@ -73,6 +97,7 @@ from clients.schedule import list_events
 from routes.auth import TokenData, get_token_data
 
 router = APIRouter(prefix="/schedule", tags=["schedule"])
+
 
 @router.get("")
 async def read_schedule(
