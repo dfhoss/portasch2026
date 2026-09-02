@@ -1,129 +1,157 @@
 # Backend Architecture
 
-## Overview
+## 1. Objetivo e escopo
 
-This project is a small, modular FastAPI application. Requests enter through the application in `app.py`, are delegated to an `APIRouter` in `routes/`, and use shared dependencies or persistence functions as needed.
+O backend é uma API FastAPI modular para autenticação, agenda, locais, eixos de
+conhecimento e painel administrativo. A arquitetura separa composição da aplicação,
+contratos HTTP, modelos de domínio e persistência.
+
+## 2. Visão estrutural — nível 1
+
+```mermaid
+flowchart LR
+    Browser[ navegador / painel admin ] --> App[ app.py ]
+    Client[ cliente HTTP ] --> App
+    App --> Routes[ routes/ ]
+    Routes --> Dependencies[ dependencies.py ]
+    Routes --> Models[ models/ ]
+    Routes --> Clients[ clients/ ]
+    Clients --> JSON[ db/*.json ]
+    App --> Static[ static/admin/ ]
+```
+
+### Catálogo de elementos
+
+| Elemento          | Responsabilidade                                         | Interface principal                    |
+| ----------------- | -------------------------------------------------------- | -------------------------------------- |
+| `app.py`          | Compor a aplicação, lifespan, logging, saúde e routers   | HTTP / composição FastAPI              |
+| `routes/`         | Validar requisições, autenticar e orquestrar respostas   | Endpoints FastAPI                      |
+| `dependencies.py` | JWT, autorização, configuração e recursos compartilhados | `Depends` / aliases `Annotated`        |
+| `models/`         | Contratos e validações de domínio reutilizáveis          | Pydantic                               |
+| `clients/`        | Ler, validar e persistir dados; encapsular erros         | Dicionários, listas e erros de domínio |
+| `db/*.json`       | Catálogos de desenvolvimento persistidos                 | Arquivos JSON                          |
+| `static/admin/`   | Shell build-free do painel administrativo                | HTML, CSS e JavaScript                 |
+
+As relações são direcionais: handlers usam clients e dependências; clients não devem
+depender da camada HTTP. Não importe routers novos em `dependencies.py`, pois isso pode
+criar ciclos de importação.
+
+## 3. Visões de runtime
+
+### 3.1 Requisição autenticada
 
 ```text
-HTTP request
-    -> app.py (application setup and router registration)
-    -> routes/<feature>.py (validation, endpoint, response)
-    -> dependencies.py (authentication/shared resources)
-    -> clients/<resource>.py (JSON or external data access)
-    -> db/*.json
+cliente -> app.py -> router -> CurrentTokenData/JWT
+        -> modelo Pydantic -> client/repositório -> JSON atômico -> resposta HTTP
 ```
 
-The current authentication feature demonstrates this pattern:
+Handlers devem validar entrada, chamar a lógica da feature e moldar a resposta. Erros
+de domínio são convertidos em `HTTPException` somente na fronteira HTTP.
 
-- `app.py` registers `routes.auth.router`.
-- `routes/auth.py` defines Pydantic models, authentication behavior, and `/auth` endpoints.
-- `clients/db.py` reads user data from `db/users.json`.
-- `dependencies.py` exposes reusable FastAPI dependencies and annotated aliases.
-- `utils/` contains general-purpose time and logging helpers.
-
-The administrative shell follows the same boundary without embedding protected
-data in the initial document:
-
-- `routes/admin.py` serves the public `/admin` shell and defines its static directory.
-- `app.py` mounts that directory at `/admin/static` and registers the existing protected
-  schedule, locations, and knowledge-axis routers.
-- The browser validates its bearer token through `/auth/users/me/` before requesting
-  the protected `/admin/api/*` resources.
-- `models/schedule.py` owns the Pydantic schedule document, nested aliases, date/time
-  validation, and structural IDs.
-- `clients/json_store.py` provides atomic JSON replacement and domain errors. The schedule,
-  locations, and knowledge-axis clients validate references, propagate location renames, and
-  restore the first catalog if a two-file write fails.
-- `db/schedule.json`, `db/locations.json`, and `db/knowledge_axes.json` are the normalized
-  development catalogs. `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH`, and
-  `KNOWLEDGE_AXES_PATH` are resolved at call time so tests and deployments can isolate data.
-- `static/admin/index.html`, `admin.css`, and `admin.js` form the build-free responsive panel;
-  persisted catalog IDs remain private to API paths and in-memory maps.
-
-The browser request flow is:
+### 3.2 Painel administrativo
 
 ```text
-login form -> /auth/token -> sessionStorage.adminToken
-    -> /auth/users/me/ (identity validation)
-    -> /admin/api/* (Bearer JWT)
-    -> routers -> JSON clients -> atomic JSON files
+login -> /auth/token -> sessionStorage.adminToken
+      -> /auth/users/me/ -> /admin/api/* com Bearer JWT
+      -> router -> client -> catálogo JSON
 ```
 
-The E2E fixtures generate a bcrypt password hash only at runtime in a temporary user database,
-configure all paths before importing the application, and start/stop a bounded local Uvicorn
-thread. They never install browsers automatically; install Chromium with
-`uv run playwright install chromium` before running browser tests.
+`/admin` entrega somente o shell público; o navegador valida a identidade antes de
+buscar dados protegidos. O HTML inicial não deve conter agenda, catálogos, credenciais,
+hashes ou IDs persistidos.
 
-## Responsibilities by Module
+### 3.3 Falha em operação multi-arquivo
 
-### Application composition (`app.py`)
-
-Keep global application concerns here: FastAPI configuration, lifespan startup checks, logging, middleware, health endpoints, and router registration. Do not add feature-specific business rules to this file.
-
-### HTTP features (`routes/`)
-
-Create one module per feature, such as `routes/schedule.py`. Each module should own its URL prefix, tags, request/response models, status codes, and endpoint orchestration. Hand data access to a client instead of opening JSON files directly.
-
-### Persistence and integrations (`clients/`)
-
-Client modules isolate storage and external-service details. Functions should accept explicit inputs and return plain dictionaries, lists, or typed domain values. Keeping file access here makes a future move from JSON to a database less disruptive.
-
-### Shared dependencies (`dependencies.py`)
-
-Use FastAPI dependencies for cross-cutting behavior such as JWT validation, authorization, configuration checks, and resource lifecycle. Prefer the existing `Annotated[..., Depends(...)]` aliases for concise endpoint signatures.
-
-### Utilities (`utils/`)
-
-Utilities must be framework-neutral and broadly reusable. Feature-specific helpers should stay in the feature module or move to a dedicated service module if the feature grows.
-
-## Adding a Feature
-
-For a new schedule feature backed by `db/schedule.json`:
-
-1. Add `clients/schedule.py` with storage operations such as `list_events()` and `get_event(event_id)`. Keep path handling and JSON parsing inside this module.
-2. Add `routes/schedule.py` with an `APIRouter`, Pydantic models, and handlers. Use dependency injection for protected endpoints.
-3. Register the router in `app.py`.
-4. Add tests in `tests/test_schedule.py`, covering successful responses, invalid input, missing records, and authorization failures.
-5. Run `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check`, and, once pytest is configured, `uv run pytest`.
-
-A minimal route follows the existing style:
-
-```python
-# routes/schedule.py
-from typing import Annotated
-
-from fastapi import APIRouter, Depends
-from clients.schedule import list_events
-from routes.auth import TokenData, get_token_data
-
-router = APIRouter(prefix="/schedule", tags=["schedule"])
-
-
-@router.get("")
-async def read_schedule(
-    token: Annotated[TokenData, Depends(get_token_data)],
-) -> list[dict]:
-    return list_events()
+```text
+validar estado atual -> gravar primeiro catálogo -> gravar segundo catálogo
+                     -> sucesso
+                     -> falha: restaurar o primeiro catálogo e relatar PersistenceError
 ```
 
-Register it at the composition root:
+Este fluxo é especialmente importante ao renomear um local, pois o nome também é
+propagado para as sessões da agenda.
 
-```python
-from routes import auth, schedule
+## 4. Conceitos e invariantes
 
-app.include_router(auth.router)
-app.include_router(schedule.router)
-```
+### Persistência JSON
 
-If authentication is used by several new features, import `CurrentTokenData` from `dependencies.py` instead of repeating its `Annotated` declaration. Avoid importing a new route module from `dependencies.py`; that direction can create circular imports. Shared models or authentication primitives should move to a neutral module when reuse increases.
+- Caminhos `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH` e
+  `KNOWLEDGE_AXES_PATH` são resolvidos em tempo de chamada, nunca cacheados no import.
+- Escritas usam arquivo temporário, `fsync` e `os.replace`; repositórios expõem falhas
+  de filesystem como `PersistenceError`, não como detalhes HTTP.
+- A agenda valida referências antes de salvar; `null` para local ou eixo é válido.
+- Dados de usuários e hashes são sensíveis e nunca devem ser incluídos em código,
+  HTML inicial ou fixtures versionadas.
 
-## Design Rules
+### Catálogos e identidade
 
-- Keep endpoint functions thin: validate input, call feature/client logic, and shape the response.
-- Use Pydantic models instead of untyped request or public response dictionaries.
-- Raise `HTTPException` at the HTTP boundary; let client functions report missing data with `None` or a specific domain exception.
-- Read secrets from environment variables and never store credentials in source or JSON fixtures.
-- Add startup validation in the lifespan only for configuration required by the whole application.
-- Preserve async endpoints, but do not mark ordinary synchronous file operations async unless an async storage client is introduced.
+- Renomear eixo preserva o ID e não reescreve referências da agenda.
+- Local ou eixo referenciado não pode ser excluído; o conflito deve informar as atividades
+  afetadas.
+- Nomes são normalizados por Unicode, espaços e caixa antes da comparação.
+- IDs persistidos não devem ser derivados da posição dos itens na lista.
 
-As a feature becomes complex, add `services/<feature>.py` between routes and clients for business rules. Introduce that layer only when logic is reused or no longer fits clearly in a route handler.
+### Camadas e contratos
+
+- Use Pydantic para modelos de entrada e resposta pública; evite dicionários não tipados
+  como contrato.
+- Clients retornam valores de domínio ou `None` e lançam exceções específicas; não devem
+  conhecer status codes ou `HTTPException`.
+- Utilities devem ser independentes do framework e reutilizáveis entre features.
+- Preserve endpoints assíncronos quando apropriado, mas não trate I/O síncrono de arquivo
+  como assíncrono sem introduzir um client de armazenamento assíncrono.
+
+## 5. Deployment e configuração
+
+O ambiente local executa a aplicação com Uvicorn. O prefixo de API é `/api`; o painel é
+servido em `/admin`, com assets em `/admin/static`. Os catálogos JSON são substituíveis
+por caminhos de ambiente para testes e deployments isolados.
+
+O `TOKEN_JWT` já está configurado em `.env`. O segredo deve permanecer fora do Git e o
+lifespan deve validar apenas configurações exigidas pela aplicação inteira.
+
+## 6. Padrão para adicionar uma feature
+
+1. Identifique o contrato e as invariantes; crie ou atualize modelos em `models/` quando
+   forem compartilhados.
+2. Encapsule leitura, escrita, caminhos e erros de armazenamento em `clients/`.
+3. Crie um router com prefixo, tags, modelos Pydantic, dependências e handlers finos.
+4. Registre o router em `app.py`, sem mover regras de negócio para a composição global.
+5. Adicione testes de sucesso, entrada inválida, ausência, autorização e consistência;
+   use `TestClient`, JSON temporário e variáveis de ambiente isoladas.
+6. Execute `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check` e
+   `uv run pytest`. Para E2E, instale Chromium previamente com Playwright.
+7. Atualize esta documentação se a mudança alterar uma fronteira, fluxo, invariável,
+   decisão ou padrão de feature.
+
+## 7. Quando introduzir `services/`
+
+Adicione `services/<feature>.py` entre router e client somente quando regras de negócio
+forem reutilizadas ou deixarem de caber claramente no handler. Não crie a camada apenas
+para repassar chamadas.
+
+## 8. Decisões arquiteturais e evolução
+
+Para uma decisão que altere fronteiras, persistência, segurança, integração ou qualidade
+do sistema, registre um ADR separado contendo:
+
+- contexto e problema;
+- opções consideradas;
+- decisão escolhida e justificativa;
+- consequências, riscos e plano de revisão.
+
+Ligue o ADR a esta arquitetura e remova ou marque como obsoleta qualquer descrição que
+deixe de refletir o código. A documentação deve explicar o “porquê” das decisões, não
+duplicar cada detalhe de implementação.
+
+## 9. Referências para manutenção da arquitetura
+
+- [Awesome ARCHITECTURE.md](https://github.com/noahbald/awesome-architecture-md) — exemplos
+  de mapas de código, diagramas, invariantes e decisões de design.
+- [Architecture View Template](https://github.com/pmerson/architecture-view-template) —
+  modelo de visão estrutural, catálogo de elementos, comportamento e ADRs relacionados.
+- [arc42 — Building Block View](https://docs.arc42.org/section-5/) — decomposição hierárquica
+  em building blocks e responsabilidades.
+- [C4 Model](https://c4model.com/) — níveis de contexto, containers, componentes e código.
+- [MADR](https://adr.github.io/madr/) — formato para registrar decisões arquiteturais,
+  justificativas e consequências.
