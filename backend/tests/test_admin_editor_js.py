@@ -78,7 +78,7 @@ vm.createContext(context);
 
 const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
-  state, loadAdminData, renderSections, renderGroups, openActivityEditor,
+  state, loadAdminData, renderEditorSection, renderSections, renderGroups, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor,
   openGroupEditor, handleEditorClick, showApiError
 };`, context, {filename: "admin.js"});
@@ -177,6 +177,25 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
         assert.equal(api.state.selectedSectionId, "secao");
         assert.match(elementFor("#editor-content").innerHTML, /Seção/);
+        assert.equal(elementFor("#editor-message").textContent, "");
+        """
+    )
+
+
+def test_switching_editor_sections_does_not_create_status_message():
+    """Navigation labels are already visible and must not occupy the status region."""
+    run_node_case(
+        """
+        api.state.locations = [];
+        api.state.knowledgeAxes = [];
+        api.state.schedule = validSchedule();
+
+        api.renderEditorSection("locations");
+        assert.equal(elementFor("#editor-message").textContent, "");
+        api.renderEditorSection("axes");
+        assert.equal(elementFor("#editor-message").textContent, "");
+        api.renderEditorSection("schedule");
+        assert.equal(elementFor("#editor-message").textContent, "");
         """
     )
 

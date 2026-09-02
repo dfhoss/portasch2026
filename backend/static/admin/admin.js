@@ -389,7 +389,7 @@ function renderKnowledgeAxes() {
     <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
 }
 
-function renderEditorSection(section, announceChange = true) {
+function renderEditorSection(section) {
   activeEditorSection = EDITOR_SECTIONS.has(section) ? section : "schedule";
   for (const button of editorView.querySelectorAll("button[data-editor-section]")) {
     if (button.dataset.editorSection === activeEditorSection) {
@@ -400,13 +400,10 @@ function renderEditorSection(section, announceChange = true) {
   }
   if (activeEditorSection === "locations") {
     renderLocations();
-    if (announceChange) announce("Editor de locais.");
   } else if (activeEditorSection === "axes") {
     renderKnowledgeAxes();
-    if (announceChange) announce("Editor de eixos.");
   } else {
     renderSections();
-    if (announceChange) announce("Editor da programação.");
   }
 }
 
@@ -996,8 +993,7 @@ async function loadAdminData() {
   state.locations = locations;
   state.knowledgeAxes = knowledgeAxes;
   restoreScheduleViewState(viewState);
-  renderEditorSection(viewState?.section || "schedule", false);
-  announce("Dados carregados.");
+  renderEditorSection(viewState?.section || "schedule");
 }
 
 async function showEditor() {
@@ -1118,8 +1114,6 @@ editorView.addEventListener("click", (event) => {
   if (EDITOR_SECTIONS.has(section)) {
     renderEditorSection(section);
     saveEditorViewState();
-  } else {
-    announce("Os dados da conta são gerenciados pelo serviço de autenticação.");
   }
 });
 
