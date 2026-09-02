@@ -1,41 +1,41 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Development Commands
 
-This repository contains a FastAPI authentication service. `app.py` creates the application, configures logging and lifecycle checks, mounts routers, and exposes root and health endpoints. Place endpoint modules in `routes/` (currently `routes/auth.py`), persistence adapters in `clients/`, and shared helpers in `utils/`. Cross-route FastAPI dependencies belong in `dependencies.py`. JSON-backed development data is stored in `db/`; treat user records and password hashes as sensitive. Dependency and tool configuration lives in `pyproject.toml`, with exact versions locked in `uv.lock`.
+- `uv sync --dev` — instala o ambiente e as ferramentas travadas em `uv.lock`.
+- `uv run uvicorn app:app --reload --env-file .env` — inicia a API local; a documentação fica em `/api/docs`.
+- `uv run pytest` — executa a suíte unitária e de contrato.
+- `uv run pytest tests/e2e` — executa E2E; requer `uv run playwright install chromium` previamente.
+- Validação: `uv run ruff check .`, `uv run ruff format --check .` e `uv run ty check`.
 
-## Architecture Guidance for Agents
+O `TOKEN_JWT` já está configurado em `.env`; mantenha o arquivo fora do versionamento e nunca versione credenciais ou hashes reais.
 
-Agents must read `ARCHITECTURE.md` before adding or reorganizing features. Follow its flow and checklist. Update it when changes alter module responsibilities, request flow, persistence boundaries, or the standard feature pattern.
+## Design Rules
 
-## Interface Design Guidance for Agents
+- Leia `ARCHITECTURE.md` antes de adicionar ou reorganizar funcionalidades; atualize-o se mudar responsabilidades, fluxo, fronteiras de persistência ou o padrão de feature.
+- Para mudanças em `static/admin/`, leia `DESIGN.md` e mantenha tokens semânticos, acessibilidade, foco, responsividade e reduced motion; altere `DESIGN.md` junto com novos tokens CSS.
+- Mantenha handlers finos e lance `HTTPException` apenas na fronteira HTTP; regras e acesso a dados ficam nos módulos apropriados.
 
-Agents must read `DESIGN.md` before creating or changing HTML, CSS, visual components, layout,
-or interaction states in `static/admin/`. Treat its token definitions and usage rules as the source
-of truth for the admin identity. Reuse semantic CSS tokens instead of introducing literal colors,
-spacing, radii, shadows, or timing values in component rules. If a visual requirement cannot be
-expressed with an existing token, first verify that the value represents a reusable role or scale;
-then update `DESIGN.md` and the corresponding CSS declarations together. Preserve documented
-accessibility, focus, responsive, and reduced-motion behavior in every interface change.
+## Gotchas & Landmines
 
-## Build, Test, and Development Commands
+### Configuração e persistência
 
-- `uv sync --dev` installs the Python 3.14 environment and development tools from the lockfile.
-- `uv run uvicorn app:app --reload --env-file .env` starts the API locally with auto-reload. Swagger UI is available under `/api/docs`.
-- `uv run ruff check .` checks imports and the configured `E`, `F`, and `I` rules.
-- `uv run ruff format --check .` verifies formatting; omit `--check` to apply it.
-- `uv run ty check` runs static type checks.
+- Resolva os caminhos `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH` e `KNOWLEDGE_AXES_PATH` em tempo de chamada, nunca em cache de import; isso permite isolamento dos testes e deployments.
+- JSON é persistido atomicamente com arquivo temporário, `fsync` e `os.replace`; converta falhas de filesystem em `PersistenceError` nos repositórios.
+- Renomear um local também altera as sessões da agenda; se a segunda gravação falhar, restaure o catálogo de locais.
 
-Copy `.env.example` to `.env` and supply a strong `TOKEN_JWT` before starting the service. Never commit `.env` or real credentials.
+### Integridade dos catálogos
 
-## Coding Style & Naming Conventions
+- Valide referências da agenda antes de salvar; `null` para local ou eixo é válido.
+- Renomear eixo preserva seu ID e não reescreve referências da agenda. Não exclua local/eixo referenciado: retorne conflito com as atividades afetadas.
+- Nomes são comparados após normalização Unicode, espaços e caixa; duplicatas equivalentes devem ser rejeitadas.
 
-Use four-space indentation, type hints for public functions, and concise docstrings where behavior is not obvious. Ruff enforces a 100-character target line length, import sorting, and core Pyflakes/pycodestyle checks. Follow Python naming conventions: `snake_case` for functions and modules, `PascalCase` for Pydantic models, and `UPPER_SNAKE_CASE` for constants. Keep route handlers thin by moving reusable database or authentication logic into `clients/` or dependencies.
+### Painel e segurança
 
-## Testing Guidelines
+- `/admin` entrega somente o shell público; o navegador valida o JWT antes de buscar os catálogos protegidos em `/admin/api/*`.
+- Dados de usuários e hashes são sensíveis. Não embuta catálogos ou credenciais no HTML inicial nem em fixtures versionadas.
 
-No automated test suite or coverage threshold is currently configured. New behavior should add `pytest` tests under `tests/`, using names such as `test_auth.py` and `test_invalid_token_returns_401`. Prefer FastAPI's `TestClient`, temporary JSON databases, and isolated environment variables. Once pytest is added to the dev dependencies, run tests with `uv run pytest`.
+## Conventions
 
-## Commit & Pull Request Guidelines
-
-Recent commits use short, imperative Portuguese summaries (for example, `Adapta autenticação para banco JSON`). Keep each commit focused and match that style. Pull requests should explain the behavior change, list validation commands, link related issues, and call out environment or data-format changes. Include screenshots only when API documentation or another visible interface changes.
+- Use `uv` para ambiente e comandos, quatro espaços, type hints públicos e o limite de 100 caracteres configurado no Ruff.
+- Commits devem ser curtos, imperativos e em português. PRs devem listar validações e destacar alterações de ambiente ou formato de dados.
