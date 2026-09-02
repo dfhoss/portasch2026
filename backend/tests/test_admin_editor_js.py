@@ -136,13 +136,36 @@ def test_editor_contains_every_required_control(client):
         assert f'id="{control_id}"' in html
 
 
+def test_schedule_cards_render_actions_inside_three_dot_menus():
+    run_node_case(
+        """
+        const schedule = validSchedule();
+        api.state.locations = [{id: "loc-1", name: "Auditório"}];
+        api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
+        const html = api.renderGroups(schedule.sections[0]);
+        assert.match(html, /class="card-menu"/);
+        assert.match(html, /aria-label="Ações do grupo Grupo"/);
+        assert.match(html, /data-action="add-activity-to-group"/);
+        assert.match(html, /data-action="edit-group"/);
+        assert.match(html, /data-action="delete-group"/);
+        assert.match(html, /aria-label="Ações da atividade Atividade"/);
+        assert.match(html, /data-action="edit-activity"/);
+        assert.match(html, /data-action="delete-activity"/);
+        assert.match(html, /<svg[^>]+aria-hidden="true"/);
+        assert.match(html, /circle cx="12" cy="5"/);
+        assert.match(html, /aria-label="Expandir grupo Grupo"/);
+        assert.equal((html.match(/class="card-menu-trigger"/g) || []).length, 2);
+        """
+    )
+
+
 def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client):
     html = client.get("/admin").text
     assert 'id="add-session"' in html
     assert 'id="modal-apply"' in html
     assert 'id="modal-close"' not in html
     assert "Fechar" not in html
-    assert '>Salvar<' in html
+    assert ">Salvar<" in html
     script = client.get("/admin/static/admin.js").text
     assert 'editorModal.addEventListener("click"' in script
     assert 'classList?.add("modal-open")' in script

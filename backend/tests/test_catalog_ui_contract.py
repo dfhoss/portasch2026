@@ -6,6 +6,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parents[1]
 ADMIN_SCRIPT = PROJECT_ROOT / "static" / "admin" / "admin.js"
 ADMIN_STYLES = PROJECT_ROOT / "static" / "admin" / "admin.css"
+ADMIN_DESIGN = PROJECT_ROOT / "DESIGN.md"
 
 
 def test_location_form_only_asks_for_name(client):
@@ -139,6 +140,30 @@ def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
     shared_rule = css.split(".primary-action", 1)[0]
     assert ".danger-action" in shared_rule
     assert ".danger-action:hover" in css
+
+
+def test_card_menus_have_shared_accessible_design_contract():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    design = ADMIN_DESIGN.read_text(encoding="utf-8")
+    menu_css = css.split(".card-menu-panel {", 1)[1].split("}", 1)[0]
+    for source in (css, design):
+        assert ".card-menu" in source
+        assert ".card-menu-trigger" in source
+        assert ".card-menu-panel" in source
+        assert "focus-visible" in source
+    assert "três pontos" in design
+    assert "background: transparent" in css
+    assert "background: var(--color-surface);" in menu_css
+    assert "box-shadow: none" in css
+    assert "border: var(--border-width) solid var(--color-border);" in menu_css
+    assert "border-radius: var(--radius-md);" in menu_css
+    assert "border: 0" in css
+    assert "pointer-events: auto" in css
+    assert "bottom: calc(100% + var(--space-1))" in css
+    assert "top: auto" in css
+    assert "z-index: 20" in css
+    assert ".schedule-group {" in css
+    assert "overflow: visible" in css
 
 
 def test_scrollbars_are_hidden_without_disabling_scroll():

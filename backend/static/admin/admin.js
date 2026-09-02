@@ -165,6 +165,17 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function actionIcon(name) {
+  const paths = {
+    more: '<circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>',
+    add: '<path d="M12 5v14M5 12h14"/>',
+    edit: '<path d="m4 16.5-.8 3.3 3.3-.8L18.8 6.7a2.3 2.3 0 0 0-3.3-3.3L4 16.5Z"/><path d="m13.5 5.5 3 3"/>',
+    delete: '<path d="M5 7h14M10 11v6M14 11v6M7 7l1 13h8l1-13M9 7V4h6v3"/>',
+    chevron: '<path d="m7 9 5 5 5-5"/>',
+  };
+  return `<svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
+}
+
 function draftKey(record) {
   if (!draftKeys.has(record)) {
     draftKeys.set(record, `draft-${nextDraftKey}`);
@@ -245,10 +256,13 @@ function renderActivities(group) {
             ${activity.description ? `<p>${escapeHtml(activity.description)}</p>` : ""}
             <div class="session-summary">${renderSessions(activity)}</div>
           </div>
-          <div class="card-actions">
-            <button type="button" data-action="edit-activity" data-key="${key}">Editar</button>
-            <button class="danger-action" type="button" data-action="delete-activity" data-key="${key}">Excluir</button>
-          </div>
+          <details class="card-menu">
+            <summary class="card-menu-trigger" aria-label="Ações da atividade ${escapeHtml(activity.title || "Atividade sem título")}">${actionIcon("more")}</summary>
+            <div class="card-menu-panel" role="menu">
+              <button type="button" role="menuitem" data-action="edit-activity" data-key="${key}">${actionIcon("edit")}Editar</button>
+              <button class="danger-action" type="button" role="menuitem" data-action="delete-activity" data-key="${key}">${actionIcon("delete")}Excluir</button>
+            </div>
+          </details>
         </article>`;
     })
     .join("");
@@ -265,15 +279,19 @@ function renderGroups(section = selectedSection()) {
       return `
         <article class="schedule-group">
           <header class="group-header">
-            <button class="group-toggle" type="button" data-action="toggle-group" data-key="${key}" aria-expanded="${expanded}">
+            <button class="group-toggle" type="button" data-action="toggle-group" data-key="${key}" aria-expanded="${expanded}" aria-label="${expanded ? "Recolher" : "Expandir"} grupo ${escapeHtml(group.title || "Grupo sem título")}">
               <strong>${escapeHtml(group.title || "Grupo sem título")}</strong>
+              <span class="group-toggle-indicator">${actionIcon("chevron")}</span>
               <span class="secondary-text">${escapeHtml(axisName(group.knowledgeAxis))} · ${expanded ? "Recolher" : "Expandir"}</span>
             </button>
-            <div class="card-actions">
-              <button type="button" data-action="add-activity-to-group" data-key="${key}">Adicionar atividade</button>
-              <button type="button" data-action="edit-group" data-key="${key}">Editar</button>
-              <button class="danger-action" type="button" data-action="delete-group" data-key="${key}">Excluir</button>
-            </div>
+            <details class="card-menu">
+              <summary class="card-menu-trigger" aria-label="Ações do grupo ${escapeHtml(group.title || "Grupo sem título")}">${actionIcon("more")}</summary>
+              <div class="card-menu-panel" role="menu">
+                <button type="button" role="menuitem" data-action="add-activity-to-group" data-key="${key}">${actionIcon("add")}Adicionar atividade</button>
+                <button type="button" role="menuitem" data-action="edit-group" data-key="${key}">${actionIcon("edit")}Editar</button>
+                <button class="danger-action" type="button" role="menuitem" data-action="delete-group" data-key="${key}">${actionIcon("delete")}Excluir</button>
+              </div>
+            </details>
           </header>
           <div class="group-body" ${expanded ? "" : "hidden"}>
             <div class="activity-list">${renderActivities(group)}</div>
@@ -1109,6 +1127,28 @@ async function handleEditorClick(event) {
 }
 
 editorContent.addEventListener("click", handleEditorClick);
+editorContent.addEventListener("click", (event) => {
+  const trigger = event.target.closest?.("summary.card-menu-trigger");
+  const menu = event.target.closest?.(".card-menu");
+  if (trigger) {
+    editorContent.querySelectorAll(".card-menu[open]").forEach((openMenu) => {
+      if (openMenu !== menu) openMenu.removeAttribute("open");
+    });
+    return;
+  }
+  if (!menu) {
+    editorContent.querySelectorAll(".card-menu[open]").forEach((openMenu) => {
+      openMenu.removeAttribute("open");
+    });
+  }
+});
+editorContent.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const menu = event.target.closest?.(".card-menu[open]");
+  if (!menu) return;
+  menu.removeAttribute("open");
+  menu.querySelector(".card-menu-trigger")?.focus();
+});
 editorContent.addEventListener("change", (event) => {
   if (!state.schedule) return;
   if (event.target.id === "schedule-version") state.schedule.version = Number(event.target.value);

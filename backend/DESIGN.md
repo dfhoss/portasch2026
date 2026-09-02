@@ -175,6 +175,15 @@ with it when implementing or changing the interface.
   do not replace labels.
 - Cards and panels use `--color-surface`, `--color-border`, and `--radius-lg`. Reserve shadows for
   overlays or cases where a boundary cannot be communicated with a border.
+- Menus popup de ações usam um menu compacto de três pontos (`.card-menu`) em qualquer viewport.
+  O gatilho `.card-menu-trigger` deve ter rótulo acessível, ícone vertical e foco visível, sem
+  moldura quadrada. O painel `.card-menu-panel` deve ser vertical, clicável, ter fundo opaco
+  `--color-surface`, borda `--border-width`/`--color-border`, raio `--radius-md` e camada acima
+  dos cards adjacentes; deve abrir para cima quando houver espaço. Cada ação deve ter um ícone
+  acompanhando o rótulo, e ações destrutivas usam `--color-danger` sem depender apenas da cor.
+- Grupos de atividades devem deixar claro que são expansíveis: o botão `.group-toggle` informa
+  `aria-expanded`, exibe “Expandir” ou “Recolher” e usa um chevron que acompanha a mudança de
+  estado. A expansão não pode depender de hover.
 - Dialogs need a clear title, keyboard focus management, and an explicit primary action labeled
   “Salvar” in the bottom-right of the footer. “Salvar” must share the complete primary-button
   contract with other primary actions: `--control-height`, spacing tokens, border, radius, and
