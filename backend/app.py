@@ -67,18 +67,18 @@ app.include_router(admin.router)
 @app.get("/", tags=["Root"])
 async def read_root():
     """
-    **Endpoint raiz - Redirecionamento para documentação**
+    **Endpoint raiz - Acesso ao painel administrativo**
 
-    Redireciona automaticamente para a documentação interativa da API.
-    Este endpoint serve como ponto de entrada conveniente para acessar a documentação completa da API.
+    Redireciona automaticamente para a interface de administração do evento.
+    O painel permite gerenciar a programação, os locais e os eixos de conhecimento.
 
-    **Redireciona para:** `/docs`
+    **Redireciona para:** `/admin`
 
     **Casos de Uso:**
-    - Acesso rápido à documentação da API
-    - Ponto de entrada padrão para desenvolvedores
+    - Acesso ao editor da programação
+    - Administração dos catálogos do evento
     """
-    return RedirectResponse(url="/api/docs", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/admin", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/health", tags=["Health"])
