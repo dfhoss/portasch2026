@@ -4,6 +4,7 @@
 
 - `uv sync --dev` — instala o ambiente e as ferramentas travadas em `uv.lock`.
 - `uv run uvicorn app:app --reload --env-file .env` — inicia a API local; a documentação fica em `/api/docs`.
+- Para testar o painel em um Android conectado por USB, confirme o aparelho com `adb devices -l`, execute `adb reverse tcp:8000 tcp:8000` e abra `http://localhost:8000/admin` no celular. O `adb` deve estar no `PATH`; nesta máquina, o fallback é `C:\Users\Administrador\AppData\Local\Microsoft\WinGet\Packages\Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe\platform-tools\adb.exe`.
 - `uv run pytest` — executa a suíte unitária e de contrato.
 - `uv run pytest tests/e2e` — executa E2E; requer `uv run playwright install chromium` previamente.
 - Validação: `uv run ruff check .`, `uv run ruff format --check .` e `uv run ty check`.
