@@ -63,6 +63,33 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
     assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
 
 
+def test_login_message_is_between_password_and_submit_and_uses_error_tone(client):
+    """Session errors must be prominent and appear next to the action they explain."""
+    html = client.get("/admin").text
+    password_end = html.index('id="password"')
+    message_position = html.index('id="login-message"')
+    submit_position = html.index('type="submit"')
+
+    assert password_end < message_position < submit_position
+
+    css = client.get("/admin/static/admin.css").text
+    message_rule = css_rule(css, "#editor-message:not(:empty), #login-message:not(:empty)")
+    login_color_rule = css_rule(css, ".login-card #login-message:not(:empty)")
+    assert "border: var(--border-width) solid var(--green-200)" in message_rule
+    assert "background: var(--color-surface-selected)" in message_rule
+    assert "border-color: var(--color-danger)" in login_color_rule
+    assert "background: var(--color-danger-surface)" in login_color_rule
+    assert "color: var(--color-danger-text)" in login_color_rule
+    assert "display: none" in css_rule(css, "#login-message:empty")
+
+
+def test_login_password_disables_browser_persistence(client):
+    html = client.get("/admin").text
+
+    assert 'id="login-form" class="login-card" autocomplete="off"' in html
+    assert 'id="password" name="password" type="password" autocomplete="off"' in html
+
+
 class EditorShellParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()

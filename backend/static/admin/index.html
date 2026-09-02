@@ -9,14 +9,14 @@
   <body>
     <main class="admin-shell">
       <section id="login-view" class="login-view" aria-labelledby="login-title">
-        <form id="login-form" class="login-card">
+        <form id="login-form" class="login-card" autocomplete="off">
           <h1 id="login-title">Painel administrativo</h1>
           <p>Entre para administrar a agenda do evento.</p>
-          <div id="login-message" role="status" aria-live="polite"></div>
           <label for="username">Usuário</label>
           <input id="username" name="username" autocomplete="username" required>
           <label for="password">Senha</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <input id="password" name="password" type="password" autocomplete="off" required>
+          <div id="login-message" role="status" aria-live="polite"></div>
           <button type="submit">Entrar</button>
         </form>
       </section>

@@ -50,7 +50,9 @@ with it when implementing or changing the interface.
   --neutral-800: #24312a;
   --yellow-50: #fff8d9;
   --yellow-400: #ead27b;
+  --red-100: #fce8e8;
   --red-600: #aa2f2f;
+  --red-800: #7f1d1d;
   --overlay-green: #17251f88;
 
   /* Typography */
@@ -110,6 +112,8 @@ with it when implementing or changing the interface.
   --color-navigation-active: var(--green-500);
   --color-focus: var(--green-300);
   --color-danger: var(--red-600);
+  --color-danger-surface: var(--red-100);
+  --color-danger-text: var(--red-800);
   --color-warning-surface: var(--yellow-50);
   --color-warning-border: var(--yellow-400);
   --color-backdrop: var(--overlay-green);

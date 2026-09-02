@@ -80,7 +80,7 @@ const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor,
-  openGroupEditor, handleEditorClick, showApiError
+  openGroupEditor, handleEditorClick, showApiError, logout
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
@@ -385,6 +385,23 @@ def test_save_schedule_lets_api_fetch_handle_unauthorized_without_save_error():
         assert.equal(storage.has("adminToken"), false);
         assert.equal(elementFor("#editor-message").textContent, "");
         assert.match(elementFor("#login-message").textContent, /sessão expirou/);
+        """
+    )
+
+
+def test_logout_clears_login_credentials_from_the_form():
+    """Logging out must not leave the previous credentials available in the login form."""
+    run_node_case(
+        """
+        storage.set("adminToken", "secret");
+        elementFor("#username").value = "usuario-secreto";
+        elementFor("#password").value = "senha-secreta";
+
+        api.logout();
+
+        assert.equal(elementFor("#username").value, "");
+        assert.equal(elementFor("#password").value, "");
+        assert.equal(storage.has("adminToken"), false);
         """
     )
 

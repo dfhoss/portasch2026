@@ -1,6 +1,8 @@
 const loginView = document.querySelector("#login-view");
 const editorView = document.querySelector("#editor-view");
 const loginForm = document.querySelector("#login-form");
+const loginUsername = document.querySelector("#username");
+const loginPassword = document.querySelector("#password");
 const loginMessage = document.querySelector("#login-message");
 const editorMessage = document.querySelector("#editor-message");
 const editorContent = document.querySelector("#editor-content");
@@ -83,9 +85,15 @@ function restoreScheduleViewState(viewState) {
   }
 }
 
+function clearLoginCredentials() {
+  loginUsername.value = "";
+  loginPassword.value = "";
+}
+
 function showLogin(message = "") {
   editorView.hidden = true;
   loginView.hidden = false;
+  clearLoginCredentials();
   loginMessage.textContent = message;
 }
 
@@ -1117,7 +1125,10 @@ editorView.addEventListener("click", (event) => {
   }
 });
 
-globalThis.addEventListener?.("pagehide", saveEditorViewState);
+globalThis.addEventListener?.("pagehide", () => {
+  saveEditorViewState();
+  clearLoginCredentials();
+});
 
 modalContent.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1182,6 +1193,7 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   loginMessage.textContent = "";
   const credentials = new URLSearchParams(new FormData(loginForm));
+  clearLoginCredentials();
   const response = await fetch("/auth/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
