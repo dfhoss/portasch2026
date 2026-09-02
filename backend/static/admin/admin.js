@@ -8,6 +8,7 @@ const editorModal = document.querySelector("#editor-modal");
 const modalTitle = document.querySelector("#modal-title");
 const modalContent = document.querySelector("#modal-content");
 const addSessionButton = document.querySelector("#add-session");
+const modalApplyButton = document.querySelector("#modal-apply");
 const ADMIN_VIEW_STATE_KEY = "adminViewState";
 const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes"]);
 
@@ -437,6 +438,10 @@ function showModal(title, content, opener) {
     : null;
   modalTitle.textContent = title;
   modalContent.innerHTML = content;
+  modalApplyButton.textContent = "Salvar";
+  modalApplyButton.hidden = false;
+  modalApplyButton.setAttribute("form", modalContent.querySelector("form")?.id || "");
+  document.body?.classList?.add("modal-open");
   editorModal.showModal();
   setTimeout(() => modalContent.querySelector("input, textarea, select")?.focus(), 0);
 }
@@ -451,7 +456,6 @@ function openSectionEditor(section = null, opener = null) {
     `<form id="item-editor-form" class="editor-form">
       <label>Título <input name="title" required value="${escapeHtml(section?.title)}"></label>
       <label>Descrição <textarea name="description">${escapeHtml(section?.description)}</textarea></label>
-      <div class="dialog-actions"><button class="primary-action" type="submit">Aplicar</button></div>
     </form>`,
     opener,
   );
@@ -477,7 +481,6 @@ function openGroupEditor(group = null, section = selectedSection(), opener = nul
           "Sem eixo",
         )}</select>
       </label>
-      <div class="dialog-actions"><button class="primary-action" type="submit">Aplicar</button></div>
     </form>`,
     opener,
   );
@@ -497,7 +500,6 @@ function openCatalogEditor(type, record = null, opener = null) {
     `<form id="${formId}" class="editor-form">
       <label for="${fieldId}">${label}</label>
       <input id="${fieldId}" name="name" required maxlength="200" autocomplete="off" value="${escapeHtml(record?.name)}">
-      <div class="dialog-actions"><button class="primary-action" type="submit">Salvar</button></div>
     </form>`,
     opener,
   );
@@ -563,10 +565,10 @@ function openActivityEditor(activity = null, group = null, opener = null) {
       <label>Descrição <textarea name="description">${escapeHtml(activity?.description)}</textarea></label>
       <label>Link <input name="link" type="text" inputmode="url" autocomplete="url" value="${escapeHtml(activity?.link)}"></label>
       <div id="session-editor-list" class="session-editor-list">${sessions}</div>
-      <div class="dialog-actions"><button class="primary-action" type="submit">Aplicar</button></div>
     </form>`,
     opener,
   );
+  modalApplyButton.setAttribute("form", "item-editor-form");
 }
 
 function formValue(form, name) {
@@ -1167,12 +1169,19 @@ function restoreModalFocus() {
 }
 
 editorModal.addEventListener("close", () => {
+  document.body?.classList?.remove("modal-open");
+  modalApplyButton.hidden = true;
+  modalApplyButton.removeAttribute("form");
   addSessionButton.hidden = true;
   modalContext = null;
   modalWorkingActivity = null;
   restoreModalFocus();
   modalOpener = null;
   modalOpenerTarget = null;
+});
+
+editorModal.addEventListener("click", (event) => {
+  if (event.target === editorModal) editorModal.close();
 });
 
 loginForm.addEventListener("submit", async (event) => {

@@ -46,7 +46,9 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 class FakeElement {
   constructor(id = "") { this.id = id; this.hidden = false; this.innerHTML = ""; this.textContent = ""; this.value = ""; this.dataset = {}; this.isConnected = true; this.listeners = new Map(); this.elements = {namedItem: () => null}; }
-  addEventListener(type, callback) { this.listeners.set(type, callback); }
+      addEventListener(type, callback) { this.listeners.set(type, callback); }
+      setAttribute(name, value) { this[name] = value; }
+      removeAttribute(name) { delete this[name]; }
   dispatchEvent(event) { return this.listeners.get(event.type)?.(event); }
   append() {}
   querySelector(selector) { return selector === "input, textarea, select" ? new FakeElement("field") : null; }
@@ -137,6 +139,25 @@ def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
     shared_rule = css.split(".primary-action", 1)[0]
     assert ".danger-action" in shared_rule
     assert ".danger-action:hover" in css
+
+
+def test_scrollbars_are_hidden_without_disabling_scroll():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    assert "scrollbar-width: none" in css
+    assert "::-webkit-scrollbar" in css
+    assert "body.modal-open" in css
+
+
+def test_links_do_not_use_underlines():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    assert "a { text-decoration: none; }" in css
+
+
+def test_dialog_save_uses_shared_primary_button_contract_and_stays_right():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    shared_rule = css.split(".primary-action", 1)[0]
+    assert "#modal-apply" in shared_rule
+    assert "#modal-apply { margin-left: auto; }" in css
 
 
 def test_location_rename_refreshes_schedule_and_locations_atomically():

@@ -171,8 +171,14 @@ with it when implementing or changing the interface.
   do not replace labels.
 - Cards and panels use `--color-surface`, `--color-border`, and `--radius-lg`. Reserve shadows for
   overlays or cases where a boundary cannot be communicated with a border.
-- Dialogs need a clear title, a close action, keyboard focus management, and an explicit primary
-  action. Destructive actions should be visually separated from confirmation actions.
+- Dialogs need a clear title, keyboard focus management, and an explicit primary action labeled
+  “Salvar” in the bottom-right of the footer. “Salvar” must share the complete primary-button
+  contract with other primary actions: `--control-height`, spacing tokens, border, radius, and
+  semantic action colors. Do not render a “Fechar” button; the backdrop and `Esc` close the dialog.
+  In activity dialogs, place “Adicionar horário” on the left of the same footer. Destructive
+  actions should be visually separated from confirmation actions.
+- Hide scrollbar chrome on the page and dialogs without disabling scrolling; preserve keyboard,
+  wheel, and touch scrolling.
 - Motion must be brief and informative. Respect `prefers-reduced-motion` for nonessential
   transitions and animations.
 - Preserve the active admin view, selected schedule section, expanded groups, and scroll position

@@ -82,6 +82,12 @@
   background: var(--color-page);
 }
 
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {
@@ -90,7 +96,11 @@ body {
   color: var(--color-text);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+body.modal-open { overflow: hidden; }
+a { text-decoration: none; }
 button, input, select, textarea { font: inherit; }
 button { min-height: var(--control-height); cursor: pointer; }
 input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
@@ -230,7 +240,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   text-transform: uppercase;
 }
 .toolbar-actions button, .section-toolbar button, .card-actions button,
-.dialog-actions button, #add-session, .danger-action {
+.dialog-actions button, #add-session, #modal-apply, .danger-action {
   padding: var(--space-2) var(--space-3);
   border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-md);
@@ -238,7 +248,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   color: var(--color-text);
 }
 .toolbar-actions button:hover, .section-toolbar button:hover, .card-actions button:hover,
-.dialog-actions button:hover, #add-session:hover, .danger-action:hover {
+.dialog-actions button:hover, #add-session:hover, #modal-apply:hover, .danger-action:hover {
   background: var(--color-surface-selected);
 }
 .primary-action {
@@ -250,6 +260,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   border-color: var(--color-action-primary-hover) !important;
   background: var(--color-action-primary-hover) !important;
 }
+#modal-apply { margin-left: auto; }
 
 .schedule-metadata {
   display: grid;
@@ -380,7 +391,10 @@ dialog {
   background: var(--color-surface);
   color: var(--color-text);
   box-shadow: var(--shadow-dialog);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+dialog::-webkit-scrollbar { display: none; }
 dialog::backdrop { background: var(--color-backdrop); }
 dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
 .editor-form { display: grid; gap: var(--space-3); }
@@ -403,16 +417,9 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
 }
 .dialog-actions, .dialog-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--space-3);
   margin-top: var(--space-4);
-}
-.dialog-footer button {
-  padding: var(--space-2) var(--space-3);
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  text-decoration: underline;
 }
 
 @media (prefers-reduced-motion: reduce) {

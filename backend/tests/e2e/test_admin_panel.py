@@ -27,7 +27,7 @@ def accept_dialog(dialog: Dialog) -> None:
 
 
 def apply_modal(page: Page) -> None:
-    page.get_by_role("button", name="Aplicar").click()
+    page.get_by_role("button", name="Salvar").click()
     expect(page.locator("#editor-modal")).to_be_hidden(timeout=500)
 
 
@@ -384,7 +384,7 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
         "Eixo não cadastrado"
     )
     expect(admin_page.locator("body")).not_to_contain_text("axis-secret")
-    admin_page.get_by_role("button", name="Fechar").click()
+    admin_page.keyboard.press("Escape")
     activity = admin_page.locator(".schedule-activity").filter(has_text="Recepção nos Auditórios")
     activity.get_by_role("button", name="Editar").click()
     expect(admin_page.locator('select[name="location"] option:checked')).to_have_text(
@@ -434,7 +434,7 @@ def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page
     expect(admin_page.locator("body")).not_to_contain_text("loc-004")
     admin_page.get_by_role("button", name="Adicionar local").click()
     admin_page.get_by_label("Nome do local").fill("Cancelado")
-    admin_page.get_by_role("button", name="Fechar").click()
+    admin_page.keyboard.press("Escape")
     expect(admin_page.locator("body")).not_to_contain_text("Cancelado")
 
     admin_page.get_by_role("button", name="Eixos").click()

@@ -65,8 +65,10 @@
     <dialog id="editor-modal" aria-labelledby="modal-title">
       <h2 id="modal-title">Editar item</h2>
       <div id="modal-content"></div>
-      <button id="add-session" type="button" hidden>Adicionar horário</button>
-      <form class="dialog-footer" method="dialog"><button type="submit">Fechar</button></form>
+      <form class="dialog-footer" method="dialog">
+        <button id="add-session" type="button" hidden>Adicionar horário</button>
+        <button id="modal-apply" class="primary-action" type="submit" hidden>Salvar</button>
+      </form>
     </dialog>
 
     <template id="location-form-template">

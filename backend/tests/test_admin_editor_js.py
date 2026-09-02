@@ -24,7 +24,9 @@ class FakeElement {
     this.children = [];
     this.elements = {namedItem: () => null};
   }
-  addEventListener(type, callback) { this.listeners.set(type, callback); }
+      addEventListener(type, callback) { this.listeners.set(type, callback); }
+      setAttribute(name, value) { this[name] = value; }
+      removeAttribute(name) { delete this[name]; }
   dispatchEvent(event) { return this.listeners.get(event.type)?.(event); }
   append(...children) { this.children.push(...children); }
   appendChild(child) { this.children.push(child); return child; }
@@ -132,6 +134,19 @@ def test_editor_contains_every_required_control(client):
     required = ["add-section", "add-group", "add-activity", "add-session", "save-schedule"]
     for control_id in required:
         assert f'id="{control_id}"' in html
+
+
+def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client):
+    html = client.get("/admin").text
+    assert 'id="add-session"' in html
+    assert 'id="modal-apply"' in html
+    assert 'id="modal-close"' not in html
+    assert "Fechar" not in html
+    assert '>Salvar<' in html
+    script = client.get("/admin/static/admin.js").text
+    assert 'editorModal.addEventListener("click"' in script
+    assert 'classList?.add("modal-open")' in script
+    assert 'classList?.remove("modal-open")' in script
 
 
 def test_editor_script_uses_portuguese_error_messages(client):
