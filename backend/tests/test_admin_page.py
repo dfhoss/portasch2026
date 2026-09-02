@@ -58,7 +58,9 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
         assert token in root_rule
 
     assert "var(--color-page)" in css_rule(css, "body")
-    assert "var(--color-navigation)" in css_rule(css, ".editor-sidebar")
+    sidebar_rule = css_rule(css, ".editor-sidebar")
+    assert "var(--color-surface-subtle)" in sidebar_rule
+    assert "var(--color-text)" in sidebar_rule
     assert "var(--color-action-primary)" in css_rule(css, ".primary-action")
     assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
 
@@ -125,10 +127,22 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     assert any(item["tag"] == "nav" for item in parser.sidebar_contents)
     assert any(item.get("id") == "editor-title" for item in parser.sidebar_contents)
     assert any(item.get("id") == "logout-button" for item in parser.sidebar_contents)
+    assert page.index('data-editor-section="account"') < page.index('id="logout-button"')
+    assert page.count('class="sidebar-icon"') == 5
 
     desktop_css, _, mobile_css = css.partition("@media (max-width: 749px)")
     assert "grid-column: 1" in css_rule(desktop_css, ".editor-sidebar")
     assert "flex-direction: column" in css_rule(desktop_css, ".editor-sidebar nav")
+    nav_rule = (
+        ".editor-sidebar nav button {\n"
+        "  display: flex;\n"
+        "  align-items: center;\n"
+        "  gap: var(--space-2);\n"
+        "  border-color: var(--color-border);\n"
+        "  background: var(--color-surface);\n"
+        "  color: var(--color-text);"
+    )
+    assert nav_rule in desktop_css
     assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
 
 

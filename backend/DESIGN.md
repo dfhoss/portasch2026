@@ -165,6 +165,12 @@ with it when implementing or changing the interface.
   content padding to `--space-6`.
 - At 749px and below, convert the sidebar to horizontal navigation, stack forms, and keep primary
   actions visible. Do not rely on hover for access to actions.
+- The admin sidebar uses `--color-surface-subtle` with `--color-text`. Navigation items use
+  `--color-surface` and `--color-border` for a subtle resting boundary; reserve
+  `--color-surface-selected` and `--color-navigation` for the active navigation item and its
+  emphasis, avoiding a fully saturated green sidebar.
+- Sidebar selectors use a consistent icon alongside each label, and the “Sair” action is the last
+  item in the navigation list with the same accessible focus and contrast treatment.
 - Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
   `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
 
