@@ -8,6 +8,16 @@ This repository contains a FastAPI authentication service. `app.py` creates the 
 
 Agents must read `ARCHITECTURE.md` before adding or reorganizing features. Follow its flow and checklist. Update it when changes alter module responsibilities, request flow, persistence boundaries, or the standard feature pattern.
 
+## Interface Design Guidance for Agents
+
+Agents must read `DESIGN.md` before creating or changing HTML, CSS, visual components, layout,
+or interaction states in `static/admin/`. Treat its token definitions and usage rules as the source
+of truth for the admin identity. Reuse semantic CSS tokens instead of introducing literal colors,
+spacing, radii, shadows, or timing values in component rules. If a visual requirement cannot be
+expressed with an existing token, first verify that the value represents a reusable role or scale;
+then update `DESIGN.md` and the corresponding CSS declarations together. Preserve documented
+accessibility, focus, responsive, and reduced-motion behavior in every interface change.
+
 ## Build, Test, and Development Commands
 
 - `uv sync --dev` installs the Python 3.14 environment and development tools from the lockfile.

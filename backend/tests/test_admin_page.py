@@ -40,6 +40,29 @@ def test_hidden_admin_views_are_not_overridden_by_layout_css(client):
     assert "display: none !important" in hidden_rule
 
 
+def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
+    """Removing semantic tokens or bypassing them in key surfaces must make this fail."""
+    css = client.get("/admin/static/admin.css").text
+
+    root_rule = css_rule(css, ":root")
+    for token in (
+        "--color-page:",
+        "--color-surface:",
+        "--color-text:",
+        "--color-action-primary:",
+        "--color-navigation:",
+        "--color-focus:",
+        "--space-4:",
+        "--radius-lg:",
+    ):
+        assert token in root_rule
+
+    assert "var(--color-page)" in css_rule(css, "body")
+    assert "var(--color-navigation)" in css_rule(css, ".editor-sidebar")
+    assert "var(--color-action-primary)" in css_rule(css, ".primary-action")
+    assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
+
+
 class EditorShellParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
