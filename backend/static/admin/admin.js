@@ -12,7 +12,7 @@ const modalContent = document.querySelector("#modal-content");
 const addSessionButton = document.querySelector("#add-session");
 const modalApplyButton = document.querySelector("#modal-apply");
 const ADMIN_VIEW_STATE_KEY = "adminViewState";
-const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes"]);
+const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes", "account"]);
 
 const state = {
   schedule: null,
@@ -340,12 +340,6 @@ function renderSections() {
         <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule">Salvar programação</button>
       </div>
     </header>
-    <div class="schedule-metadata">
-      <label for="schedule-version">Versão</label>
-      <input id="schedule-version" name="version" type="number" min="1" inputmode="numeric" value="${escapeHtml(state.schedule.version)}">
-      <label for="schedule-date">Data do evento</label>
-      <input id="schedule-date" name="eventDate" type="date" value="${escapeHtml(state.schedule.eventDate)}">
-    </div>
     <nav id="section-list" class="section-list" aria-label="Seções da programação">${sectionButtons}</nav>
     <div class="section-toolbar">
       <button id="add-group" type="button" data-action="add-group">Adicionar grupo</button>
@@ -415,6 +409,25 @@ function renderKnowledgeAxes() {
     <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
 }
 
+function renderSettings() {
+  editorContent.innerHTML = `
+    <header class="content-header">
+      <div><p class="eyebrow">Preferências do evento</p><h2>Configurações</h2></div>
+      <div class="toolbar-actions">
+        <button type="button" class="primary-action" data-action="save-schedule">Salvar configurações</button>
+      </div>
+    </header>
+    <section class="settings-panel" aria-labelledby="settings-title">
+      <h3 id="settings-title">Identificação do evento</h3>
+      <div class="schedule-metadata">
+        <label for="schedule-version">Edição do evento</label>
+        <input id="schedule-version" name="version" type="number" min="1" inputmode="numeric" value="${escapeHtml(state.schedule.version)}">
+        <label for="schedule-date">Data do evento</label>
+        <input id="schedule-date" name="eventDate" type="date" value="${escapeHtml(state.schedule.eventDate)}">
+      </div>
+    </section>`;
+}
+
 function renderEditorSection(section) {
   activeEditorSection = EDITOR_SECTIONS.has(section) ? section : "schedule";
   for (const button of editorView.querySelectorAll("button[data-editor-section]")) {
@@ -428,6 +441,8 @@ function renderEditorSection(section) {
     renderLocations();
   } else if (activeEditorSection === "axes") {
     renderKnowledgeAxes();
+  } else if (activeEditorSection === "account") {
+    renderSettings();
   } else {
     renderSections();
   }

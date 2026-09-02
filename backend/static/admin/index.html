@@ -30,7 +30,7 @@
             <button type="button" data-editor-section="schedule"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>Programação</button>
             <button type="button" data-editor-section="locations"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>Locais</button>
             <button type="button" data-editor-section="axes"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/></svg>Eixos</button>
-            <button type="button" data-editor-section="account"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Minha conta</button>
+            <button type="button" data-editor-section="account"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Configurações</button>
             <button id="logout-button" type="button"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M14 8l4 4-4 4M8 12h10"/></svg>Sair</button>
           </nav>
         </aside>
@@ -46,12 +46,6 @@
               <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule">Salvar programação</button>
             </div>
           </header>
-          <div class="schedule-metadata">
-            <label for="schedule-version">Versão</label>
-            <input id="schedule-version" name="version" type="number" min="1" inputmode="numeric">
-            <label for="schedule-date">Data do evento</label>
-            <input id="schedule-date" name="eventDate" type="date">
-          </div>
           <nav id="section-list" class="section-list" aria-label="Seções da programação"></nav>
           <div class="section-toolbar">
             <button id="add-group" type="button" data-action="add-group">Adicionar grupo</button>

@@ -301,6 +301,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
+.settings-panel {
+  padding: var(--panel-padding);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.settings-panel h3 { margin: 0 0 var(--space-4); }
 .section-list {
   display: flex;
   gap: var(--space-2);

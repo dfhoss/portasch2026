@@ -78,7 +78,7 @@ vm.createContext(context);
 
 const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
-  state, loadAdminData, renderEditorSection, renderSections, renderGroups, openActivityEditor,
+  state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor,
   openGroupEditor, handleEditorClick, showApiError, logout
 };`, context, {filename: "admin.js"});
@@ -155,6 +155,20 @@ def test_schedule_cards_render_actions_inside_three_dot_menus():
         assert.match(html, /circle cx="12" cy="5"/);
         assert.match(html, /aria-label="Expandir grupo Grupo"/);
         assert.equal((html.match(/class="card-menu-trigger"/g) || []).length, 2);
+        """
+    )
+
+
+def test_settings_contains_event_metadata_outside_schedule_workspace():
+    run_node_case(
+        """
+        api.state.schedule = validSchedule();
+        api.renderEditorSection("account");
+        assert.match(elementFor("#editor-content").innerHTML, /Configurações/);
+        assert.match(elementFor("#editor-content").innerHTML, /Edição do evento/);
+        assert.match(elementFor("#editor-content").innerHTML, /Data do evento/);
+        api.renderEditorSection("schedule");
+        assert.equal(elementFor("#editor-content").querySelector(".schedule-metadata"), null);
         """
     )
 

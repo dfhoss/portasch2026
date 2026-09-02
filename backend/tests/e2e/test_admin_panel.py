@@ -196,7 +196,7 @@ def test_navigation_and_modal_escape_apply_restore_focus(admin_page: Page) -> No
     for name, heading in (
         ("Locais", "Locais"),
         ("Eixos", "Eixos de conhecimento"),
-        ("Minha conta", None),
+        ("Configurações", "Configurações"),
     ):
         admin_page.get_by_role("button", name=name).click()
         if heading:
@@ -397,10 +397,11 @@ def test_year_zero_is_rejected_without_put_request(admin_page: Page) -> None:
     login(admin_page)
     requests: list[str] = []
     admin_page.on("request", lambda request: requests.append(request.method + " " + request.url))
+    admin_page.get_by_role("button", name="Configurações").click()
     admin_page.locator("#schedule-date").evaluate(
         "(element) => { element.value = '0000-01-01'; element.dispatchEvent(new Event('change', {bubbles: true})); }"
     )
-    admin_page.get_by_role("button", name="Salvar programação").click()
+    admin_page.get_by_role("button", name="Salvar configurações").click()
     expect(admin_page.get_by_text("Informe uma data válida para o evento.")).to_be_visible()
     assert not any(
         request.startswith("PUT ") and "/admin/api/schedule" in request for request in requests

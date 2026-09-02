@@ -171,6 +171,9 @@ with it when implementing or changing the interface.
   emphasis, avoiding a fully saturated green sidebar.
 - Sidebar selectors use a consistent icon alongside each label, and the “Sair” action is the last
   item in the navigation list with the same accessible focus and contrast treatment.
+- Event edition and event date belong to “Configurações”, not the programming workspace. Label the
+  edition as “Edição do evento” so its purpose is explicit; save it through the same schedule
+  persistence flow.
 - Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
   `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
 
