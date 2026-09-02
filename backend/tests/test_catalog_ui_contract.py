@@ -5,6 +5,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parents[1]
 ADMIN_SCRIPT = PROJECT_ROOT / "static" / "admin" / "admin.js"
+ADMIN_STYLES = PROJECT_ROOT / "static" / "admin" / "admin.css"
 
 
 def test_location_form_only_asks_for_name(client):
@@ -129,6 +130,13 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
         assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar eixo/);
         """
     )
+
+
+def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    shared_rule = css.split(".primary-action", 1)[0]
+    assert ".danger-action" in shared_rule
+    assert ".danger-action:hover" in css
 
 
 def test_location_rename_refreshes_schedule_and_locations_atomically():

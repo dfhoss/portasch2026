@@ -49,6 +49,7 @@ const storage = new Map();
 let confirmResult = true;
 const context = {
   console,
+  URL,
   URLSearchParams,
   Headers,
   setTimeout,
@@ -176,6 +177,21 @@ def test_validate_draft_accepts_null_catalog_references_and_minute_times():
         schedule.sections[0].groups[0].items[0].sessions[0].location = null;
 
         assert.deepEqual(Array.from(api.validateDraft(schedule)), []);
+        """
+    )
+
+
+def test_validate_draft_accepts_bare_domain_links_and_rejects_incomplete_urls():
+    """Links may omit a scheme, but must still contain a usable hostname."""
+    run_node_case(
+        """
+        api.state.locations = [{id: "loc-1", name: "Auditório"}];
+        api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
+        const schedule = validSchedule();
+        schedule.sections[0].groups[0].items[0].link = "google.com";
+        assert.deepEqual(Array.from(api.validateDraft(schedule)), []);
+        schedule.sections[0].groups[0].items[0].link = "https://www.";
+        assert.ok(Array.from(api.validateDraft(schedule)).some((item) => item.includes("link")));
         """
     )
 

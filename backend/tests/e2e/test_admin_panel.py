@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import jwt
 from playwright.sync_api import Dialog, Page, expect
@@ -270,6 +271,58 @@ def test_schedule_create_edit_session_validation_and_reload_persistence(admin_pa
     ).click()
     expect(admin_page.get_by_text("Atividade E2E")).to_be_visible(timeout=10_000)
     expect(admin_page.get_by_text("10:00–11:00")).to_be_visible()
+
+
+def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
+    admin_page: Page,
+) -> None:
+    fixture_path = Path(__file__).parents[1] / "fixtures" / "admin_inclusion_scenario.json"
+    scenario = json.loads(fixture_path.read_text(encoding="utf-8"))
+    login(admin_page)
+
+    admin_page.get_by_role("button", name="Locais").click()
+    admin_page.get_by_role("button", name="Adicionar local").click()
+    admin_page.get_by_label("Nome do local").fill(scenario["location"])
+    admin_page.get_by_role("button", name="Salvar").click()
+    expect(admin_page.get_by_text(scenario["location"])).to_be_visible()
+
+    admin_page.get_by_role("button", name="Eixos").click()
+    admin_page.get_by_role("button", name="Adicionar eixo").click()
+    admin_page.get_by_label("Nome do eixo").fill(scenario["axis"])
+    admin_page.get_by_role("button", name="Salvar").click()
+    expect(admin_page.get_by_text(scenario["axis"])).to_be_visible()
+
+    admin_page.get_by_role("button", name="Programação").click()
+    admin_page.get_by_role("button", name="Adicionar seção").click()
+    admin_page.get_by_label("Título").fill(scenario["section"])
+    admin_page.get_by_label("Descrição").fill(scenario["sectionDescription"])
+    apply_modal(admin_page)
+    admin_page.get_by_role("button", name="Adicionar grupo").click()
+    admin_page.get_by_label("Título").fill(scenario["group"])
+    admin_page.get_by_label("Eixo de conhecimento").select_option(label=scenario["axis"])
+    apply_modal(admin_page)
+    admin_page.locator("#add-activity").click()
+    admin_page.get_by_label("Título").fill(scenario["activity"])
+    admin_page.get_by_label("Descrição").fill(scenario["description"])
+    admin_page.get_by_label("Link").fill(scenario["link"])
+    for index, session in enumerate(scenario["sessions"]):
+        if index:
+            admin_page.get_by_role("button", name="Adicionar horário").click()
+        row = admin_page.locator(".session-editor").nth(index)
+        row.get_by_label("Início").fill(session["start"])
+        row.get_by_label("Fim").fill(session["end"])
+        row.get_by_label("Local").select_option(label=scenario["location"])
+    apply_modal(admin_page)
+    admin_page.get_by_role("button", name="Salvar programação").click()
+    expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
+
+    admin_page.reload(wait_until="networkidle")
+    admin_page.get_by_role("button", name=scenario["section"]).click()
+    group = admin_page.locator(".schedule-group").filter(has_text=scenario["group"])
+    group.get_by_role("button", name=re.compile("Expandir")).click()
+    activity = admin_page.locator(".schedule-activity").filter(has_text=scenario["activity"])
+    expect(activity).to_contain_text("08:00–09:00")
+    expect(activity).to_contain_text("10:30–12:00")
 
 
 def test_created_location_can_be_selected_in_a_session(admin_page: Page) -> None:

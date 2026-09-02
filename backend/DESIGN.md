@@ -126,6 +126,11 @@ with it when implementing or changing the interface.
 
 ## Usage rules
 
+### Components
+
+- Semantic variants such as `.primary-action` and `.danger-action` carry their complete visual
+  contract (spacing, border, radius, surface, and typography), independent of their container.
+
 ### Color
 
 - Use `--color-navigation` only for persistent navigation or similarly strong brand anchors.

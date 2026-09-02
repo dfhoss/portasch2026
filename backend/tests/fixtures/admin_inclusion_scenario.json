@@ -1,0 +1,14 @@
+{
+  "location": "Local inclusão exaustiva E2E",
+  "axis": "Eixo inclusão exaustiva E2E",
+  "section": "Seção inclusão exaustiva E2E",
+  "sectionDescription": "Descrição completa da seção",
+  "group": "Grupo inclusão exaustiva E2E",
+  "activity": "Atividade inclusão exaustiva E2E",
+  "description": "Descrição completa da atividade",
+  "link": "google.com",
+  "sessions": [
+    {"start": "08:00", "end": "09:00"},
+    {"start": "10:30", "end": "12:00"}
+  ]
+}

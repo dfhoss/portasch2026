@@ -155,3 +155,24 @@ def test_round_trips_a_temporary_copy_of_the_current_schedule_without_field_loss
     document = ScheduleDocument.model_validate(original)
 
     assert document.model_dump(by_alias=True, exclude_unset=True, mode="json") == original
+
+
+def test_activity_link_accepts_bare_domains_and_rejects_incomplete_urls():
+    payload = {
+        "version": 1,
+        "eventDate": "2026-10-26",
+        "sections": [{
+            "id": "s",
+            "title": "S",
+            "groups": [{
+                "id": "g",
+                "title": "G",
+                "items": [{"id": "a", "title": "A", "link": "google.com"}],
+            }],
+        }],
+    }
+    document = ScheduleDocument.model_validate(payload)
+    assert document.sections[0].groups[0].items[0].link == "google.com"
+    payload["sections"][0]["groups"][0]["items"][0]["link"] = "https://www."
+    with pytest.raises(ValidationError):
+        ScheduleDocument.model_validate(payload)

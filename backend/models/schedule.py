@@ -3,8 +3,16 @@ import unicodedata
 from copy import deepcopy
 from datetime import date, time
 from typing import Any, Self
+from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 
 def slugify_id(value: str) -> str:
@@ -41,6 +49,21 @@ class Activity(BaseModel):
     link: str | None = None
 
     model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("link")
+    @classmethod
+    def validate_link(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        candidate = (
+            value if re.match(r"^[a-z][a-z\d+.-]*://", value, re.IGNORECASE) else f"https://{value}"
+        )
+        parsed = urlsplit(candidate)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            raise ValueError("O link deve conter um domínio válido")
+        if any(not label for label in parsed.hostname.split(".")):
+            raise ValueError("O link deve conter um domínio válido")
+        return value.strip()
 
 
 class ScheduleGroup(BaseModel):

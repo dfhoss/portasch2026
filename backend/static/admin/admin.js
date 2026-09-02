@@ -561,7 +561,7 @@ function openActivityEditor(activity = null, group = null, opener = null) {
       <label>Grupo <select name="groupKey">${groupOptions}</select></label>
       <label>Título <input name="title" required value="${escapeHtml(activity?.title)}"></label>
       <label>Descrição <textarea name="description">${escapeHtml(activity?.description)}</textarea></label>
-      <label>Link <input name="link" type="url" value="${escapeHtml(activity?.link)}"></label>
+      <label>Link <input name="link" type="text" inputmode="url" autocomplete="url" value="${escapeHtml(activity?.link)}"></label>
       <div id="session-editor-list" class="session-editor-list">${sessions}</div>
       <div class="dialog-actions"><button class="primary-action" type="submit">Aplicar</button></div>
     </form>`,
@@ -870,6 +870,19 @@ function isMinuteTime(value) {
   return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 }
 
+function isValidLink(value) {
+  if (!value) return true;
+  const candidate = /^[a-z][a-z\d+.-]*:\/\//i.test(value) ? value : `https://${value}`;
+  try {
+    const parsed = new URL(candidate);
+    return ["http:", "https:"].includes(parsed.protocol)
+      && Boolean(parsed.hostname)
+      && parsed.hostname.split(".").every((label) => label.length > 0);
+  } catch {
+    return false;
+  }
+}
+
 function validateDraft(schedule) {
   const errors = [];
   if (!Number.isInteger(Number(schedule?.version)) || Number(schedule.version) < 1) {
@@ -898,6 +911,9 @@ function validateDraft(schedule) {
         records.push(activity);
         const activityLabel = `Atividade ${activityIndex + 1} de ${groupLabel.toLowerCase()}`;
         if (!activity.title?.trim()) errors.push(`${activityLabel}: o título é obrigatório.`);
+        if (!isValidLink(activity.link?.trim() || "")) {
+          errors.push(`${activityLabel}: informe um link válido.`);
+        }
         (activity.sessions || []).forEach((session, sessionIndex) => {
           const sessionLabel = `${activityLabel}, horário ${sessionIndex + 1}`;
           const startValid = isMinuteTime(session.startTime);

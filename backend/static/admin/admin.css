@@ -230,7 +230,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   text-transform: uppercase;
 }
 .toolbar-actions button, .section-toolbar button, .card-actions button,
-.dialog-actions button, #add-session {
+.dialog-actions button, #add-session, .danger-action {
   padding: var(--space-2) var(--space-3);
   border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-md);
@@ -238,7 +238,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   color: var(--color-text);
 }
 .toolbar-actions button:hover, .section-toolbar button:hover, .card-actions button:hover,
-.dialog-actions button:hover, #add-session:hover { background: var(--color-surface-selected); }
+.dialog-actions button:hover, #add-session:hover, .danger-action:hover {
+  background: var(--color-surface-selected);
+}
 .primary-action {
   border-color: var(--color-action-primary) !important;
   background: var(--color-action-primary) !important;
