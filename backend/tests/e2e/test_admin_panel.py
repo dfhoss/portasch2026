@@ -54,6 +54,111 @@ def test_valid_login_orders_identity_before_admin_requests_and_limits_storage(
     assert admin_page.evaluate("Object.keys(sessionStorage)") == ["adminToken"]
 
 
+def test_editor_content_follows_status_without_desktop_gap_and_adapts_on_tablet(
+    admin_page: Page,
+) -> None:
+    """Implicit grid rows or an unchanged wide sidebar on tablets must make this fail."""
+    admin_page.set_viewport_size({"width": 1600, "height": 800})
+    login(admin_page)
+
+    def layout() -> dict:
+        return admin_page.evaluate(
+            """() => {
+              const view = document.querySelector('.editor-view');
+              const sidebar = document.querySelector('.editor-sidebar');
+              const message = document.querySelector('#editor-message');
+              const content = document.querySelector('#editor-content');
+              const box = (element) => element.getBoundingClientRect();
+              return {
+                display: getComputedStyle(view).display,
+                sidebarWidth: box(sidebar).width,
+                messageBottom: box(message).bottom,
+                contentTop: box(content).top,
+                contentLeft: box(content).left,
+              };
+            }"""
+        )
+
+    desktop = layout()
+    assert desktop["display"] == "grid"
+    assert abs(desktop["contentTop"] - desktop["messageBottom"]) <= 1
+    assert desktop["contentTop"] < 100
+
+    admin_page.set_viewport_size({"width": 800, "height": 800})
+    tablet = layout()
+    assert tablet["display"] == "grid"
+    assert tablet["sidebarWidth"] < desktop["sidebarWidth"]
+    assert abs(tablet["contentTop"] - tablet["messageBottom"]) <= 1
+
+    admin_page.set_viewport_size({"width": 749, "height": 800})
+    mobile = layout()
+    assert mobile["display"] == "block"
+    assert mobile["contentLeft"] == 0
+
+
+def test_reload_restores_admin_view_schedule_context_and_scroll(admin_page: Page) -> None:
+    login(admin_page)
+
+    admin_page.get_by_role("button", name="Eixos").click()
+    expect(admin_page.get_by_role("heading", name="Eixos de conhecimento")).to_be_visible()
+    admin_page.reload(wait_until="networkidle")
+    expect(admin_page.get_by_role("heading", name="Eixos de conhecimento")).to_be_visible()
+
+    admin_page.get_by_role("button", name="Programação").click()
+    sections = admin_page.locator("#section-list button")
+    sections.nth(1).click()
+    selected_title = sections.nth(1).text_content()
+    assert selected_title is not None
+    group_toggle = admin_page.locator(".group-toggle").first
+    group_toggle.click()
+    expect(group_toggle).to_have_attribute("aria-expanded", "true")
+    admin_page.evaluate("window.scrollTo(0, 300)")
+    assert admin_page.evaluate("window.scrollY") > 0
+
+    admin_page.reload(wait_until="networkidle")
+
+    expect(admin_page.locator('#section-list button[aria-current="true"]')).to_have_text(
+        selected_title
+    )
+    expect(admin_page.locator(".group-toggle").first).to_have_attribute("aria-expanded", "true")
+    assert admin_page.evaluate("window.scrollY") > 0
+
+
+def test_schedule_and_catalog_headers_share_action_style_and_content_spacing(
+    admin_page: Page,
+) -> None:
+    login(admin_page)
+
+    def header_metrics(button_name: str) -> dict:
+        return admin_page.evaluate(
+            """(buttonName) => {
+              const header = document.querySelector('.content-header');
+              const next = header.nextElementSibling;
+              const button = [...header.querySelectorAll('button')]
+                .find((item) => item.textContent.trim() === buttonName);
+              const style = getComputedStyle(button);
+              return {
+                gap: next.getBoundingClientRect().top - header.getBoundingClientRect().bottom,
+                height: button.getBoundingClientRect().height,
+                padding: style.padding,
+                radius: style.borderRadius,
+                background: style.backgroundColor,
+              };
+            }""",
+            button_name,
+        )
+
+    schedule = header_metrics("Salvar programação")
+    admin_page.get_by_role("button", name="Locais").click()
+    locations = header_metrics("Adicionar local")
+    admin_page.get_by_role("button", name="Eixos").click()
+    axes = header_metrics("Adicionar eixo")
+
+    assert schedule["gap"] > 0
+    assert locations == schedule
+    assert axes == schedule
+
+
 def test_malformed_token_is_removed_and_returns_to_login(live_server_url: str, browser) -> None:
     page = browser.new_page()
     page.add_init_script("sessionStorage.setItem('adminToken', 'malformed-token')")

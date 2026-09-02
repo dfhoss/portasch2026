@@ -8,6 +8,8 @@ const editorModal = document.querySelector("#editor-modal");
 const modalTitle = document.querySelector("#modal-title");
 const modalContent = document.querySelector("#modal-content");
 const addSessionButton = document.querySelector("#add-session");
+const ADMIN_VIEW_STATE_KEY = "adminViewState";
+const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes"]);
 
 const state = {
   schedule: null,
@@ -27,6 +29,58 @@ const modalReferenceValues = new Map();
 let nextStaleReference = 1;
 const catalogKeys = new WeakMap();
 let nextCatalogKey = 1;
+let activeEditorSection = "schedule";
+
+function readEditorViewState() {
+  try {
+    const value = JSON.parse(sessionStorage.getItem(ADMIN_VIEW_STATE_KEY) || "null");
+    if (!value || typeof value !== "object") return null;
+    return {
+      section: EDITOR_SECTIONS.has(value.section) ? value.section : "schedule",
+      selectedSectionId:
+        typeof value.selectedSectionId === "string" ? value.selectedSectionId : null,
+      expandedGroupIds: Array.isArray(value.expandedGroupIds)
+        ? value.expandedGroupIds.filter((id) => typeof id === "string")
+        : [],
+      scrollY: Number.isFinite(value.scrollY) && value.scrollY >= 0 ? value.scrollY : 0,
+    };
+  } catch (_error) {
+    return null;
+  }
+}
+
+function saveEditorViewState() {
+  const expandedGroupIds = [];
+  for (const section of state.schedule?.sections || []) {
+    for (const group of section.groups || []) {
+      if (group.id && expandedGroups.has(group)) expandedGroupIds.push(group.id);
+    }
+  }
+  sessionStorage.setItem(
+    ADMIN_VIEW_STATE_KEY,
+    JSON.stringify({
+      section: activeEditorSection,
+      selectedSectionId: state.selectedSectionId,
+      expandedGroupIds,
+      scrollY: Number(globalThis.scrollY) || 0,
+    }),
+  );
+}
+
+function restoreScheduleViewState(viewState) {
+  const sections = state.schedule?.sections || [];
+  const selectedExists = sections.some((section) => section.id === viewState?.selectedSectionId);
+  state.selectedSectionId = selectedExists
+    ? viewState.selectedSectionId
+    : sections[0]?.id || null;
+  const expandedIds = new Set(viewState?.expandedGroupIds || []);
+  expandedGroups = new WeakSet();
+  for (const section of sections) {
+    for (const group of section.groups || []) {
+      if (group.id && expandedIds.has(group.id)) expandedGroups.add(group);
+    }
+  }
+}
 
 function showLogin(message = "") {
   editorView.hidden = true;
@@ -291,7 +345,9 @@ function renderLocations() {
   editorContent.innerHTML = `
     <header class="content-header">
       <div><p class="eyebrow">Catálogo da agenda</p><h2>Locais</h2></div>
-      <button type="button" class="primary-action" data-action="add-location">Adicionar local</button>
+      <div class="toolbar-actions">
+        <button type="button" class="primary-action" data-action="add-location">Adicionar local</button>
+      </div>
     </header>
     <div class="catalog-list" id="locations-list">${cards}</div>`;
 }
@@ -325,9 +381,32 @@ function renderKnowledgeAxes() {
   editorContent.innerHTML = `
     <header class="content-header">
       <div><p class="eyebrow">Catálogo da agenda</p><h2>Eixos de conhecimento</h2></div>
-      <button type="button" class="primary-action" data-action="add-axis">Adicionar eixo</button>
+      <div class="toolbar-actions">
+        <button type="button" class="primary-action" data-action="add-axis">Adicionar eixo</button>
+      </div>
     </header>
     <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
+}
+
+function renderEditorSection(section, announceChange = true) {
+  activeEditorSection = EDITOR_SECTIONS.has(section) ? section : "schedule";
+  for (const button of editorView.querySelectorAll("button[data-editor-section]")) {
+    if (button.dataset.editorSection === activeEditorSection) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
+  }
+  if (activeEditorSection === "locations") {
+    renderLocations();
+    if (announceChange) announce("Editor de locais.");
+  } else if (activeEditorSection === "axes") {
+    renderKnowledgeAxes();
+    if (announceChange) announce("Editor de eixos.");
+  } else {
+    renderSections();
+    if (announceChange) announce("Editor da programação.");
+  }
 }
 
 function selectOptions(items, selectedValue, emptyLabel) {
@@ -874,6 +953,7 @@ async function saveSchedule() {
 }
 
 async function loadAdminData() {
+  const viewState = readEditorViewState();
   const [scheduleResponse, locationsResponse, knowledgeAxesResponse] = await Promise.all([
     apiFetch("/admin/api/schedule"),
     apiFetch("/admin/api/locations"),
@@ -897,8 +977,8 @@ async function loadAdminData() {
   state.schedule = schedule;
   state.locations = locations;
   state.knowledgeAxes = knowledgeAxes;
-  state.selectedSectionId = schedule.sections?.[0]?.id || null;
-  renderSections();
+  restoreScheduleViewState(viewState);
+  renderEditorSection(viewState?.section || "schedule", false);
   announce("Dados carregados.");
 }
 
@@ -911,10 +991,13 @@ async function showEditor() {
   await loadAdminData();
   loginView.hidden = true;
   editorView.hidden = false;
+  const scrollY = readEditorViewState()?.scrollY || 0;
+  setTimeout(() => globalThis.scrollTo?.(0, scrollY), 0);
 }
 
 function logout() {
   sessionStorage.removeItem("adminToken");
+  sessionStorage.removeItem(ADMIN_VIEW_STATE_KEY);
   showLogin("Sessão encerrada.");
 }
 
@@ -948,6 +1031,7 @@ async function handleEditorClick(event) {
     if (section) {
       state.selectedSectionId = section.id || draftKey(section);
       renderSections();
+      saveEditorViewState();
     }
     return;
   }
@@ -959,6 +1043,7 @@ async function handleEditorClick(event) {
     const nextSection = state.schedule.sections[0];
     state.selectedSectionId = nextSection?.id || (nextSection ? draftKey(nextSection) : null);
     renderSections();
+    saveEditorViewState();
     announce("Seção removida do rascunho.");
     return;
   }
@@ -968,6 +1053,7 @@ async function handleEditorClick(event) {
     if (expandedGroups.has(groupRecord.group)) expandedGroups.delete(groupRecord.group);
     else expandedGroups.add(groupRecord.group);
     renderSections();
+    saveEditorViewState();
     return;
   }
   if (action === "add-activity-to-group" && groupRecord) {
@@ -1011,19 +1097,15 @@ editorView.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-editor-section]");
   if (!button) return;
   const section = button.dataset.editorSection;
-  if (section === "schedule") {
-    renderSections();
-    announce("Editor da programação.");
-  } else if (section === "locations") {
-    renderLocations();
-    announce("Editor de locais.");
-  } else if (section === "axes") {
-    renderKnowledgeAxes();
-    announce("Editor de eixos.");
+  if (EDITOR_SECTIONS.has(section)) {
+    renderEditorSection(section);
+    saveEditorViewState();
   } else {
     announce("Os dados da conta são gerenciados pelo serviço de autenticação.");
   }
 });
+
+globalThis.addEventListener?.("pagehide", saveEditorViewState);
 
 modalContent.addEventListener("submit", (event) => {
   event.preventDefault();

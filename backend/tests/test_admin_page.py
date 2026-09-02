@@ -106,11 +106,12 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
 
 
 def test_browser_authentication_contract_validates_identity_before_loading_data(client):
-    """Loading editor data before identity validation or storing extra login data must fail."""
+    """Loading data early or storing anything beyond token and view state must make this fail."""
     script = client.get("/admin/static/admin.js").text
 
     assert 'sessionStorage.setItem("adminToken", token.access_token)' in script
-    assert script.count("sessionStorage.setItem(") == 1
+    assert 'const ADMIN_VIEW_STATE_KEY = "adminViewState"' in script
+    assert script.count("sessionStorage.setItem(") == 2
     editor_start = script.index("async function showEditor")
     assert script.index('apiFetch("/auth/users/me/")', editor_start) < script.index(
         "await loadAdminData()", editor_start

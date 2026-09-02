@@ -145,11 +145,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .editor-view {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-areas:
+    "sidebar message"
+    "sidebar content";
+  grid-template-rows: auto 1fr;
   min-height: 100vh;
 }
 .editor-sidebar {
   grid-column: 1;
   grid-row: 1 / -1;
+  grid-area: sidebar;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -188,7 +193,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   width: min(100%, var(--content-width));
   padding: var(--content-padding);
 }
+#editor-message { grid-area: message; }
+#editor-content { grid-area: content; }
 #editor-message { align-self: start; padding-bottom: var(--space-0); }
+#editor-message:empty { display: none; padding: var(--space-0); }
 #editor-message:not(:empty), #login-message:not(:empty) {
   padding: var(--space-3);
   border: var(--border-width) solid var(--green-200);
@@ -202,7 +210,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   gap: var(--component-gap);
   flex-wrap: wrap;
 }
-.content-header { justify-content: space-between; }
+.content-header {
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
 .content-header h2, .content-header p, .section-heading h3, .section-heading p {
   margin: var(--space-0);
 }
@@ -243,7 +254,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   grid-template-columns: max-content minmax(6rem, 8rem) max-content minmax(10rem, 13rem);
   gap: var(--space-2) var(--space-3);
   align-items: center;
-  margin: var(--space-5) 0;
+  margin: 0 0 var(--space-5);
   padding: var(--panel-padding);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -408,6 +419,17 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+@media (min-width: 750px) and (max-width: 1024px) {
+  :root {
+    --sidebar-width: 12rem;
+    --content-padding: var(--space-6);
+  }
+
+  .editor-sidebar {
+    padding: var(--space-4) var(--space-3);
   }
 }
 

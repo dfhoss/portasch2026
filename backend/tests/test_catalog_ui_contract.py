@@ -115,6 +115,22 @@ def test_axis_group_counts_come_from_schedule_without_exposing_ids():
     )
 
 
+def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
+    run_node_case(
+        r"""
+        api.state.locations = [];
+        api.renderLocations();
+        let html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar local/);
+
+        api.state.knowledgeAxes = [];
+        api.renderKnowledgeAxes();
+        html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar eixo/);
+        """
+    )
+
+
 def test_location_rename_refreshes_schedule_and_locations_atomically():
     run_node_case(
         """

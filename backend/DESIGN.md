@@ -149,8 +149,15 @@ with it when implementing or changing the interface.
   recurring need cannot be represented by the existing scale.
 - Keep the main content at or below `--content-width`; allow dense tables to scroll rather than
   shrinking text below `--font-size-sm`.
-- At narrow widths, convert the sidebar to horizontal or compact navigation, stack forms, and
-  keep primary actions visible. Do not rely on hover for access to actions.
+- On desktop widths above 1024px, use explicit `sidebar`, `message`, and `content` grid areas. The
+  content must follow the status message immediately; sidebar height must not create an implicit
+  empty row above it.
+- Between 750px and 1024px, keep the two-column layout but reduce the sidebar to `12rem` and the
+  content padding to `--space-6`.
+- At 749px and below, convert the sidebar to horizontal navigation, stack forms, and keep primary
+  actions visible. Do not rely on hover for access to actions.
+- Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
+  `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
 
 ### Components and interaction
 
@@ -163,6 +170,9 @@ with it when implementing or changing the interface.
   action. Destructive actions should be visually separated from confirmation actions.
 - Motion must be brief and informative. Respect `prefers-reduced-motion` for nonessential
   transitions and animations.
+- Preserve the active admin view, selected schedule section, expanded groups, and scroll position
+  across reloads with `sessionStorage`. Validate restored IDs against fresh API data, never persist
+  unsaved form contents, and clear the view state on logout.
 
 ## Example
 
@@ -199,4 +209,3 @@ navigation, schedule editor, catalog views, dialogs, focus states, and mobile la
 - [W3C CSS Custom Properties specification](https://www.w3.org/TR/css-variables-1/)
 - [Design Tokens Community Group format](https://www.designtokens.org/tr/drafts/format/)
 - [MDN: Using CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
-
