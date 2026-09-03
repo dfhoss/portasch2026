@@ -11,6 +11,20 @@ PROJECT_ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 TEST_JWT_SECRET = "test-only-jwt-secret-with-sufficient-length"
+PYTEST_ARTIFACT_NAMES = (".pytest_cache", ".pytest-tmp-unit")
+
+
+def _remove_pytest_artifacts() -> None:
+    artifact_paths = [PROJECT_ROOT / name for name in PYTEST_ARTIFACT_NAMES]
+    artifact_paths.extend(PROJECT_ROOT.glob(".pytest-tmp-*"))
+    for artifact_path in artifact_paths:
+        if artifact_path.is_dir() and not artifact_path.is_symlink():
+            shutil.rmtree(artifact_path, ignore_errors=True)
+
+
+def pytest_unconfigure() -> None:
+    """Remove temporary pytest output after the test process finishes."""
+    _remove_pytest_artifacts()
 
 
 @dataclass(frozen=True)
