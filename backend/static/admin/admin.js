@@ -25,6 +25,7 @@ const state = {
 const draftKeys = new WeakMap();
 let nextDraftKey = 1;
 let expandedGroups = new WeakSet();
+let savedScheduleSnapshot = null;
 let modalOpener = null;
 let modalOpenerTarget = null;
 let modalContext = null;
@@ -100,6 +101,29 @@ function showLogin(message = "") {
 
 function announce(message) {
   editorMessage.textContent = message;
+}
+
+function scheduleSnapshot(schedule = state.schedule) {
+  return JSON.stringify(schedule || null);
+}
+
+function scheduleIsDirty() {
+  return savedScheduleSnapshot !== null && scheduleSnapshot() !== savedScheduleSnapshot;
+}
+
+function updateScheduleSaveState() {
+  const saveButton = editorContent.querySelector?.("#save-schedule");
+  const status = editorContent.querySelector?.("#schedule-save-status");
+  const dirty = scheduleIsDirty();
+  if (saveButton) saveButton.disabled = !dirty;
+  if (status) {
+    status.textContent = dirty ? "Alterações não salvas" : "Salvo";
+    status.classList?.toggle("is-dirty", dirty);
+  }
+}
+
+function markScheduleChanged() {
+  updateScheduleSaveState();
 }
 
 function catalogKey(record) {
@@ -313,6 +337,8 @@ function renderSections() {
     return;
   }
 
+  if (savedScheduleSnapshot === null) savedScheduleSnapshot = scheduleSnapshot();
+
   const section = selectedSection();
   const sectionButtons = state.schedule.sections
     .map((item) => {
@@ -330,6 +356,13 @@ function renderSections() {
             ${section.description ? `<p>${escapeHtml(section.description)}</p>` : ""}
           </div>
           <div class="card-actions">
+            <details class="toolbar-menu section-create-menu">
+              <summary class="toolbar-menu-trigger">Adicionar</summary>
+              <div class="toolbar-menu-panel" role="menu">
+                <button type="button" role="menuitem" data-action="add-group">Adicionar grupo</button>
+                <button type="button" role="menuitem" data-action="add-activity">Adicionar atividade</button>
+              </div>
+            </details>
             <button type="button" data-action="edit-section" data-key="${draftKey(section)}">Editar seção</button>
             <button class="danger-action" type="button" data-action="delete-section" data-key="${draftKey(section)}">Excluir seção</button>
           </div>
@@ -342,16 +375,21 @@ function renderSections() {
     <header class="content-header">
       <div><p class="eyebrow">Agenda do evento</p><h2>Programação</h2></div>
       <div class="toolbar-actions">
-        <button id="add-section" type="button" data-action="add-section">Adicionar seção</button>
-        <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule">Salvar programação</button>
+        <details id="add-schedule-actions" class="toolbar-menu">
+          <summary class="toolbar-menu-trigger">Adicionar</summary>
+          <div class="toolbar-menu-panel" role="menu">
+            <button type="button" role="menuitem" data-action="add-section">Adicionar seção</button>
+          </div>
+        </details>
+        <div class="save-status-group">
+          <span id="schedule-save-status" class="save-status" role="status">Salvo</span>
+          <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule" disabled>Salvar alterações</button>
+        </div>
       </div>
     </header>
     <nav id="section-list" class="section-list" aria-label="Seções da programação">${sectionButtons}</nav>
-    <div class="section-toolbar">
-      <button id="add-group" type="button" data-action="add-group">Adicionar grupo</button>
-      <button id="add-activity" type="button" data-action="add-activity">Adicionar atividade</button>
-    </div>
     <div id="schedule-sections">${sectionPanel}</div>`;
+  updateScheduleSaveState();
 }
 
 function renderLocations() {
@@ -989,6 +1027,7 @@ function applyModalDraft(form) {
   }
 
   renderSections();
+  markScheduleChanged();
   editorModal.close();
   announce("Alteração aplicada ao rascunho. Salve a programação para publicar.");
 }
@@ -1110,6 +1149,7 @@ async function saveSchedule() {
     }
     const canonicalSchedule = await response.json();
     state.schedule = canonicalSchedule;
+    savedScheduleSnapshot = scheduleSnapshot();
     expandedGroups = new WeakSet();
     const canonicalSection = canonicalSchedule.sections?.[selectedIndex] || canonicalSchedule.sections?.[0];
     state.selectedSectionId = canonicalSection?.id || null;
@@ -1145,6 +1185,7 @@ async function loadAdminData() {
     throw new Error("load-failed");
   }
   state.schedule = schedule;
+  savedScheduleSnapshot = scheduleSnapshot();
   state.locations = locations;
   state.locationGroups = locations
     .filter((location) => location.groupId)
@@ -1187,6 +1228,8 @@ async function handleEditorClick(event) {
   if (!button) return;
   const { action, key } = button.dataset;
 
+  button.closest(".toolbar-menu")?.removeAttribute("open");
+
   if (action === "save-schedule") return saveSchedule();
   if (action === "add-section") {
     if (!state.schedule) {
@@ -1221,6 +1264,7 @@ async function handleEditorClick(event) {
     const nextSection = state.schedule.sections[0];
     state.selectedSectionId = nextSection?.id || (nextSection ? draftKey(nextSection) : null);
     renderSections();
+    markScheduleChanged();
     saveEditorViewState();
     announce("Seção removida do rascunho.");
     return;
@@ -1246,6 +1290,7 @@ async function handleEditorClick(event) {
       (item) => item !== groupRecord.group,
     );
     renderSections();
+    markScheduleChanged();
     announce("Grupo removido do rascunho.");
     return;
   }
@@ -1260,12 +1305,23 @@ async function handleEditorClick(event) {
       (item) => item !== activityRecord.activity,
     );
     renderSections();
+    markScheduleChanged();
     announce("Atividade removida do rascunho.");
   }
 }
 
 editorContent.addEventListener("click", handleEditorClick);
 editorContent.addEventListener("click", (event) => {
+  const toolbarTrigger = event.target.closest?.("summary.toolbar-menu-trigger");
+  if (toolbarTrigger?.tagName === "SUMMARY") {
+    event.preventDefault?.();
+    const menu = toolbarTrigger.closest(".toolbar-menu");
+    if (menu) {
+      if (menu.toggleAttribute) menu.toggleAttribute("open");
+      else menu.open = !menu.open;
+    }
+    return;
+  }
   const trigger = event.target.closest?.("summary.card-menu-trigger");
   const menu = event.target.closest?.(".card-menu");
   if (trigger) {
@@ -1274,6 +1330,7 @@ editorContent.addEventListener("click", (event) => {
     });
     return;
   }
+
   if (!menu) {
     editorContent.querySelectorAll(".card-menu[open]").forEach((openMenu) => {
       openMenu.removeAttribute("open");
@@ -1291,6 +1348,7 @@ editorContent.addEventListener("change", (event) => {
   if (!state.schedule) return;
   if (event.target.id === "schedule-version") state.schedule.version = Number(event.target.value);
   if (event.target.id === "schedule-date") state.schedule.eventDate = event.target.value;
+  markScheduleChanged();
 });
 
 editorView.addEventListener("click", (event) => {
@@ -1335,6 +1393,15 @@ addSessionButton.addEventListener("click", () => {
 
 function restoreModalFocus() {
   if (modalOpener?.isConnected) {
+    if (modalOpener.dataset?.action === "add-section") {
+      editorContent.querySelector("#add-schedule-actions .toolbar-menu-trigger")?.focus();
+      return;
+    }
+    const menu = modalOpener.closest?.(".toolbar-menu, .card-menu");
+    if (menu) {
+      menu.querySelector("summary")?.focus();
+      return;
+    }
     modalOpener.focus();
     return;
   }
@@ -1348,7 +1415,15 @@ function restoreModalFocus() {
   } else if (modalOpenerTarget.id) {
     selector = `#${CSS.escape(modalOpenerTarget.id)}`;
   }
-  if (selector) editorContent.querySelector(selector)?.focus();
+  if (!selector) return;
+  const target = editorContent.querySelector(selector);
+  if (target?.closest?.(".toolbar-menu, .card-menu")) {
+    const menu = target.closest(".toolbar-menu, .card-menu");
+    menu.querySelector("summary")?.focus();
+    setTimeout(() => menu.querySelector("summary")?.focus(), 0);
+    return;
+  }
+  target?.focus();
 }
 
 editorModal.addEventListener("close", () => {

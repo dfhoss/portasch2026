@@ -289,6 +289,54 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: var(--color-action-primary-hover) !important;
 }
 #modal-apply { margin-left: auto; }
+.toolbar-menu { position: relative; }
+.toolbar-menu-trigger {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  list-style: none;
+}
+.toolbar-menu-trigger::-webkit-details-marker { display: none; }
+.toolbar-menu-trigger::after { content: "⌄"; margin-left: var(--space-2); }
+.toolbar-menu-trigger:hover { background: var(--color-surface-selected); }
+.toolbar-menu-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  display: grid;
+  min-width: 13rem;
+  padding: var(--space-1) 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-dialog);
+}
+.toolbar-menu-panel button {
+  display: flex;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.toolbar-menu-panel button:hover { background: var(--color-surface-selected); }
+.save-status-group { display: flex; align-items: center; gap: var(--space-2); }
+.save-status { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.save-status.is-dirty { color: var(--color-navigation); font-weight: var(--font-weight-semibold); }
+.primary-action:disabled { opacity: 0.55; cursor: not-allowed; }
+.primary-action:disabled:hover {
+  border-color: var(--color-action-primary) !important;
+  background: var(--color-action-primary) !important;
+}
 
 .schedule-metadata {
   display: grid;
@@ -329,6 +377,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   font-weight: var(--font-weight-bold);
 }
 .section-toolbar { margin: var(--space-2) 0 var(--space-4); }
+.section-create-menu { flex: 0 0 auto; }
 .schedule-section { display: grid; gap: var(--space-4); }
 .section-heading {
   display: flex;
@@ -594,6 +643,8 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
   #editor-message { padding-bottom: var(--space-0); }
   .schedule-metadata { grid-template-columns: 1fr; }
   .section-heading, .schedule-activity { display: grid; grid-template-columns: 1fr; }
+  .section-heading .card-actions { align-items: start; flex-wrap: wrap; }
+  .save-status-group { align-items: stretch; flex-direction: column; }
   .catalog-card { align-items: start; flex-direction: column; }
   .session-editor { grid-template-columns: 1fr 1fr; }
   .session-editor label:nth-child(3), .session-editor .danger-action {

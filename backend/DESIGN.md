@@ -186,6 +186,10 @@ with it when implementing or changing the interface.
   is accepted only for migration to the list form.
 - Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
   `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
+- The schedule workspace keeps only one creation action in the page header: `Adicionar seção` is
+  inside an `Adicionar` menu. Group and activity creation belongs to the selected section's
+  contextual `Adicionar` menu. The primary save action is `Salvar alterações`, disabled when the
+  draft matches the loaded schedule, with a visible `Salvo`/`Alterações não salvas` status.
 
 ### Components and interaction
 

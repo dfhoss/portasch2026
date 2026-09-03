@@ -31,6 +31,19 @@ def apply_modal(page: Page) -> None:
     expect(page.locator("#editor-modal")).to_be_hidden(timeout=500)
 
 
+def open_schedule_add_menu(page: Page) -> None:
+    page.locator("#add-schedule-actions .toolbar-menu-trigger").click()
+
+
+def open_section_add_menu(page: Page) -> None:
+    page.locator(".section-heading .section-create-menu .toolbar-menu-trigger").click()
+
+
+def click_section_action(page: Page, action: str) -> None:
+    open_section_add_menu(page)
+    page.locator(f'.section-create-menu[open] [data-action="{action}"]').click()
+
+
 def test_invalid_login_never_requests_admin_data(admin_page: Page) -> None:
     requests: list[str] = []
     admin_page.on("request", lambda request: requests.append(request.url))
@@ -107,8 +120,8 @@ def test_reload_restores_admin_view_schedule_context_and_scroll(admin_page: Page
 
     admin_page.get_by_role("button", name="Programação").click()
     sections = admin_page.locator("#section-list button")
-    sections.nth(1).click()
-    selected_title = sections.nth(1).text_content()
+    sections.nth(2).click()
+    selected_title = sections.nth(2).text_content()
     assert selected_title is not None
     group_toggle = admin_page.locator(".group-toggle").first
     group_toggle.click()
@@ -149,7 +162,7 @@ def test_schedule_and_catalog_headers_share_action_style_and_content_spacing(
             button_name,
         )
 
-    schedule = header_metrics("Salvar programação")
+    schedule = header_metrics("Salvar alterações")
     admin_page.get_by_role("button", name="Locais").click()
     locations = header_metrics("Adicionar local")
     admin_page.get_by_role("button", name="Eixos").click()
@@ -202,17 +215,19 @@ def test_navigation_and_modal_escape_apply_restore_focus(admin_page: Page) -> No
         if heading:
             expect(admin_page.get_by_role("heading", name=heading)).to_be_visible()
     admin_page.get_by_role("button", name="Programação").click()
-    add_section = admin_page.get_by_role("button", name="Adicionar seção")
+    open_schedule_add_menu(admin_page)
+    add_section = admin_page.get_by_role("menuitem", name="Adicionar seção")
     add_section.click()
     expect(admin_page.locator("#editor-modal")).to_be_visible()
     expect(admin_page.get_by_label("Título")).to_be_focused()
     admin_page.keyboard.press("Escape")
     expect(admin_page.locator("#editor-modal")).to_be_hidden()
-    expect(add_section).to_be_focused()
+    expect(admin_page.locator("#add-schedule-actions .toolbar-menu-trigger")).to_be_focused()
+    open_schedule_add_menu(admin_page)
     add_section.click()
     admin_page.get_by_label("Título").fill("Foco E2E")
     apply_modal(admin_page)
-    expect(admin_page.get_by_role("button", name="Adicionar seção")).to_be_focused()
+    expect(admin_page.locator("#add-schedule-actions .toolbar-menu-trigger")).to_be_focused()
 
 
 def test_delayed_initial_data_keeps_editor_hidden_until_schedule_exists(admin_page: Page) -> None:
@@ -236,33 +251,34 @@ def test_delayed_initial_data_keeps_editor_hidden_until_schedule_exists(admin_pa
 
 def test_schedule_create_edit_session_validation_and_reload_persistence(admin_page: Page) -> None:
     login(admin_page)
-    add_section = admin_page.get_by_role("button", name="Adicionar seção")
+    open_schedule_add_menu(admin_page)
+    add_section = admin_page.get_by_role("menuitem", name="Adicionar seção")
     add_section.click()
     title = admin_page.get_by_label("Título")
     title.fill("Seção E2E")
     title.press("Tab")
     apply_modal(admin_page)
 
-    admin_page.get_by_role("button", name="Adicionar grupo").click()
+    click_section_action(admin_page, "add-group")
     admin_page.get_by_label("Título").fill("Grupo E2E")
     apply_modal(admin_page)
-    admin_page.locator("#add-activity").click()
+    click_section_action(admin_page, "add-activity")
     admin_page.get_by_label("Título").fill("Atividade E2E")
     admin_page.get_by_role("button", name="Adicionar horário").click()
     sessions = admin_page.locator(".session-editor")
     sessions.last.get_by_label("Início").fill("10:00")
     sessions.last.get_by_label("Fim").fill("09:00")
     apply_modal(admin_page)
-    admin_page.get_by_role("button", name="Salvar programação").click()
+    admin_page.get_by_role("button", name="Salvar alterações").click()
     expect(admin_page.get_by_text("O horário final deve ser posterior ao inicial.")).to_be_visible()
 
     activity = admin_page.locator(".schedule-activity").filter(has_text="Atividade E2E")
     activity.locator(".card-menu-trigger").click()
-    activity.get_by_role("button", name="Editar").click()
+    activity.get_by_role("menuitem", name="Editar").click()
     sessions = admin_page.locator(".session-editor")
     sessions.last.get_by_label("Fim").fill("11:00")
     apply_modal(admin_page)
-    admin_page.get_by_role("button", name="Salvar programação").click()
+    admin_page.get_by_role("button", name="Salvar alterações").click()
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
 
     admin_page.reload(wait_until="networkidle")
@@ -294,18 +310,20 @@ def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
     expect(admin_page.get_by_text(scenario["axis"])).to_be_visible()
 
     admin_page.get_by_role("button", name="Programação").click()
-    admin_page.get_by_role("button", name="Adicionar seção").click()
+    open_schedule_add_menu(admin_page)
+    admin_page.get_by_role("menuitem", name="Adicionar seção").click()
     admin_page.get_by_label("Título").fill(scenario["section"])
     admin_page.get_by_label("Descrição").fill(scenario["sectionDescription"])
     apply_modal(admin_page)
-    admin_page.get_by_role("button", name="Adicionar grupo").click()
+    click_section_action(admin_page, "add-group")
     admin_page.get_by_label("Título").fill(scenario["group"])
     admin_page.get_by_label("Eixo de conhecimento").select_option(label=scenario["axis"])
     apply_modal(admin_page)
-    admin_page.locator("#add-activity").click()
+    click_section_action(admin_page, "add-activity")
     admin_page.get_by_label("Título").fill(scenario["activity"])
     admin_page.get_by_label("Descrição").fill(scenario["description"])
     admin_page.get_by_label("Link").fill(scenario["link"])
+    admin_page.get_by_role("button", name="Adicionar horário").click()
     for index, session in enumerate(scenario["sessions"]):
         if index:
             admin_page.get_by_role("button", name="Adicionar horário").click()
@@ -314,7 +332,7 @@ def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
         row.get_by_label("Fim").fill(session["end"])
         row.get_by_label("Local").select_option(label=scenario["location"])
     apply_modal(admin_page)
-    admin_page.get_by_role("button", name="Salvar programação").click()
+    admin_page.get_by_role("button", name="Salvar alterações").click()
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
 
     admin_page.reload(wait_until="networkidle")
@@ -341,10 +359,10 @@ def test_created_location_can_be_selected_in_a_session(admin_page: Page) -> None
         has_text="Voz e Ação: conhecendo o curso de Administração"
     )
     activity.locator(".card-menu-trigger").click()
-    activity.get_by_role("button", name="Editar").click()
+    activity.get_by_role("menuitem", name="Editar").click()
     admin_page.locator('select[name="locations"]').first.select_option(label="Local de sessão E2E")
     apply_modal(admin_page)
-    admin_page.get_by_role("button", name="Salvar programação").click()
+    admin_page.get_by_role("button", name="Salvar alterações").click()
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
 
 
@@ -357,11 +375,11 @@ def test_created_axis_can_be_selected_and_persists_after_reload(admin_page: Page
     expect(admin_page.get_by_text("Eixo de persistência E2E")).to_be_visible()
 
     admin_page.get_by_role("button", name="Programação").click()
-    admin_page.locator("#add-group").click()
+    click_section_action(admin_page, "add-group")
     admin_page.get_by_label("Título").fill("Grupo com eixo E2E")
     admin_page.get_by_label("Eixo de conhecimento").select_option(label="Eixo de persistência E2E")
     apply_modal(admin_page)
-    admin_page.locator("#save-schedule").click()
+    admin_page.get_by_role("button", name="Salvar alterações").click()
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
 
     admin_page.reload(wait_until="networkidle")
@@ -382,7 +400,7 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
     group = admin_page.locator(".schedule-group").filter(has_text="Atividades gerais")
     group.get_by_role("button", name=re.compile("Expandir")).click()
     group.locator(".card-menu-trigger").click()
-    group.get_by_role("button", name="Editar").first.click()
+    group.get_by_role("menuitem", name="Editar").first.click()
     expect(admin_page.locator('select[name="knowledgeAxis"] option:checked')).to_have_text(
         "Eixo não cadastrado"
     )
@@ -390,7 +408,7 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
     admin_page.keyboard.press("Escape")
     activity = admin_page.locator(".schedule-activity").filter(has_text="Recepção nos Auditórios")
     activity.locator(".card-menu-trigger").click()
-    activity.get_by_role("button", name="Editar").click()
+    activity.get_by_role("menuitem", name="Editar").click()
     expect(admin_page.locator('select[name="locations"] option:checked')).to_have_text(
         "Local não cadastrado"
     )
@@ -472,7 +490,7 @@ def test_axis_in_use_delete_is_safe_and_null_axis_is_visible(admin_page: Page) -
     ).to_be_visible()
     expect(admin_page.locator("body")).not_to_contain_text("administracao-negocios-e-direito")
     admin_page.get_by_role("button", name="Programação").click()
-    admin_page.get_by_role("button", name="Adicionar grupo").click()
+    click_section_action(admin_page, "add-group")
     admin_page.get_by_label("Título").fill("Grupo sem eixo")
     expect(admin_page.get_by_label("Eixo de conhecimento")).to_have_value("")
 

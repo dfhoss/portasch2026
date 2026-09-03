@@ -42,15 +42,19 @@
               <h2>Programação</h2>
             </div>
             <div class="toolbar-actions">
-              <button id="add-section" type="button" data-action="add-section">Adicionar seção</button>
-              <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule">Salvar programação</button>
+              <details id="add-schedule-actions" class="toolbar-menu">
+                <summary class="toolbar-menu-trigger">Adicionar</summary>
+                <div class="toolbar-menu-panel" role="menu">
+                  <button type="button" role="menuitem" data-action="add-section">Adicionar seção</button>
+                </div>
+              </details>
+              <div class="save-status-group">
+                <span id="schedule-save-status" class="save-status" role="status">Salvo</span>
+                <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule" disabled>Salvar alterações</button>
+              </div>
             </div>
           </header>
           <nav id="section-list" class="section-list" aria-label="Seções da programação"></nav>
-          <div class="section-toolbar">
-            <button id="add-group" type="button" data-action="add-group">Adicionar grupo</button>
-            <button id="add-activity" type="button" data-action="add-activity">Adicionar atividade</button>
-          </div>
           <div id="schedule-sections"></div>
         </section>
       </section>
