@@ -145,6 +145,55 @@ def test_accepts_json_aliases_and_defaults_optional_activity_fields():
     )
 
 
+def test_migrates_legacy_location_and_accepts_multiple_locations_per_session():
+    document = ScheduleDocument.model_validate(
+        {
+            "version": 1,
+            "eventDate": "2026-10-26",
+            "sections": [
+                {
+                    "id": "s",
+                    "title": "S",
+                    "groups": [
+                        {
+                            "id": "g",
+                            "title": "G",
+                            "items": [
+                                {
+                                    "id": "a",
+                                    "title": "A",
+                                    "sessions": [
+                                        {
+                                            "startTime": "09:00",
+                                            "endTime": "10:00",
+                                            "location": "Sala antiga",
+                                        },
+                                        {
+                                            "startTime": "10:00",
+                                            "endTime": "11:00",
+                                            "locations": ["Sala 110", "Sala 111"],
+                                        },
+                                    ],
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+    )
+
+    sessions = document.sections[0].groups[0].items[0].sessions
+    assert sessions[0].locations == ["Sala antiga"]
+    assert sessions[1].locations == ["Sala 110", "Sala 111"]
+    assert document.model_dump(by_alias=True, mode="json")["sections"][0]["groups"][0]["items"][0][
+        "sessions"
+    ] == [
+        {"startTime": "09:00", "endTime": "10:00", "locations": ["Sala antiga"]},
+        {"startTime": "10:00", "endTime": "11:00", "locations": ["Sala 110", "Sala 111"]},
+    ]
+
+
 def test_round_trips_a_temporary_copy_of_the_current_schedule_without_field_loss(
     schedule_copy,
 ):
@@ -161,15 +210,19 @@ def test_activity_link_accepts_bare_domains_and_rejects_incomplete_urls():
     payload = {
         "version": 1,
         "eventDate": "2026-10-26",
-        "sections": [{
-            "id": "s",
-            "title": "S",
-            "groups": [{
-                "id": "g",
-                "title": "G",
-                "items": [{"id": "a", "title": "A", "link": "google.com"}],
-            }],
-        }],
+        "sections": [
+            {
+                "id": "s",
+                "title": "S",
+                "groups": [
+                    {
+                        "id": "g",
+                        "title": "G",
+                        "items": [{"id": "a", "title": "A", "link": "google.com"}],
+                    }
+                ],
+            }
+        ],
     }
     document = ScheduleDocument.model_validate(payload)
     assert document.sections[0].groups[0].items[0].link == "google.com"

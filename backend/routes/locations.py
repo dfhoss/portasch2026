@@ -19,11 +19,37 @@ router = APIRouter(prefix="/admin/api/locations", tags=["admin-locations"])
 
 class LocationInput(BaseModel):
     name: str = Field(min_length=1, max_length=200)
+    category: str = Field(
+        default="outros", pattern="^(blocos|laboratorios|estacionamentos|outros)$"
+    )
+    group_id: str | None = Field(default=None, alias="groupId")
+    room_number: str = Field(default="", alias="roomNumber", max_length=80)
+    description: str | None = Field(default=None, max_length=500)
+
+    model_config = {"populate_by_name": True}
 
 
 class LocationResponse(BaseModel):
     id: str
     name: str
+    category: str
+    room_number: str = Field(alias="roomNumber")
+    description: str | None
+    group_id: str | None = Field(alias="groupId")
+    group_name: str = Field(alias="groupName")
+
+    model_config = {"populate_by_name": True}
+
+
+class LocationGroupInput(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    category: str = Field(pattern="^(blocos|laboratorios|estacionamentos|outros)$")
+
+
+class LocationGroupResponse(BaseModel):
+    id: str
+    name: str
+    category: str
 
 
 def get_location_repository() -> LocationRepository:
@@ -66,9 +92,29 @@ def list_locations(_: CurrentTokenData, repository: LocationRepo) -> list[dict]:
     return _run(repository.list)
 
 
+@router.get("/groups", response_model=list[LocationGroupResponse])
+def list_location_groups(_: CurrentTokenData, repository: LocationRepo) -> list[dict]:
+    return _run(repository.list_groups)
+
+
+@router.post("/groups", status_code=status.HTTP_201_CREATED, response_model=LocationGroupResponse)
+def create_location_group(
+    payload: LocationGroupInput, _: CurrentTokenData, repository: LocationRepo
+) -> dict:
+    return _run(lambda: repository.create_group(payload.name, payload.category))
+
+
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=LocationResponse)
 def create_location(payload: LocationInput, _: CurrentTokenData, repository: LocationRepo) -> dict:
-    return _run(lambda: repository.create(payload.name.strip()))
+    return _run(
+        lambda: repository.create(
+            payload.name,
+            payload.category,
+            payload.group_id,
+            payload.room_number,
+            payload.description,
+        )
+    )
 
 
 @router.put("/{location_id}", response_model=LocationResponse)
@@ -78,7 +124,16 @@ def rename_location(
     _: CurrentTokenData,
     repository: LocationRepo,
 ) -> dict:
-    return _run(lambda: repository.rename(location_id, payload.name.strip()))
+    return _run(
+        lambda: repository.rename(
+            location_id,
+            payload.name,
+            payload.category,
+            payload.group_id,
+            payload.room_number,
+            payload.description,
+        )
+    )
 
 
 @router.delete("/{location_id}", status_code=status.HTTP_204_NO_CONTENT)

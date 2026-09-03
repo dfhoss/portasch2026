@@ -12,7 +12,7 @@ def read_json(path: Path) -> dict:
 
 
 def canonical_schedule(
-    *, location: str | None = "Auditórios dos Blocos A e B", axis: str | None = "geral"
+    *, location: str | None = "Auditório do Bloco A", axis: str | None = "geral"
 ) -> dict:
     group = {
         "id": "grupo",
@@ -171,10 +171,9 @@ def test_list_locations_returns_catalog(client, auth_headers):
     response = client.get("/admin/api/locations", headers=auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()[0] == {
-        "id": "loc-001",
-        "name": "Auditórios dos Blocos A e B",
-    }
+    assert response.json()[0]["id"] == "loc-001"
+    assert response.json()[0]["name"] == "Auditório do Bloco A"
+    assert response.json()[0]["category"] == "blocos"
 
 
 def test_location_crud_create_rename_and_delete(client, auth_headers):
@@ -183,23 +182,36 @@ def test_location_crud_create_rename_and_delete(client, auth_headers):
         "/admin/api/locations", json={"name": "  Novo auditório  "}, headers=auth_headers
     )
     assert created.status_code == status.HTTP_201_CREATED
-    assert created.json() == {"id": "loc-038", "name": "Novo auditório"}
+    assert created.json()["id"] == "loc-039"
+    assert created.json()["name"] == "Novo auditório"
 
     renamed = client.put(
-        "/admin/api/locations/loc-038",
+        "/admin/api/locations/loc-039",
         json={"name": "Auditório renovado"},
         headers=auth_headers,
     )
     assert renamed.status_code == status.HTTP_200_OK
-    assert renamed.json() == {"id": "loc-038", "name": "Auditório renovado"}
+    assert renamed.json()["name"] == "Auditório renovado"
 
-    deleted = client.delete("/admin/api/locations/loc-038", headers=auth_headers)
+    deleted = client.delete("/admin/api/locations/loc-039", headers=auth_headers)
     assert deleted.status_code == status.HTTP_204_NO_CONTENT
     assert deleted.content == b""
     assert all(
-        item["id"] != "loc-038"
+        item["id"] != "loc-039"
         for item in client.get("/admin/api/locations", headers=auth_headers).json()
     )
+
+
+def test_location_group_can_be_created_with_a_category(client, auth_headers):
+    response = client.post(
+        "/admin/api/locations/groups",
+        json={"name": "Bloco novo", "category": "blocos"},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["name"] == "Bloco novo"
+    assert response.json()["category"] == "blocos"
 
 
 def test_list_knowledge_axes_returns_catalog(client, auth_headers):
@@ -260,7 +272,7 @@ def test_catalog_missing_resource_maps_to_structured_404(
 @pytest.mark.parametrize(
     ("prefix", "name"),
     [
-        ("/admin/api/locations", "  AUDITÓRIOS DOS BLOCOS A E B  "),
+        ("/admin/api/locations", "  AUDITÓRIO DO BLOCO A  "),
         ("/admin/api/knowledge-axes", "  GERAL  "),
     ],
 )
@@ -313,7 +325,7 @@ def test_catalog_invalid_cleaned_name_maps_to_structured_422(
 
 
 class FailingRepository:
-    def create(self, name: str) -> dict:
+    def create(self, name: str, *args, **kwargs) -> dict:
         raise PersistenceError("filesystem path and internal secret")
 
 

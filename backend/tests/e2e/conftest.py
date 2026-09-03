@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import socket
 import threading
@@ -20,6 +21,21 @@ PROJECT_ROOT = Path(__file__).parents[2]
 TEST_JWT_SECRET = "e2e-only-jwt-secret-with-sufficient-length"
 TEST_USERNAME = "e2e-admin"
 TEST_PASSWORD = "e2e-password-only"
+DEFAULT_ACTION_TIMEOUT_MS = 5_000
+DEFAULT_NAVIGATION_TIMEOUT_MS = 10_000
+
+
+def _timeout_from_environment(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        timeout = int(value)
+    except ValueError as error:
+        raise ValueError(f"{name} deve ser um inteiro positivo") from error
+    if timeout <= 0:
+        raise ValueError(f"{name} deve ser um inteiro positivo")
+    return timeout
 
 
 @pytest.fixture(scope="session")
@@ -119,6 +135,12 @@ def live_server(
 @pytest.fixture
 def admin_page(browser: Browser, live_server: str) -> Iterator[Page]:
     page = browser.new_page()
+    page.set_default_timeout(
+        _timeout_from_environment("E2E_ACTION_TIMEOUT_MS", DEFAULT_ACTION_TIMEOUT_MS)
+    )
+    page.set_default_navigation_timeout(
+        _timeout_from_environment("E2E_NAVIGATION_TIMEOUT_MS", DEFAULT_NAVIGATION_TIMEOUT_MS)
+    )
     page.goto(f"{live_server}/admin", wait_until="domcontentloaded")
     yield page
     page.close()

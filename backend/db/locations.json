@@ -1,48 +1,326 @@
 {
-  "nextId": 38,
+  "nextId": 39,
+  "nextGroupId": 9,
+  "groups": [
+    {
+      "id": "group-002",
+      "name": "Bloco A",
+      "category": "blocos"
+    },
+    {
+      "id": "group-003",
+      "name": "Bloco B",
+      "category": "blocos"
+    },
+    {
+      "id": "group-005",
+      "name": "LAB 01",
+      "category": "laboratorios"
+    },
+    {
+      "id": "group-004",
+      "name": "LAB 02",
+      "category": "laboratorios"
+    },
+    {
+      "id": "group-008",
+      "name": "LAB 04",
+      "category": "laboratorios"
+    },
+    {
+      "id": "group-007",
+      "name": "Estacionamento em frente à Cantina",
+      "category": "estacionamentos"
+    }
+  ],
   "locations": [
-    { "id": "loc-001", "name": "Auditórios dos Blocos A e B" },
-    { "id": "loc-002", "name": "Bloco A - Hall" },
-    { "id": "loc-003", "name": "Bloco A - Sala 103" },
-    { "id": "loc-004", "name": "Bloco A - Sala 105" },
-    { "id": "loc-005", "name": "Bloco A - Sala 106" },
-    { "id": "loc-006", "name": "Bloco A - Sala 201" },
-    { "id": "loc-007", "name": "Bloco A - Sala 202" },
-    { "id": "loc-008", "name": "Bloco A - Sala 203" },
-    { "id": "loc-009", "name": "Bloco A - Sala 204" },
-    { "id": "loc-010", "name": "Bloco A - Sala 205" },
-    { "id": "loc-011", "name": "Bloco A - Sala 208" },
-    { "id": "loc-012", "name": "Bloco A - Sala 305" },
-    { "id": "loc-013", "name": "Bloco A - Sala 401" },
-    { "id": "loc-014", "name": "Bloco A - Sala 408 Lab. de informática" },
-    { "id": "loc-015", "name": "Bloco B - Hall" },
-    { "id": "loc-016", "name": "Bloco B - Lab 2 - Sala 110" },
-    { "id": "loc-017", "name": "Bloco B - Lab 2 - Sala 111" },
-    { "id": "loc-018", "name": "Bloco B - Sala 105" },
-    { "id": "loc-019", "name": "Bloco B - Sala 107" },
-    { "id": "loc-020", "name": "Bloco B - Sala 109" },
-    { "id": "loc-021", "name": "Bloco B - Sala 110" },
-    { "id": "loc-022", "name": "Bloco B - Sala 110 CELUFFS" },
-    { "id": "loc-023", "name": "Bloco B - Sala 204" },
-    { "id": "loc-024", "name": "Bloco B - Sala 205" },
-    { "id": "loc-025", "name": "Bloco B - Sala 206" },
-    { "id": "loc-026", "name": "Bloco B - Sala 207" },
-    { "id": "loc-027", "name": "Bloco B - Sala 405" },
-    { "id": "loc-028", "name": "Bloco B - Sala 409" },
-    { "id": "loc-029", "name": "Bloco LAB 2  - Sala 103-3" },
+    {
+      "id": "loc-001",
+      "name": "Auditório do Bloco A",
+      "category": "blocos",
+      "roomNumber": "Auditório",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-002",
+      "name": "Bloco A - Hall",
+      "category": "blocos",
+      "roomNumber": "",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-003",
+      "name": "Bloco A - Sala 103",
+      "category": "blocos",
+      "roomNumber": "103",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-004",
+      "name": "Bloco A - Sala 105",
+      "category": "blocos",
+      "roomNumber": "105",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-005",
+      "name": "Bloco A - Sala 106",
+      "category": "blocos",
+      "roomNumber": "106",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-006",
+      "name": "Bloco A - Sala 201",
+      "category": "blocos",
+      "roomNumber": "201",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-007",
+      "name": "Bloco A - Sala 202",
+      "category": "blocos",
+      "roomNumber": "202",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-008",
+      "name": "Bloco A - Sala 203",
+      "category": "blocos",
+      "roomNumber": "203",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-009",
+      "name": "Bloco A - Sala 204",
+      "category": "blocos",
+      "roomNumber": "204",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-010",
+      "name": "Bloco A - Sala 205",
+      "category": "blocos",
+      "roomNumber": "205",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-011",
+      "name": "Bloco A - Sala 208",
+      "category": "blocos",
+      "roomNumber": "208",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-012",
+      "name": "Bloco A - Sala 305",
+      "category": "blocos",
+      "roomNumber": "305",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-013",
+      "name": "Bloco A - Sala 401",
+      "category": "blocos",
+      "roomNumber": "401",
+      "description": null,
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-014",
+      "name": "Bloco A - Sala 408",
+      "category": "blocos",
+      "roomNumber": "408",
+      "description": "Laboratório de informática",
+      "groupId": "group-002"
+    },
+    {
+      "id": "loc-015",
+      "name": "Bloco B - Hall",
+      "category": "blocos",
+      "roomNumber": "",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-016",
+      "name": "Bloco B - Sala 110",
+      "category": "blocos",
+      "roomNumber": "110",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-017",
+      "name": "Bloco B - Sala 111",
+      "category": "blocos",
+      "roomNumber": "111",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-018",
+      "name": "Bloco B - Sala 105",
+      "category": "blocos",
+      "roomNumber": "105",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-019",
+      "name": "Bloco B - Sala 107",
+      "category": "blocos",
+      "roomNumber": "107",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-020",
+      "name": "Bloco B - Sala 109",
+      "category": "blocos",
+      "roomNumber": "109",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-021",
+      "name": "Bloco B - Sala 110 CELUFFS",
+      "category": "blocos",
+      "roomNumber": "110",
+      "description": "CELUFFS",
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-023",
+      "name": "Bloco B - Sala 204",
+      "category": "blocos",
+      "roomNumber": "204",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-024",
+      "name": "Bloco B - Sala 205",
+      "category": "blocos",
+      "roomNumber": "205",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-025",
+      "name": "Bloco B - Sala 206",
+      "category": "blocos",
+      "roomNumber": "206",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-026",
+      "name": "Bloco B - Sala 207",
+      "category": "blocos",
+      "roomNumber": "207",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-027",
+      "name": "Bloco B - Sala 405",
+      "category": "blocos",
+      "roomNumber": "405",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-028",
+      "name": "Bloco B - Sala 409",
+      "category": "blocos",
+      "roomNumber": "409",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-029",
+      "name": "LAB 02 - Sala 103-3",
+      "category": "laboratorios",
+      "roomNumber": "103-3",
+      "description": null,
+      "groupId": "group-004"
+    },
     {
       "id": "loc-030",
-      "name": "Bloco Lab. 01 - Sala 106\nLaboratório de Histologia"
+      "name": "LAB 01 - Sala 106",
+      "category": "laboratorios",
+      "roomNumber": "106",
+      "description": "Laboratório de Histologia",
+      "groupId": "group-005"
     },
-    { "id": "loc-031", "name": "Bloco Lab. 01 - Sala 109 e 110 -Enfermagem" },
+    {
+      "id": "loc-031",
+      "name": "LAB 01 - Sala 109 e 110",
+      "category": "laboratorios",
+      "roomNumber": "109 e 110",
+      "description": "Enfermagem",
+      "groupId": "group-005"
+    },
     {
       "id": "loc-032",
-      "name": "Bloco Lab. 01 - Salas 112 e 113\nLoratório de Anatomia"
+      "name": "LAB 01 - Salas 112 e 113",
+      "category": "laboratorios",
+      "roomNumber": "112 e 113",
+      "description": "Laboratório de Anatomia",
+      "groupId": "group-005"
     },
-    { "id": "loc-033", "name": "Bloco Lab. 2 - Sala 109 - LUDOBRINC" },
-    { "id": "loc-034", "name": "Estacionamento em frente à Cantina" },
-    { "id": "loc-035", "name": "Hall do Bloco A" },
-    { "id": "loc-036", "name": "LAB 04 - Sala 102" },
-    { "id": "loc-037", "name": "Sala 103 - LAB 1" }
+    {
+      "id": "loc-033",
+      "name": "LAB 02 - Sala 109",
+      "category": "laboratorios",
+      "roomNumber": "109",
+      "description": "LUDOBRINC",
+      "groupId": "group-004"
+    },
+    {
+      "id": "loc-034",
+      "name": "Estacionamento em frente à Cantina",
+      "category": "estacionamentos",
+      "roomNumber": "",
+      "description": null,
+      "groupId": "group-007"
+    },
+    {
+      "id": "loc-036",
+      "name": "LAB 04 - Sala 102",
+      "category": "laboratorios",
+      "roomNumber": "102",
+      "description": null,
+      "groupId": "group-008"
+    },
+    {
+      "id": "loc-037",
+      "name": "LAB 01 - Sala 103",
+      "category": "laboratorios",
+      "roomNumber": "103",
+      "description": null,
+      "groupId": "group-005"
+    },
+    {
+      "id": "loc-038",
+      "name": "Auditório do Bloco B",
+      "category": "blocos",
+      "groupId": "group-003",
+      "roomNumber": "Auditório",
+      "description": null
+    }
   ]
 }

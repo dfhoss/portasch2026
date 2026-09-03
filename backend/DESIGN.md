@@ -174,6 +174,16 @@ with it when implementing or changing the interface.
 - Event edition and event date belong to “Configurações”, not the programming workspace. Label the
   edition as “Edição do evento” so its purpose is explicit; save it through the same schedule
   persistence flow.
+- Locais are organized by explicit groups stored in `locations.json`. A group has a name and one
+  category (`blocos`, `laboratorios`, `estacionamentos`, or `outros`); each room belongs to a group
+  through `groupId` and stores `roomNumber` and `description`. The locations page shows groups as
+  accordions (`Bloco A`, `LAB 01`, etc.) and their child rooms; “Estacionamentos” is also an
+  accordion containing its parking locations directly, without a nested group. Use the same
+  spacing token between every group, regardless of category. Room names remain the schedule
+  references.
+- A schedule session stores `locations` as a list. Multiple rooms can share one time slot; rooms
+  with different times use separate session entries for the same activity. Legacy `location` input
+  is accepted only for migration to the list form.
 - Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
   `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
 

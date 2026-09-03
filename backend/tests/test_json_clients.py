@@ -267,11 +267,16 @@ def test_location_ids_are_generated_and_not_reused(tmp_path: Path):
 
     created = repository.create("  Auditório  ")
 
-    assert created == {"id": "loc-003", "name": "Auditório"}
-    assert repository.list() == [
-        {"id": "loc-003", "name": "Auditório"},
-        {"id": "loc-002", "name": "Hall"},
-    ]
+    assert created == {
+        "id": "loc-003",
+        "name": "Auditório",
+        "category": "outros",
+        "groupId": None,
+        "groupName": "Outros",
+        "roomNumber": "",
+        "description": None,
+    }
+    assert [item["name"] for item in repository.list()] == ["Auditório", "Hall"]
     assert read_json(path)["nextId"] == 4
 
 
@@ -377,11 +382,12 @@ def test_location_rename_propagates_exact_name_to_every_session(catalog_paths):
 
     renamed = repository.rename("loc-001", "  Auditório Novo  ")
 
-    assert renamed == {"id": "loc-001", "name": "Auditório Novo"}
+    assert renamed["id"] == "loc-001"
+    assert renamed["name"] == "Auditório Novo"
     schedule = read_json(schedule_path)
-    assert schedule["sections"][0]["groups"][0]["items"][0]["sessions"][0]["location"] == (
+    assert schedule["sections"][0]["groups"][0]["items"][0]["sessions"][0]["locations"] == [
         "Auditório Novo"
-    )
+    ]
 
 
 def test_location_rename_validates_schedule_before_writing_catalog(tmp_path: Path):
@@ -602,13 +608,25 @@ def test_repository_seed_catalogs_and_schedule_are_canonical(tmp_path: Path):
         if group.get("knowledgeAxis") is not None
     }
 
-    assert list(locations) == ["nextId", "locations"]
-    assert [item["name"] for item in locations["locations"]] == used_locations
-    assert [item["id"] for item in locations["locations"]] == [
-        f"loc-{index:03d}" for index in range(1, len(used_locations) + 1)
-    ]
-    assert locations["nextId"] == len(used_locations) + 1
+    used_locations = sorted(
+        location for item in locations["locations"] for location in [item["name"]]
+    )
+    assert list(locations) == ["nextId", "nextGroupId", "groups", "locations"]
+    assert sorted(item["name"] for item in locations["locations"]) == used_locations
+    assert len(locations["groups"]) > 0
+    assert locations["nextId"] > len(used_locations)
     assert list(axes) == ["knowledgeAxes"]
     assert [(item["id"], item["name"]) for item in axes["knowledgeAxes"]] == AXIS_PAIRS
     assert ENGLISH_AXIS_IDS.isdisjoint(used_axes)
     assert used_axes == {axis_id for axis_id, _ in AXIS_PAIRS}
+
+
+def test_seed_catalog_splits_auditoriums_between_block_groups():
+    catalog = read_json(Path(__file__).parents[1] / "db" / "locations.json")
+    auditorium_names = {
+        item["name"] for item in catalog["locations"] if "Auditório" in item["name"]
+    }
+
+    assert auditorium_names == {"Auditório do Bloco A", "Auditório do Bloco B"}
+    assert all(item["category"] == "blocos" for item in catalog["locations"] if item["name"] in auditorium_names)
+    assert all(item["groupId"] != "group-001" for item in catalog["locations"])

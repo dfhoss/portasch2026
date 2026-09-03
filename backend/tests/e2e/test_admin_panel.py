@@ -27,7 +27,7 @@ def accept_dialog(dialog: Dialog) -> None:
 
 
 def apply_modal(page: Page) -> None:
-    page.get_by_role("button", name="Salvar").click()
+    page.get_by_role("button", name="Salvar", exact=True).click()
     expect(page.locator("#editor-modal")).to_be_hidden(timeout=500)
 
 
@@ -257,6 +257,7 @@ def test_schedule_create_edit_session_validation_and_reload_persistence(admin_pa
     expect(admin_page.get_by_text("O horário final deve ser posterior ao inicial.")).to_be_visible()
 
     activity = admin_page.locator(".schedule-activity").filter(has_text="Atividade E2E")
+    activity.locator(".card-menu-trigger").click()
     activity.get_by_role("button", name="Editar").click()
     sessions = admin_page.locator(".session-editor")
     sessions.last.get_by_label("Fim").fill("11:00")
@@ -339,8 +340,9 @@ def test_created_location_can_be_selected_in_a_session(admin_page: Page) -> None
     activity = admin_page.locator(".schedule-activity").filter(
         has_text="Voz e Ação: conhecendo o curso de Administração"
     )
+    activity.locator(".card-menu-trigger").click()
     activity.get_by_role("button", name="Editar").click()
-    admin_page.locator('select[name="location"]').first.select_option(label="Local de sessão E2E")
+    admin_page.locator('select[name="locations"]').first.select_option(label="Local de sessão E2E")
     apply_modal(admin_page)
     admin_page.get_by_role("button", name="Salvar programação").click()
     expect(admin_page.get_by_text("Programação salva com sucesso.")).to_be_visible(timeout=10_000)
@@ -372,13 +374,14 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
         response = route.fetch()
         payload = response.json()
         payload["sections"][0]["groups"][0]["knowledgeAxis"] = "axis-secret"
-        payload["sections"][0]["groups"][0]["items"][0]["sessions"][0]["location"] = "loc-secret"
+        payload["sections"][0]["groups"][0]["items"][0]["sessions"][0]["locations"] = ["loc-secret"]
         route.fulfill(response=response, json=payload)
 
     admin_page.route("**/admin/api/schedule", add_stale_reference)
     login(admin_page)
     group = admin_page.locator(".schedule-group").filter(has_text="Atividades gerais")
     group.get_by_role("button", name=re.compile("Expandir")).click()
+    group.locator(".card-menu-trigger").click()
     group.get_by_role("button", name="Editar").first.click()
     expect(admin_page.locator('select[name="knowledgeAxis"] option:checked')).to_have_text(
         "Eixo não cadastrado"
@@ -386,8 +389,9 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
     expect(admin_page.locator("body")).not_to_contain_text("axis-secret")
     admin_page.keyboard.press("Escape")
     activity = admin_page.locator(".schedule-activity").filter(has_text="Recepção nos Auditórios")
+    activity.locator(".card-menu-trigger").click()
     activity.get_by_role("button", name="Editar").click()
-    expect(admin_page.locator('select[name="location"] option:checked')).to_have_text(
+    expect(admin_page.locator('select[name="locations"] option:checked')).to_have_text(
         "Local não cadastrado"
     )
     expect(admin_page.locator("body")).not_to_contain_text("loc-secret")

@@ -24,9 +24,33 @@ def slugify_id(value: str) -> str:
 class Session(BaseModel):
     start_time: time = Field(alias="startTime")
     end_time: time = Field(alias="endTime")
-    location: str | None = None
+    locations: list[str] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_location(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+        migrated = dict(value)
+        if "locations" not in migrated and "location" in migrated:
+            migrated["locations"] = [migrated.pop("location")] if migrated["location"] else []
+        return migrated
+
+    @field_validator("locations")
+    @classmethod
+    def validate_locations(cls, value: list[str]) -> list[str]:
+        if any(not isinstance(location, str) or not location.strip() for location in value):
+            raise ValueError("Os locais devem ser textos não vazios")
+        if len(set(value)) != len(value):
+            raise ValueError("Uma sessão não pode repetir o mesmo local")
+        return [location.strip() for location in value]
+
+    @property
+    def location(self) -> str | None:
+        """Compatibility accessor for consumers that display one location."""
+        return self.locations[0] if self.locations else None
 
     @field_serializer("start_time", "end_time")
     def serialize_time(self, value: time) -> str:

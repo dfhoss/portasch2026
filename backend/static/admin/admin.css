@@ -480,6 +480,25 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: var(--color-surface);
 }
 .catalog-card > div:not(.card-actions) { display: grid; gap: var(--space-1); }
+.location-category { display: grid; gap: var(--space-3); }
+.location-category + .location-category { margin-top: var(--space-0); }
+.location-category > h3,
+.location-group > summary {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-navigation);
+}
+.location-group > summary h3 { margin: var(--space-0); }
+.location-group > summary::marker { color: var(--color-action-primary); }
+.location-group > summary:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.location-category .catalog-list { margin-top: var(--space-0); }
+.location-groups { display: grid; gap: var(--space-4); margin-top: var(--space-0); }
+.location-groups + .location-groups { margin-top: var(--space-0); }
+#locations-list { gap: var(--space-4); }
+.location-group { display: grid; gap: var(--space-2); }
+.location-group h4 { margin: var(--space-0); color: var(--color-text); }
+.catalog-card p { margin: var(--space-1) var(--space-0) var(--space-0); }
 .danger-action { color: var(--color-danger) !important; }
 
 dialog {
@@ -516,6 +535,7 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
   border-radius: var(--radius-md);
   background: var(--color-surface-subtle);
 }
+.session-editor select[multiple] { min-height: 7rem; }
 .dialog-actions, .dialog-footer {
   display: flex;
   justify-content: space-between;

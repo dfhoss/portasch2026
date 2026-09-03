@@ -20,10 +20,12 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Auditórios dos Blocos A e B"
+                  "locations": [
+                    "Auditório do Bloco A",
+                    "Auditório do Bloco B"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -40,20 +42,25 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco A - Sala 105"
+                  "locations": [
+                    "Bloco A - Sala 105"
+                  ]
                 },
                 {
                   "startTime": "13:00",
                   "endTime": "18:00",
-                  "location": "Bloco A - Sala 105"
+                  "locations": [
+                    "Bloco A - Sala 105"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 105"
+                  "locations": [
+                    "Bloco A - Sala 105"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "administracao-oficina-de-comunicacao-e-oratoria",
@@ -63,20 +70,25 @@
                 {
                   "startTime": "09:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 103"
+                  "locations": [
+                    "Bloco A - Sala 103"
+                  ]
                 },
                 {
                   "startTime": "15:00",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 103"
+                  "locations": [
+                    "Bloco A - Sala 103"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 103"
+                  "locations": [
+                    "Bloco A - Sala 103"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "administracao-pitch-relampago-e-quiz",
@@ -86,20 +98,25 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco A - Sala 106"
+                  "locations": [
+                    "Bloco A - Sala 106"
+                  ]
                 },
                 {
                   "startTime": "13:00",
                   "endTime": "18:00",
-                  "location": "Bloco A - Sala 106"
+                  "locations": [
+                    "Bloco A - Sala 106"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 106"
+                  "locations": [
+                    "Bloco A - Sala 106"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -116,10 +133,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 203"
+                  "locations": [
+                    "Bloco A - Sala 203"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "agronomia-visitacao-ao-laboratorio-de-lupas-luparia",
@@ -129,20 +147,25 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "LAB 04 - Sala 102"
+                  "locations": [
+                    "LAB 04 - Sala 102"
+                  ]
                 },
                 {
                   "startTime": "13:00",
                   "endTime": "18:00",
-                  "location": "LAB 04 - Sala 102"
+                  "locations": [
+                    "LAB 04 - Sala 102"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "LAB 04 - Sala 102"
+                  "locations": [
+                    "LAB 04 - Sala 102"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "agronomia-maquinas-agricolas",
@@ -152,10 +175,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Estacionamento em frente à Cantina"
+                  "locations": [
+                    "Estacionamento em frente à Cantina"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -172,10 +196,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 409"
+                  "locations": [
+                    "Bloco B - Sala 409"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "ciencia-da-computacao-oficina-de-programacao",
@@ -185,10 +210,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 405"
+                  "locations": [
+                    "Bloco B - Sala 405"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -205,10 +231,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 204"
+                  "locations": [
+                    "Bloco A - Sala 204"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "ciencias-economicas-observatorio-do-mercado-financeiro",
@@ -218,15 +245,18 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco A - Sala 408 Lab. de informática"
+                  "locations": [
+                    "Bloco A - Sala 408"
+                  ]
                 },
                 {
                   "startTime": "13:00",
                   "endTime": "18:00",
-                  "location": "Bloco A - Sala 408 Lab. de informática"
+                  "locations": [
+                    "Bloco A - Sala 408"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -243,10 +273,11 @@
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 107"
+                  "locations": [
+                    "Bloco B - Sala 107"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "ciencias-sociais-sala-tematica-audiovisual-e-ciencias-sociais",
@@ -256,20 +287,25 @@
                 {
                   "startTime": "19:30",
                   "endTime": "20:00",
-                  "location": "Bloco A - Sala 305"
+                  "locations": [
+                    "Bloco A - Sala 305"
+                  ]
                 },
                 {
                   "startTime": "20:10",
                   "endTime": "20:40",
-                  "location": "Bloco A - Sala 305"
+                  "locations": [
+                    "Bloco A - Sala 305"
+                  ]
                 },
                 {
                   "startTime": "20:50",
                   "endTime": "21:20",
-                  "location": "Bloco A - Sala 305"
+                  "locations": [
+                    "Bloco A - Sala 305"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -285,10 +321,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco Lab. 01 - Sala 109 e 110 -Enfermagem"
+                  "locations": [
+                    "LAB 01 - Sala 109 e 110"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "enfermagem-oficina-de-atendimento-a-ovace-e-atendimento-a-crise-convulsiva",
@@ -297,10 +334,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco Lab. 01 - Sala 109 e 110 -Enfermagem"
+                  "locations": [
+                    "LAB 01 - Sala 109 e 110"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "enfermagem-afericao-de-pressao-arterial",
@@ -309,10 +347,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 109"
+                  "locations": [
+                    "Bloco B - Sala 109"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -329,10 +368,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 201"
+                  "locations": [
+                    "Bloco A - Sala 201"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "engenharia-ambiental-experimentos-exposicao",
@@ -342,10 +382,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 202"
+                  "locations": [
+                    "Bloco A - Sala 202"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -362,10 +403,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Hall do Bloco A"
+                  "locations": [
+                    "Bloco A - Hall"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -381,10 +423,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Hall"
+                  "locations": [
+                    "Bloco A - Hall"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -401,10 +444,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 105"
+                  "locations": [
+                    "Bloco B - Sala 105"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -421,10 +465,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 205"
+                  "locations": [
+                    "Bloco A - Sala 205"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "historia-oficina-sobre-fontes-historicas-detetives-do-passado-rastros-da-historia-do-oeste-catarinense",
@@ -434,10 +479,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco A - Sala 208"
+                  "locations": [
+                    "Bloco A - Sala 208"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "historia-oficina-fronteiras-quando-a-historia-deixa-pegadas-na-natureza",
@@ -447,15 +493,18 @@
                 {
                   "startTime": "09:30",
                   "endTime": "21:00",
-                  "location": "Bloco LAB 2  - Sala 103-3"
+                  "locations": [
+                    "LAB 02 - Sala 103-3"
+                  ]
                 },
                 {
                   "startTime": "15:00",
                   "endTime": "21:00",
-                  "location": "Bloco LAB 2  - Sala 103-3"
+                  "locations": [
+                    "LAB 02 - Sala 103-3"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "historia-visita-laboratorio-universitario-de-patrimonio-e-arqueologia-lupa",
@@ -465,20 +514,25 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Sala 103 - LAB 1"
+                  "locations": [
+                    "LAB 01 - Sala 103"
+                  ]
                 },
                 {
                   "startTime": "13:00",
                   "endTime": "18:00",
-                  "location": "Sala 103 - LAB 1"
+                  "locations": [
+                    "LAB 01 - Sala 103"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "Sala 103 - LAB 1"
+                  "locations": [
+                    "LAB 01 - Sala 103"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -495,10 +549,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 206"
+                  "locations": [
+                    "Bloco B - Sala 206"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-micro-aula-heterosemanticos",
@@ -508,10 +563,11 @@
                 {
                   "startTime": "09:00",
                   "endTime": "09:20",
-                  "location": "Bloco B - Sala 204"
+                  "locations": [
+                    "Bloco B - Sala 204"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-experiencia-dom-quixote",
@@ -521,15 +577,18 @@
                 {
                   "startTime": "14:00",
                   "endTime": "17:00",
-                  "location": "Bloco B - Hall"
+                  "locations": [
+                    "Bloco B - Hall"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:00",
-                  "location": "Bloco B - Hall"
+                  "locations": [
+                    "Bloco B - Hall"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-musica-e-jogos-em-ple-e-ele",
@@ -538,25 +597,32 @@
                 {
                   "startTime": "09:30",
                   "endTime": "10:00",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "10:30",
                   "endTime": "11:00",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "15:00",
                   "endTime": "15:30",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "16:00",
                   "endTime": "16:30",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-leitura-e-interpretacao-de-poesia",
@@ -566,20 +632,25 @@
                 {
                   "startTime": "11:00",
                   "endTime": "11:30",
-                  "location": "Bloco B - Lab 2 - Sala 111"
+                  "locations": [
+                    "Bloco B - Sala 111"
+                  ]
                 },
                 {
                   "startTime": "16:00",
                   "endTime": "16:30",
-                  "location": "Bloco B - Lab 2 - Sala 111"
+                  "locations": [
+                    "Bloco B - Sala 111"
+                  ]
                 },
                 {
                   "startTime": "19:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Lab 2 - Sala 111"
+                  "locations": [
+                    "Bloco B - Sala 111"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-clube-de-leitura-travessia-narrativas-de-misterio",
@@ -588,20 +659,25 @@
                 {
                   "startTime": "10:00",
                   "endTime": "11:00",
-                  "location": "Bloco B - Sala 205"
+                  "locations": [
+                    "Bloco B - Sala 205"
+                  ]
                 },
                 {
                   "startTime": "15:00",
                   "endTime": "16:00",
-                  "location": "Bloco B - Sala 205"
+                  "locations": [
+                    "Bloco B - Sala 205"
+                  ]
                 },
                 {
                   "startTime": "19:30",
                   "endTime": "20:30",
-                  "location": "Bloco B - Sala 205"
+                  "locations": [
+                    "Bloco B - Sala 205"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-oficina-de-microconto",
@@ -611,35 +687,46 @@
                 {
                   "startTime": "13:30",
                   "endTime": "13:50",
-                  "location": "Bloco B - Lab 2 - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "14:00",
                   "endTime": "14:20",
-                  "location": "Bloco B - Lab 2 - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "14:30",
                   "endTime": "14:50",
-                  "location": "Bloco B - Lab 2 - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "15:00",
                   "endTime": "15:20",
-                  "location": "Bloco B - Lab 2 - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "15:30",
                   "endTime": "15:50",
-                  "location": "Bloco B - Lab 2 - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "16:00",
                   "endTime": "16:20",
-                  "location": "Bloco B - Lab 2 - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-musica-e-jogos-em-ple-e-ele-2",
@@ -648,25 +735,32 @@
                 {
                   "startTime": "09:30",
                   "endTime": "10:00",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "10:30",
                   "endTime": "11:00",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "15:00",
                   "endTime": "15:30",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 },
                 {
                   "startTime": "16:00",
                   "endTime": "16:30",
-                  "location": "Bloco B - Sala 110"
+                  "locations": [
+                    "Bloco B - Sala 110"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-oficina-de-elaboracao-de-prompts",
@@ -676,20 +770,25 @@
                 {
                   "startTime": "09:00",
                   "endTime": "09:20",
-                  "location": "Bloco B - Sala 110 CELUFFS"
+                  "locations": [
+                    "Bloco B - Sala 110 CELUFFS"
+                  ]
                 },
                 {
                   "startTime": "14:00",
                   "endTime": "14:20",
-                  "location": "Bloco B - Sala 110 CELUFFS"
+                  "locations": [
+                    "Bloco B - Sala 110 CELUFFS"
+                  ]
                 },
                 {
                   "startTime": "19:20",
                   "endTime": "19:40",
-                  "location": "Bloco B - Sala 110 CELUFFS"
+                  "locations": [
+                    "Bloco B - Sala 110 CELUFFS"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "letras-jogos-sintaticos",
@@ -699,25 +798,32 @@
                 {
                   "startTime": "19:30",
                   "endTime": "20:00",
-                  "location": "Bloco B - Sala 207"
+                  "locations": [
+                    "Bloco B - Sala 207"
+                  ]
                 },
                 {
                   "startTime": "20:00",
                   "endTime": "20:30",
-                  "location": "Bloco B - Sala 207"
+                  "locations": [
+                    "Bloco B - Sala 207"
+                  ]
                 },
                 {
                   "startTime": "20:30",
                   "endTime": "21:00",
-                  "location": "Bloco B - Sala 207"
+                  "locations": [
+                    "Bloco B - Sala 207"
+                  ]
                 },
                 {
                   "startTime": "21:00",
                   "endTime": "21:30",
-                  "location": "Bloco B - Sala 207"
+                  "locations": [
+                    "Bloco B - Sala 207"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -734,20 +840,25 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco A - Sala 401"
+                  "locations": [
+                    "Bloco A - Sala 401"
+                  ]
                 },
                 {
                   "startTime": "13:00",
                   "endTime": "18:00",
-                  "location": "Bloco A - Sala 401"
+                  "locations": [
+                    "Bloco A - Sala 401"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:30",
-                  "location": "Bloco A - Sala 401"
+                  "locations": [
+                    "Bloco A - Sala 401"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -764,15 +875,18 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco Lab. 01 - Salas 112 e 113\nLoratório de Anatomia"
+                  "locations": [
+                    "LAB 01 - Salas 112 e 113"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:30",
-                  "location": "Bloco Lab. 01 - Salas 112 e 113\nLoratório de Anatomia"
+                  "locations": [
+                    "LAB 01 - Salas 112 e 113"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "medicina-oficina-entendendo-a-constituicao-histologica-dos-tecidos",
@@ -782,15 +896,18 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco Lab. 01 - Sala 106\nLaboratório de Histologia"
+                  "locations": [
+                    "LAB 01 - Sala 106"
+                  ]
                 },
                 {
                   "startTime": "19:00",
                   "endTime": "21:30",
-                  "location": "Bloco Lab. 01 - Sala 106\nLaboratório de Histologia"
+                  "locations": [
+                    "LAB 01 - Sala 106"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "medicina-oficina-tecnica-de-desengasgo",
@@ -800,10 +917,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "12:00",
-                  "location": "Bloco B - Sala 109"
+                  "locations": [
+                    "Bloco B - Sala 109"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             },
             {
               "id": "medicina-projeto-viva-bem-cardiologia",
@@ -813,10 +931,11 @@
                 {
                   "startTime": "15:00",
                   "endTime": "18:00",
-                  "location": "Bloco B - Sala 109"
+                  "locations": [
+                    "Bloco B - Sala 109"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         },
@@ -833,10 +952,11 @@
                 {
                   "startTime": "08:30",
                   "endTime": "21:30",
-                  "location": "Bloco Lab. 2 - Sala 109 - LUDOBRINC"
+                  "locations": [
+                    "LAB 02 - Sala 109"
+                  ]
                 }
-              ],
-              "link": null
+              ]
             }
           ]
         }
@@ -853,22 +973,22 @@
             {
               "id": "sunset-da-federal",
               "title": "Sunset da Federal",
-              "link": null
+              "sessions": []
             },
             {
               "id": "karaoke",
               "title": "Karaoke",
-              "link": null
+              "sessions": []
             },
             {
               "id": "integrasom",
               "title": "IntegraSom",
-              "link": null
+              "sessions": []
             },
             {
               "id": "biodanza",
               "title": "Biodanza",
-              "link": null
+              "sessions": []
             }
           ]
         }
@@ -885,57 +1005,57 @@
             {
               "id": "team-01",
               "title": "Eeb Candido Ramos",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-02",
               "title": "EEB Prof Lourdes A. S. Lago",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-03",
               "title": "EEB Olga Fin Travi",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-04",
               "title": "EEB Professora Zitta Flach",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-05",
               "title": "EEB Cordilheira Alta",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-06",
               "title": "Colégio Trilíngue Inovação",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-07",
               "title": "EEB BELERMINO VICTOR DALLA VECCHIA",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-08",
               "title": "E.E.B. Jorge Lacerda",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-09",
               "title": "Eeb Prof Manuel De Freitas Trancoso",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-10",
               "title": "Eeb Cedrense",
-              "link": null
+              "sessions": []
             },
             {
               "id": "team-11",
               "title": "EEB RuI Barbosa",
-              "link": null
+              "sessions": []
             }
           ]
         }

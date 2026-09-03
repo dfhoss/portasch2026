@@ -45,12 +45,12 @@ def replace_schedule(document: ScheduleDocument, path: Path | None = None) -> Sc
         if isinstance(item, dict) and isinstance(item.get("id"), str)
     }
     used_locations = {
-        session.location
+        location
         for section in document.sections
         for group in section.groups
         for activity in group.items
         for session in activity.sessions
-        if session.location is not None
+        for location in session.locations
     }
     used_axes = {
         group.knowledge_axis

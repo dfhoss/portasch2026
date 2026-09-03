@@ -17,6 +17,7 @@ const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes", "account"]);
 const state = {
   schedule: null,
   locations: [],
+  locationGroups: [],
   knowledgeAxes: [],
   selectedSectionId: null,
 };
@@ -230,6 +231,11 @@ function locationName(location) {
     : "Local não cadastrado";
 }
 
+function locationNames(locations) {
+  if (!Array.isArray(locations) || !locations.length) return "Sem local";
+  return locations.map((location) => locationName(location)).join(" · ");
+}
+
 function renderSessions(activity) {
   if (!activity.sessions?.length) return '<span class="secondary-text">Sem horários</span>';
   return activity.sessions
@@ -237,7 +243,7 @@ function renderSessions(activity) {
       (session) =>
         `<span class="session-chip">${escapeHtml(session.startTime)}–${escapeHtml(
           session.endTime,
-        )} · ${escapeHtml(locationName(session.location))}</span>`,
+        )} · ${escapeHtml(locationNames(session.locations ?? (session.location ? [session.location] : [])))}</span>`,
     )
     .join("");
 }
@@ -349,17 +355,35 @@ function renderSections() {
 }
 
 function renderLocations() {
+  const categoryLabels = {
+    blocos: "Blocos",
+    laboratorios: "Laboratórios",
+    estacionamentos: "Estacionamentos",
+    outros: "Outros",
+  };
   const cards = state.locations.length
-    ? state.locations
-        .map((location) => {
-          const key = catalogKey(location);
-          return `<article class="catalog-card">
-            <strong>${escapeHtml(location.name)}</strong>
-            <div class="card-actions">
-              <button type="button" data-action="edit-location" data-key="${key}">Editar</button>
-              <button class="danger-action" type="button" data-action="delete-location" data-key="${key}">Excluir</button>
-            </div>
-          </article>`;
+    ? ["blocos", "laboratorios", "estacionamentos", "outros"]
+        .map((category) => {
+          const locations = state.locations.filter(
+            (location) => (location.category || "outros") === category,
+          );
+          if (!locations.length) return "";
+          if (category === "estacionamentos") {
+            return `<details class="location-group" open>
+              <summary><h3>${categoryLabels[category]}</h3></summary>
+              <div class="catalog-list">${locations.map((location) => locationCard(location)).join("")}</div>
+            </details>`;
+          }
+          const grouped = new Map();
+          locations.forEach((location) => {
+            const key = location.groupId || `ungrouped-${category}`;
+            if (!grouped.has(key)) grouped.set(key, {name: location.groupName || "Outros", locations: []});
+            grouped.get(key).locations.push(location);
+          });
+          return `<div class="location-groups">${Array.from(grouped.values()).map((group) => `<details class="location-group" open>
+            <summary><h3>${escapeHtml(group.name)}</h3></summary>
+            <div class="catalog-list">${group.locations.map((location) => locationCard(location)).join("")}</div>
+          </details>`).join("")}</div>`;
         })
         .join("")
     : '<p class="empty-state">Nenhum local cadastrado.</p>';
@@ -367,6 +391,7 @@ function renderLocations() {
     <header class="content-header">
       <div><p class="eyebrow">Catálogo da agenda</p><h2>Locais</h2></div>
       <div class="toolbar-actions">
+        <button type="button" data-action="add-location-group">Adicionar grupo</button>
         <button type="button" class="primary-action" data-action="add-location">Adicionar local</button>
       </div>
     </header>
@@ -409,6 +434,20 @@ function renderKnowledgeAxes() {
     <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
 }
 
+function locationCard(location) {
+  const key = catalogKey(location);
+  return `<article class="catalog-card">
+    <div><strong>${escapeHtml(location.roomNumber ? `Sala ${location.roomNumber}` : location.name)}</strong>
+      ${location.roomNumber ? `<span class="secondary-text">Sala/local: ${escapeHtml(location.roomNumber)}</span>` : ""}
+      ${location.description ? `<p class="secondary-text">${escapeHtml(location.description)}</p>` : ""}
+    </div>
+    <div class="card-actions">
+      <button type="button" data-action="edit-location" data-key="${key}">Editar</button>
+      <button class="danger-action" type="button" data-action="delete-location" data-key="${key}">Excluir</button>
+    </div>
+  </article>`;
+}
+
 function renderSettings() {
   editorContent.innerHTML = `
     <header class="content-header">
@@ -448,18 +487,19 @@ function renderEditorSection(section) {
   }
 }
 
-function selectOptions(items, selectedValue, emptyLabel) {
+function selectOptions(items, selectedValue, emptyLabel, multiple = false) {
   const options = [`<option value="">${escapeHtml(emptyLabel)}</option>`];
-  let selected = selectedValue == null || selectedValue === "";
+  const selectedValues = multiple ? new Set(selectedValue || []) : new Set([selectedValue]);
+  let selected = selectedValues.has(null) || selectedValues.has("");
   for (const item of items) {
     const value = emptyLabel === "Sem local" ? item.name : item.id;
-    const isSelected = value === selectedValue;
+    const isSelected = selectedValues.has(value);
     selected ||= isSelected;
     options.push(
       `<option value="${escapeHtml(value)}"${isSelected ? " selected" : ""}>${escapeHtml(item.name)}</option>`,
     );
   }
-  if (!selected && selectedValue != null) {
+  if (!selected && selectedValue != null && !multiple) {
     const token = `__stale-reference-${nextStaleReference}`;
     nextStaleReference += 1;
     modalReferenceValues.set(token, selectedValue);
@@ -533,11 +573,32 @@ function openCatalogEditor(type, record = null, opener = null) {
   const formId = location ? "location-form" : "knowledge-axis-form";
   const fieldId = location ? "location-name" : "knowledge-axis-name";
   const label = location ? "Nome do local" : "Nome do eixo";
+  const locationFields = location
+    ? `<label>Grupo
+        <select name="groupId">
+          <option value="">Sem grupo</option>
+          ${state.locationGroups
+            .map((item) => `<option value="${escapeHtml(item.id)}"${item.id === record?.groupId ? " selected" : ""}>${escapeHtml(item.name)}</option>`)
+            .join("")}
+        </select>
+      </label>
+      <label>Categoria
+        <select name="category">
+          <option value="blocos"${record?.category === "blocos" ? " selected" : ""}>Blocos</option>
+          <option value="laboratorios"${record?.category === "laboratorios" ? " selected" : ""}>Laboratórios</option>
+          <option value="estacionamentos"${record?.category === "estacionamentos" ? " selected" : ""}>Estacionamentos</option>
+          <option value="outros"${record?.category === "outros" || !record ? " selected" : ""}>Outros</option>
+        </select>
+      </label>
+      <label>Número da sala/local <input name="roomNumber" maxlength="80" value="${escapeHtml(record?.roomNumber)}"></label>
+      <label>Descrição <textarea name="description" maxlength="500">${escapeHtml(record?.description)}</textarea></label>`
+    : "";
   showModal(
     record ? `Editar ${location ? "local" : "eixo"}` : `Adicionar ${location ? "local" : "eixo"}`,
     `<form id="${formId}" class="editor-form">
       <label for="${fieldId}">${label}</label>
       <input id="${fieldId}" name="name" required maxlength="200" autocomplete="off" value="${escapeHtml(record?.name)}">
+      ${locationFields}
     </form>`,
     opener,
   );
@@ -545,6 +606,27 @@ function openCatalogEditor(type, record = null, opener = null) {
 
 function openLocationEditor(record = null, opener = null) {
   openCatalogEditor("location", record, opener);
+}
+
+function openLocationGroupEditor(opener = null) {
+  modalReferenceValues.clear();
+  modalContext = {type: "location-group"};
+  addSessionButton.hidden = true;
+  showModal(
+    "Adicionar grupo de locais",
+    `<form id="location-group-form" class="editor-form">
+      <label>Nome do grupo <input name="name" required maxlength="200"></label>
+      <label>Tipo
+        <select name="category" required>
+          <option value="blocos">Blocos</option>
+          <option value="laboratorios">Laboratórios</option>
+          <option value="estacionamentos">Estacionamentos</option>
+          <option value="outros">Outros</option>
+        </select>
+      </label>
+    </form>`,
+    opener,
+  );
 }
 
 function openKnowledgeAxisEditor(record = null, opener = null) {
@@ -555,7 +637,7 @@ function sessionEditorMarkup(session, index) {
   return `<div class="session-editor" data-session-index="${index}">
     <label>Início <input name="startTime" type="time" step="60" required value="${escapeHtml(session.startTime)}"></label>
     <label>Fim <input name="endTime" type="time" step="60" required value="${escapeHtml(session.endTime)}"></label>
-    <label>Local <select name="location">${selectOptions(state.locations, session.location, "Sem local")}</select></label>
+    <label>Locais <select name="locations" multiple size="4">${selectOptions(state.locations, session.locations ?? (session.location ? [session.location] : []), "Sem local", true)}</select></label>
     <button class="danger-action" type="button" data-action="delete-session">Excluir horário</button>
   </div>`;
 }
@@ -563,7 +645,7 @@ function sessionEditorMarkup(session, index) {
 function addSession(activity = modalWorkingActivity) {
   if (!activity) return null;
   if (!Array.isArray(activity.sessions)) activity.sessions = [];
-  const session = { startTime: "", endTime: "", location: null };
+  const session = { startTime: "", endTime: "", locations: [] };
   activity.sessions.push(session);
   return session;
 }
@@ -713,7 +795,8 @@ function isCanonicalSchedule(schedule) {
             isMinuteTime(session.startTime) &&
             isMinuteTime(session.endTime) &&
             session.endTime > session.startTime &&
-            (session.location == null || nonEmptyString(session.location)),
+            Array.isArray(session.locations ?? (session.location ? [session.location] : [])) &&
+            (session.locations ?? (session.location ? [session.location] : [])).every((location) => nonEmptyString(location)),
         );
       });
     });
@@ -753,11 +836,18 @@ async function saveLocation(form = modalContent.querySelector("#location-form"))
   }
   const record = modalContext?.type === "location" ? modalContext.record : null;
   const path = record ? `/admin/api/locations/${encodeURIComponent(record.id)}` : "/admin/api/locations";
+  const payload = {name};
+  if (form.elements.namedItem("category")) {
+    payload.category = formValue(form, "category") || "outros";
+    payload.groupId = formValue(form, "groupId") || null;
+    payload.roomNumber = formValue(form, "roomNumber");
+    payload.description = formValue(form, "description") || null;
+  }
   try {
     const response = await apiFetch(path, {
       method: record ? "PUT" : "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({name}),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) return showCatalogApiError(response);
     const canonical = await response.json();
@@ -851,6 +941,7 @@ function catalogReferenceValue(value) {
 function applyModalDraft(form) {
   if (!modalContext) return;
   if (modalContext.type === "location") return saveLocation(form);
+  if (modalContext.type === "location-group") return saveLocationGroup(form);
   if (modalContext.type === "axis") return saveKnowledgeAxis(form);
   const title = formValue(form, "title");
   if (!title) {
@@ -884,7 +975,9 @@ function applyModalDraft(form) {
     activity.sessions = Array.from(form.querySelectorAll(".session-editor")).map((row) => ({
       startTime: row.querySelector('[name="startTime"]').value,
       endTime: row.querySelector('[name="endTime"]').value,
-      location: catalogReferenceValue(row.querySelector('[name="location"]').value) || null,
+      locations: Array.from(row.querySelector('[name="locations"]').selectedOptions)
+        .map((option) => catalogReferenceValue(option.value))
+        .filter(Boolean),
     }));
     if (!modalContext.record) {
       targetGroup.items.push(activity);
@@ -908,6 +1001,26 @@ function isValidDate(value) {
 
 function isMinuteTime(value) {
   return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+async function saveLocationGroup(form = modalContent.querySelector("#location-group-form")) {
+  const name = formValue(form, "name");
+  if (!name) return announce("O nome do grupo é obrigatório.");
+  try {
+    const response = await apiFetch("/admin/api/locations/groups", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name, category: formValue(form, "category")}),
+    });
+    if (!response.ok) return showCatalogApiError(response);
+    const group = await response.json();
+    state.locationGroups.push(group);
+    renderLocations();
+    editorModal.close();
+    announce("Grupo criado com sucesso.");
+  } catch (error) {
+    if (error.message !== "unauthorized") announce("Não foi possível salvar as alterações.");
+  }
 }
 
 function isValidLink(value) {
@@ -963,7 +1076,8 @@ function validateDraft(schedule) {
           } else if (session.endTime <= session.startTime) {
             errors.push(`${sessionLabel}: O horário final deve ser posterior ao inicial.`);
           }
-          if (session.location != null && !locationNames.has(session.location)) {
+          const locations = session.locations ?? (session.location ? [session.location] : []);
+          if (!locations.every((location) => locationNames.has(location))) {
             errors.push(`${sessionLabel}: selecione um local cadastrado.`);
           }
         });
@@ -1032,6 +1146,14 @@ async function loadAdminData() {
   }
   state.schedule = schedule;
   state.locations = locations;
+  state.locationGroups = locations
+    .filter((location) => location.groupId)
+    .reduce((groups, location) => {
+      if (!groups.some((group) => group.id === location.groupId)) {
+        groups.push({id: location.groupId, name: location.groupName, category: location.category});
+      }
+      return groups;
+    }, []);
   state.knowledgeAxes = knowledgeAxes;
   restoreScheduleViewState(viewState);
   renderEditorSection(viewState?.section || "schedule");
@@ -1076,6 +1198,7 @@ async function handleEditorClick(event) {
   if (action === "add-group") return openGroupEditor(null, selectedSection(), button);
   if (action === "add-activity") return openActivityEditor(null, null, button);
   if (action === "add-location") return openLocationEditor(null, button);
+  if (action === "add-location-group") return openLocationGroupEditor(button);
   if (action === "edit-location") return openLocationEditor(catalogRecord("location", key), button);
   if (action === "delete-location") return deleteLocation(catalogRecord("location", key));
   if (action === "add-axis") return openKnowledgeAxisEditor(null, button);

@@ -173,6 +173,38 @@ def test_settings_contains_event_metadata_outside_schedule_workspace():
     )
 
 
+def test_locations_render_as_category_dropdowns_with_room_metadata():
+    run_node_case(
+        """
+        api.state.locations = [
+          {id: "loc-1", name: "Bloco B - Sala 111", category: "blocos", groupName: "Bloco B", roomNumber: "111", description: "Sala prática"},
+          {id: "loc-2", name: "Estacionamento", category: "estacionamentos", roomNumber: "", description: "Área externa"},
+        ];
+        api.renderEditorSection("locations");
+        assert.match(elementFor("#editor-content").innerHTML, /Bloco B/);
+        assert.equal(elementFor("#editor-content").innerHTML.includes(">Blocos<"), false);
+        assert.match(elementFor("#editor-content").innerHTML, /Sala prática/);
+        assert.match(elementFor("#editor-content").innerHTML, /111/);
+        assert.match(elementFor("#editor-content").innerHTML, /<details/);
+        """
+    )
+
+
+def test_parking_locations_are_listed_without_an_intermediate_group():
+    run_node_case(
+        """
+        api.state.locations = [
+          {id: "loc-1", name: "Estacionamento em frente à Cantina", category: "estacionamentos", groupId: "parking", groupName: "Estacionamento em frente à Cantina", roomNumber: "", description: null},
+        ];
+        api.renderEditorSection("locations");
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /Estacionamentos/);
+        assert.match(html, /Estacionamento em frente à Cantina/);
+        assert.match(html, /class="location-group"/);
+        """
+    )
+
+
 def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client):
     html = client.get("/admin").text
     assert 'id="add-session"' in html
@@ -327,7 +359,7 @@ def test_add_session_changes_only_the_schedule_draft():
         assert.equal(activity.sessions.length, 1);
         assert.equal(activity.sessions[0], session);
         assert.deepEqual(JSON.parse(JSON.stringify(session)), {
-          startTime: "", endTime: "", location: null,
+          startTime: "", endTime: "", locations: [],
         });
         """
     )

@@ -90,6 +90,8 @@ propagado para as sessões da agenda.
   afetadas.
 - Nomes são normalizados por Unicode, espaços e caixa antes da comparação.
 - IDs persistidos não devem ser derivados da posição dos itens na lista.
+- O catálogo de locais mantém grupos tipados e salas relacionadas por `groupId`; a agenda
+  referencia os nomes das salas e cada sessão pode conter uma lista `locations`.
 
 ### Camadas e contratos
 
