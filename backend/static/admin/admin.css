@@ -291,7 +291,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 #editor-content {
   grid-column: 2;
-  width: min(100%, var(--content-width));
+  width: 100%;
+  max-width: none;
   padding: var(--content-padding);
 }
 #editor-content { grid-area: content; }

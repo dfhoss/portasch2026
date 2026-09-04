@@ -159,8 +159,9 @@ ele ao implementar ou alterar a interface.
 
 - Use a escala de espaçamento em vez de valores arbitrários em pixels. Adicione um token primitivo
   somente quando uma necessidade recorrente não puder ser representada pela escala existente.
-- Mantenha o conteúdo principal em `--content-width` ou abaixo dele; permita que tabelas densas
-  rolem em vez de reduzir o texto abaixo de `--font-size-sm`.
+- Faça o conteúdo principal ocupar toda a coluna disponível em viewports amplos; componentes que
+  precisam de leitura mais contida podem usar `--content-width` internamente. Permita que tabelas
+  densas rolem em vez de reduzir o texto abaixo de `--font-size-sm`.
 - Em larguras de desktop acima de 1024px, use áreas explícitas de grid `sidebar`, `message` e
   `content`. O conteúdo deve seguir imediatamente a mensagem de status; a altura da barra lateral
   não deve criar uma linha vazia implícita acima dele.

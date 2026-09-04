@@ -65,6 +65,14 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
     assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
 
 
+def test_editor_content_fills_the_available_desktop_column(client):
+    css = client.get("/admin/static/admin.css").text
+    content_rule = css_rule(css, "#editor-content")
+
+    assert "width: 100%;" in content_rule
+    assert "max-width: none;" in content_rule
+
+
 def test_login_message_is_between_password_and_submit_and_uses_error_tone(client):
     """Session errors must be prominent and appear next to the action they explain."""
     html = client.get("/admin").text
