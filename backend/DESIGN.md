@@ -133,7 +133,7 @@ ele ao implementar ou alterar a interface.
 
 ### Componentes
 
-- Variantes semânticas como `.primary-action` e `.danger-action` carregam seu contrato visual
+- Variantes semânticas como `.primary-action`, `.secondary-action` e `.danger-action` carregam seu contrato visual
   completo (espaçamento, borda, raio, superfície e tipografia), independentemente do contêiner.
 
 ### Cor
@@ -159,8 +159,9 @@ ele ao implementar ou alterar a interface.
 
 - Use a escala de espaçamento em vez de valores arbitrários em pixels. Adicione um token primitivo
   somente quando uma necessidade recorrente não puder ser representada pela escala existente.
-- Mantenha o conteúdo principal em `--content-width` ou abaixo dele; permita que tabelas densas
-  rolem em vez de reduzir o texto abaixo de `--font-size-sm`.
+- Faça o conteúdo principal ocupar toda a coluna disponível em viewports amplos; componentes que
+  precisam de leitura mais contida podem usar `--content-width` internamente. Permita que tabelas
+  densas rolem em vez de reduzir o texto abaixo de `--font-size-sm`.
 - Em larguras de desktop acima de 1024px, use áreas explícitas de grid `sidebar`, `message` e
   `content`. O conteúdo deve seguir imediatamente a mensagem de status; a altura da barra lateral
   não deve criar uma linha vazia implícita acima dele.
@@ -172,22 +173,42 @@ ele ao implementar ou alterar a interface.
   navegação usam `--color-surface` e `--color-border` para uma borda sutil em repouso; reserve
   `--color-surface-selected` e `--color-navigation` para o item ativo e sua ênfase, evitando uma
   barra lateral totalmente verde saturada.
-- Os itens da barra lateral usam um ícone consistente ao lado de cada rótulo, e a ação “Sair” é o
-  último item da lista de navegação, com o mesmo tratamento de foco acessível e contraste.
+- Os itens da barra lateral usam um ícone consistente ao lado de cada rótulo. A navegação principal
+  fica no topo; “Configurações” e “Sair” compartilham um único dropdown “Perfil” no rodapé, sem
+  criar uma tela de perfil por enquanto. O gatilho e as opções mantêm foco acessível e contraste.
 - A edição e a data do evento pertencem a “Configurações”, não ao espaço de trabalho da
   programação. Rotule a edição como “Edição do evento” para deixar sua finalidade explícita; salve-a
   pelo mesmo fluxo de persistência da agenda.
 - Os locais são organizados por grupos explícitos armazenados em `locations.json`. Um grupo tem
   nome e uma categoria (`blocos`, `laboratorios`, `estacionamentos` ou `outros`); cada sala pertence
   a um grupo por meio de `groupId` e armazena `roomNumber` e `description`. A página de locais
-  exibe grupos como accordions inicialmente fechados (`Bloco A`, `LAB 01` etc.) e suas salas;
-  “Estacionamentos” também é um accordion que contém diretamente seus locais de estacionamento,
-  sem grupo aninhado. O título de cada accordion deve mostrar um chevron e a dica “Clique para
-  expandir”; ao abrir, o chevron gira e o conteúdo fica disponível. Use o mesmo token de
-  espaçamento entre todos os grupos, independentemente da categoria. Os nomes das salas continuam
+  exibe uma navegação de grupos à esquerda e as salas do grupo selecionado à direita;
+  “Estacionamentos” segue o mesmo padrão e contém diretamente seus locais de estacionamento,
+  sem grupo aninhado. Cada grupo é um botão claramente clicável, com nome e quantidade de salas; o
+  grupo ativo usa `aria-current="true"`. Use o mesmo token de espaçamento entre todos os grupos,
+  independentemente da categoria. Os nomes das salas continuam
   sendo as referências da agenda. Grupos sem salas continuam visíveis após o carregamento e
-  exibem o estado vazio “Nenhum local cadastrado”, para confirmar que o grupo foi criado e permitir
+  exibem o estado vazio “Nenhuma sala encontrada neste grupo”, para confirmar que o grupo foi criado e permitir
   que o usuário adicione locais a ele.
+- A lista de salas usa uma grade responsiva de cartões compactos, com rolagem limitada ao painel de
+  salas (`.location-rooms-grid`); a página e a navegação de grupos permanecem estáveis quando há
+  muitas salas. O campo de busca filtra as salas do grupo selecionado por nome, número ou descrição.
+  Em telas estreitas, a navegação de grupos fica mais compacta e a grade reduz o tamanho mínimo dos
+  cartões, preservando foco visível, contraste e alvos de toque.
+- Busca, navegação e salas compartilham um único canvas `.locations-workspace`, com a superfície
+  principal `--color-surface`; somente a navegação usa `--color-surface-subtle` para criar hierarquia.
+  O cabeçalho da página de Locais não usa recuo à direita, para terminar junto ao workspace; o
+  cabeçalho do painel usa `--space-1` (4px) à esquerda e `--space-2` (8px) à direita, conforme
+  as bordas internas da grade. A barra de busca mantém o recuo esquerdo original e usa `--space-2`
+  adicional à direita para alinhar seu fim aos cartões da lista.
+  O card `Novo grupo` fica no fim da navegação e é a ação contextual de criação de grupos; ele permanece
+  reservado no rodapé da coluna enquanto a lista de grupos ocupa o espaço flexível restante. A lista
+  só mostra rolagem quando o conteúdo excede a altura disponível, inclusive em zooms e viewports menores.
+  O cabeçalho
+  da página mantém apenas `Adicionar sala` como ação primária, vinculando a nova sala ao grupo ativo.
+- O menu de ações de uma sala deve escapar da área rolável da grade e abrir abaixo, à direita do botão
+  quando houver espaço. Seu posicionamento usa a viewport para evitar que o cartão ou a grade o recorte;
+  se não houver espaço inferior ou lateral, ele se reposiciona dentro da viewport.
 - Uma sessão da agenda armazena `locations` como lista. Várias salas podem compartilhar um horário;
   salas com horários diferentes usam entradas de sessão separadas para a mesma atividade. A entrada
   legada `location` é aceita somente para migração ao formato de lista.
@@ -221,9 +242,16 @@ ele ao implementar ou alterar a interface.
   usam somente o chevron no gatilho; o ícone da ação fica nas opções internas. O painel deve ser
   vertical, clicável, ter fundo opaco `--color-surface`, borda
   `--border-width`/`--color-border`, raio `--radius-md`, sombra `--shadow-dialog` e camada acima
-  dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço.
-- Nos cards de locais, o menu de ações deve exibir o rótulo “Ações” e um chevron; não use somente
-  um ícone de três pontos, pois isso reduz a descoberta das operações disponíveis.
+  dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço. Todos os
+  menus compartilham largura intrínseca (`max-content`) sem depender das dimensões de outro menu,
+  usando `--menu-default-width: 130.625px` como largura mínima padrão medida no menu de edição de
+  seção. Opções com texto maior expandem o painel. Um limite relativo à viewport evita transbordamento
+  em telas estreitas. Diálogos de edição usam
+  `--dialog-width-default: 672px` como largura padrão, com `max-width` responsivo.
+- Nos cards de locais, o menu de ações usa o ícone SVG de três pontos já estabelecido no projeto,
+  com rótulo acessível contextual. A edição do grupo selecionado fica como ação secundária explícita
+  à direita do cabeçalho de `.locations-room-panel`, permitindo alterar nome e categoria sem trocar
+  o ID nem romper os vínculos das salas.
 - Em cada momento, mantenha no máximo um menu popup aberto dentro do editor: abrir qualquer
   outro gatilho, inclusive um dropdown da barra, fecha o menu anterior; clicar fora ou executar
   uma opção também fecha o menu atual. Essa regra deve ser implementada no comportamento
@@ -253,6 +281,9 @@ ele ao implementar ou alterar a interface.
   `place-items: center`, `line-height: 0` e SVG como `display: block`. Se o resultado visual de um
   ajuste não corresponder ao pedido, não acumule tentativas empíricas: pesquise referências
   técnicas confiáveis e registre a solução baseada nessa pesquisa.
+- O ícone de três pontos (`more`) é uma exceção visual aos demais ícones de ação: seus círculos
+  devem ser sólidos (`fill: currentColor` e `stroke: none`) para permanecerem legíveis em zoom alto.
+  Os outros ícones continuam usando o traço padrão de `.action-icon`.
 - Diálogos precisam de título claro, gerenciamento de foco pelo teclado e uma ação primária
   explícita com o rótulo “Salvar” no canto inferior direito do rodapé. “Salvar” deve compartilhar
   o contrato completo de botão primário com as demais ações primárias: `--control-height`, tokens
@@ -290,7 +321,8 @@ ele ao implementar ou alterar a interface.
   por teclado, toque e foco visível em todos os viewports.
 - Mensagens de feedback do editor usam um toast fixo no canto superior direito, fora do fluxo do
   conteúdo. Sucessos desaparecem após alguns segundos e erros permanecem até serem fechados; o
-  toast mantém texto acessível e um controle explícito para dispensá-lo.
+  toast mantém texto acessível e um controle explícito para dispensá-lo. A caixa visual não deve
+  bloquear cliques no conteúdo atrás dela; somente o controle de fechamento recebe eventos de ponteiro.
 - Edição do evento e data do evento pertencem a `Configurações`: são campos de configuração,
   não ações da programação. O mesmo fluxo de persistência usa `Salvar alterações`, cujo estado
   fica neutro como `Tudo salvo` quando o rascunho corresponde à agenda carregada e ganha ênfase

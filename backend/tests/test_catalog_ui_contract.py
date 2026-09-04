@@ -40,6 +40,17 @@ def test_catalog_script_exposes_crud_and_safe_in_use_feedback(client):
     assert "escapeHtml" in script
 
 
+def test_more_action_icon_is_solid_without_changing_other_icons():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    more_css = css.split(".action-icon--more", 1)[1].split("}", 1)[0]
+    assert 'name === "more"' in script
+    assert "fill: currentColor;" in more_css
+    assert "stroke: none;" in more_css
+    assert ".action-icon {" in css
+    assert "fill: none;" in css.split("\n.action-icon {", 1)[1].split("}", 1)[0]
+
+
 def run_node_case(case: str) -> None:
     harness = r"""
 const assert = require("node:assert/strict");
@@ -125,8 +136,9 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
         api.state.locations = [{id: "loc-1", name: "Auditório"}];
         api.renderLocations();
         let html = elementFor("#editor-content").innerHTML;
-        assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar local/);
+        assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar sala/);
         assert.match(html, /class="menu card-menu"[\s\S]*data-action="edit-location"[\s\S]*data-action="delete-location"/);
+        assert.equal((html.match(/data-action="add-location"/g) || []).length, 1);
         assert.equal((html.match(/data-action="edit-location"/g) || []).length, 1);
         assert.equal((html.match(/data-action="delete-location"/g) || []).length, 1);
 
@@ -141,6 +153,18 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
     )
 
 
+def test_secondary_action_uses_established_surface_and_border_tokens():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    secondary_css = css.split(".secondary-action", 1)[1].split("}", 1)[0]
+    secondary_hover_css = css.split(".secondary-action:hover", 1)[1].split("}", 1)[0]
+    assert "padding: var(--space-2) var(--space-3);" in secondary_css
+    assert "border: var(--border-width) solid var(--color-border-strong);" in secondary_css
+    assert "border-radius: var(--radius-md);" in secondary_css
+    assert "background: var(--color-surface);" in secondary_css
+    assert "color: var(--color-text);" in secondary_css
+    assert "background: var(--color-surface-selected);" in secondary_hover_css
+
+
 def test_empty_location_group_is_rendered_after_reload():
     run_node_case(
         """
@@ -149,7 +173,7 @@ def test_empty_location_group_is_rendered_after_reload():
         api.renderLocations();
         const html = elementFor("#editor-content").innerHTML;
         assert.match(html, /Bloco C/);
-        assert.match(html, /Nenhum local cadastrado/);
+        assert.match(html, /Nenhuma sala encontrada neste grupo/);
         """
     )
 
@@ -161,13 +185,144 @@ def test_location_groups_start_collapsed_and_explain_interactions():
         api.state.locationGroups = [{id: "group-c", name: "Bloco C", category: "blocos"}];
         api.renderLocations();
         const html = elementFor("#editor-content").innerHTML;
-        assert.match(html, /<details class="location-group">/);
-        assert.match(html, /Clique para expandir/);
-        assert.match(html, /class="location-group-chevron/);
-        assert.match(html, /class="menu-trigger card-menu-trigger"[^>]*>[\s\S]*>Ações<\/span>/);
-        assert.equal((html.match(/class="location-group" open/g) || []).length, 0);
+        assert.match(html, /id="location-group-nav"/);
+        assert.match(html, /data-action="select-location-group"/);
+        assert.match(html, /aria-current="true"/);
+        assert.match(html, /class="menu-trigger card-menu-trigger"[^>]*>[\s\S]*class="action-icon"/);
+        assert.equal((html.match(/>Ações<\/span>/g) || []).length, 0);
+        assert.equal((html.match(/<details class="location-group"/g) || []).length, 0);
         """
     )
+
+
+def test_locations_use_group_navigation_and_compact_room_grid():
+    run_node_case(
+        """
+        api.state.locations = [
+          {id: "loc-1", name: "Sala 101", roomNumber: "101", category: "blocos", groupId: "group-a", groupName: "Bloco A"},
+          {id: "loc-2", name: "Sala 102", roomNumber: "102", category: "blocos", groupId: "group-a", groupName: "Bloco A"},
+        ];
+        api.state.locationGroups = [
+          {id: "group-a", name: "Bloco A", category: "blocos"},
+          {id: "group-c", name: "Bloco C", category: "blocos"},
+        ];
+        api.renderLocations();
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /id="location-group-nav"/);
+        assert.match(html, /data-action="select-location-group"/);
+        assert.match(html, /class="catalog-list location-rooms-grid"/);
+        assert.match(html, /id="location-search"/);
+        assert.match(html, /class="locations-workspace"[\s\S]*class="location-toolbar"[\s\S]*class="locations-workspace-body"/);
+        assert.match(html, /class="location-group-add-card"[\s\S]*>Novo grupo/);
+        assert.match(html, /data-action="edit-location-group"/);
+        assert.equal((html.match(/class="catalog-card location-room-card"/g) || []).length, 2);
+        """
+    )
+
+
+def test_location_group_edit_action_lives_in_selected_panel_header():
+    run_node_case(
+        """
+        api.state.locations = [{id: "loc-1", name: "Sala 101", groupId: "group-a", category: "blocos"}];
+        api.state.locationGroups = [{id: "group-a", name: "Bloco A", category: "blocos"}];
+        api.renderLocations();
+        const html = elementFor("#editor-content").innerHTML;
+        const nav = html.slice(html.indexOf('id="location-group-nav"'), html.indexOf("</nav>"));
+        const panel = html.slice(html.indexOf('class="locations-room-panel"'), html.indexOf("</section>"));
+        assert.equal(nav.includes('data-action="edit-location-group"'), false);
+        assert.match(panel, /class="secondary-action location-group-edit"/);
+        assert.match(panel, /data-action="edit-location-group"/);
+        assert.match(panel, /Editar grupo/);
+        """
+    )
+
+
+def test_location_search_restores_focus_and_selection_after_filter_render():
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    input_handler = script.split('editorContent.addEventListener("input"', 1)[1].split(
+        'editorView.addEventListener("click"', 1
+    )[0]
+    assert "const selectionStart = searchInput.selectionStart;" in input_handler
+    assert "const selectionEnd = searchInput.selectionEnd;" in input_handler
+    assert 'document.querySelector("#location-search")' in input_handler
+    assert "nextSearchInput?.focus();" in input_handler
+    assert "nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);" in input_handler
+
+
+def test_location_room_menu_escapes_scroll_grid_and_opens_below_trigger():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    room_menu_css = css.split(".location-room-card .menu-panel", 1)[1].split("}", 1)[0]
+    assert "position: fixed;" in room_menu_css
+    assert "top: var(--location-menu-top);" in room_menu_css
+    assert "left: var(--location-menu-left);" in room_menu_css
+    assert "function positionLocationMenu" in script
+    assert "positionLocationMenu(menu);" in script
+    locations_render = script.split("function renderLocations", 1)[1].split(
+        "function axisGroupCount", 1
+    )[0]
+    assert "initializeMenuDefaultWidth();" not in locations_render
+
+
+def test_location_group_navigation_reserves_space_for_add_card_before_scrolling_groups():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    nav_css = css.split(".location-group-nav {", 1)[1].split("}", 1)[0]
+    list_css = css.split(".location-group-nav-list {", 1)[1].split("}", 1)[0]
+    add_css = css.split(".location-group-add-card {", 1)[1].split("}", 1)[0]
+    assert "overflow: hidden;" in nav_css
+    assert "flex: 1 1 auto;" in list_css
+    assert "overflow-y: auto;" in list_css
+    assert "min-height: 0;" in list_css
+    assert "flex: 0 0 auto;" in add_css
+
+
+def test_locations_search_and_room_header_share_catalog_card_inset():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    toolbar_css = css.split(".locations-workspace .location-toolbar {", 1)[1].split("}", 1)[0]
+    panel_css = css.split(".locations-room-panel {", 1)[1].split("}", 1)[0]
+    header_css = css.split(".locations-page-header {", 1)[1].split("}", 1)[0]
+    room_header_css = css.split(".locations-room-panel > header {", 1)[1].split("}", 1)[0]
+    assert "padding-left: var(--space-1);" in header_css
+    assert "padding-right: var(--space-0);" in header_css
+    assert "padding-left: var(--space-1);" in room_header_css
+    assert "padding-right: var(--space-2);" in room_header_css
+    assert "margin: var(--space-4) var(--space-4) var(--space-3);" in toolbar_css
+    assert "padding-right: var(--space-2);" in toolbar_css
+    assert "padding: var(--panel-padding);" in panel_css
+    assert ".locations-room-panel { padding: var(--panel-padding); }" in css
+
+
+def test_group_navigation_styles_do_not_override_three_dot_menu_alignment():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    assert ".location-group-nav button {" not in css
+    assert ".location-group-select {" in css
+    assert ".location-group-select:hover" in css
+    assert ".menu-item {" in css
+    assert "text-align: left;" in css.split(".menu-item {", 1)[1].split("}", 1)[0]
+
+
+def test_popup_menus_share_intrinsic_width_based_on_the_longest_option():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    menu_css = css.split(".menu-panel {", 1)[1].split("}", 1)[0]
+    item_css = css.split(".menu-item {", 1)[1].split("}", 1)[0]
+    assert "width: max-content;" in menu_css
+    assert "min-width: var(--menu-default-width);" in menu_css
+    assert "max-width: calc(100vw - var(--space-8));" in menu_css
+    assert "white-space: nowrap;" in item_css
+    assert ".toolbar-menu-panel { min-width:" not in css
+    assert "min-width: 12rem;" not in css.split(".card-menu .menu-panel", 1)[1].split("}", 1)[0]
+    assert "function syncMenuDefaultWidth" not in script
+    assert "document.body.append(probe)" not in script
+    assert "--menu-default-width: 130.625px;" in css
+
+
+def test_editor_dialog_uses_rendered_section_width_as_shared_responsive_default():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    dialog_css = css.split("dialog {", 1)[1].split("}", 1)[0]
+    assert "--dialog-width-default: 672px;" in css
+    assert "width: var(--dialog-width-default);" in dialog_css
+    assert "max-width: calc(100vw - var(--space-8));" in dialog_css
 
 
 def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
@@ -252,10 +407,14 @@ def test_schedule_group_menu_can_escape_its_card_and_stay_in_foreground():
 
 def test_opening_any_popup_closes_other_open_popups_including_toolbar_menus():
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
-    toolbar_branch = script.split('const toolbarTrigger = event.target.closest?.("summary.menu-trigger");', 1)[1]
-    toolbar_branch = toolbar_branch.split('const trigger = event.target.closest?.("summary.menu-trigger");', 1)[0]
+    toolbar_branch = script.split(
+        'const toolbarTrigger = event.target.closest?.("summary.menu-trigger");', 1
+    )[1]
+    toolbar_branch = toolbar_branch.split(
+        'const trigger = event.target.closest?.("summary.menu-trigger");', 1
+    )[0]
     assert "closeOpenMenus(menu);" in toolbar_branch
-    assert "closeOpenMenus(menu);" in script.split('if (trigger) {', 1)[1].split("return;", 1)[0]
+    assert "closeOpenMenus(menu);" in script.split("if (trigger) {", 1)[1].split("return;", 1)[0]
 
 
 def test_group_toggle_uses_only_stateful_accessible_label():
@@ -273,8 +432,8 @@ def test_dropdown_menu_items_define_their_own_vertical_size():
 
 def test_contextual_creation_icons_are_not_generic_plus_icons():
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
-    assert 'collection: ' in script
-    assert 'activity: ' in script
+    assert "collection: " in script
+    assert "activity: " in script
 
 
 def test_crud_hierarchy_is_documented():

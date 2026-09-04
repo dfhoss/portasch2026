@@ -65,6 +65,14 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
     assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
 
 
+def test_editor_content_fills_the_available_desktop_column(client):
+    css = client.get("/admin/static/admin.css").text
+    content_rule = css_rule(css, "#editor-content")
+
+    assert "width: 100%;" in content_rule
+    assert "max-width: none;" in content_rule
+
+
 def test_login_message_is_between_password_and_submit_and_uses_error_tone(client):
     """Session errors must be prominent and appear next to the action they explain."""
     html = client.get("/admin").text
@@ -75,7 +83,7 @@ def test_login_message_is_between_password_and_submit_and_uses_error_tone(client
     assert password_end < message_position < submit_position
 
     css = client.get("/admin/static/admin.css").text
-    message_rule = css_rule(css, "#editor-message:not(:empty), #login-message:not(:empty)")
+    message_rule = css_rule(css, "#login-message:not(:empty)")
     login_color_rule = css_rule(css, ".login-card #login-message:not(:empty)")
     assert "border: var(--border-width) solid var(--green-200)" in message_rule
     assert "background: var(--color-surface-selected)" in message_rule
@@ -132,18 +140,32 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
 
     desktop_css, _, mobile_css = css.partition("@media (max-width: 749px)")
     assert "grid-column: 1" in css_rule(desktop_css, ".editor-sidebar")
+    assert "height: 100vh" in css_rule(desktop_css, ".editor-sidebar")
+    assert "position: sticky" in css_rule(desktop_css, ".editor-sidebar")
     assert "flex-direction: column" in css_rule(desktop_css, ".editor-sidebar nav")
-    nav_rule = (
-        ".editor-sidebar nav button {\n"
-        "  display: flex;\n"
-        "  align-items: center;\n"
-        "  gap: var(--space-2);\n"
-        "  border-color: var(--color-border);\n"
-        "  background: var(--color-surface);\n"
-        "  color: var(--color-text);"
-    )
-    assert nav_rule in desktop_css
+    nav_start = desktop_css.index("\n.editor-sidebar nav button {") + 1
+    nav_rule = css_rule(desktop_css, ".editor-sidebar nav button", start=nav_start)
+    assert "display: flex;" in nav_rule
+    assert "align-items: center;" in nav_rule
+    assert "gap: var(--space-2);" in nav_rule
+    assert "border-color: var(--color-border);" in nav_rule
+    assert "background: var(--color-surface);" in nav_rule
+    assert "color: var(--color-text);" in nav_rule
     assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
+
+
+def test_sidebar_groups_account_and_logout_under_profile_at_the_bottom(client):
+    page = client.get("/admin").text
+    css = client.get("/admin/static/admin.css").text
+    nav = page.split('<nav aria-label="Seções administrativas">', 1)[1].split("</nav>", 1)[0]
+    profile = page.split('<details class="sidebar-profile">', 1)[1].split("</details>", 1)[0]
+
+    assert 'data-editor-section="account"' not in nav
+    assert 'id="logout-button"' not in nav
+    assert 'class="sidebar-profile-trigger"' in profile
+    assert 'data-editor-section="account"' in profile
+    assert 'id="logout-button"' in profile
+    assert "margin-top: auto;" in css_rule(css, ".sidebar-profile")
 
 
 def test_browser_authentication_contract_validates_identity_before_loading_data(client):

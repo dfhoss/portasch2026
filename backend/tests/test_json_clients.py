@@ -280,6 +280,30 @@ def test_location_ids_are_generated_and_not_reused(tmp_path: Path):
     assert read_json(path)["nextId"] == 4
 
 
+def test_location_group_can_be_updated_without_changing_its_id(tmp_path: Path):
+    locations_path = tmp_path / "locations.json"
+    schedule_path = tmp_path / "schedule.json"
+    write_json(
+        locations_path,
+        {
+            "nextId": 2,
+            "nextGroupId": 2,
+            "groups": [{"id": "group-001", "name": "Bloco D", "category": "blocos"}],
+            "locations": [
+                {"id": "loc-001", "name": "Sala 1", "category": "blocos", "groupId": "group-001"}
+            ],
+        },
+    )
+    write_json(schedule_path, empty_schedule())
+
+    updated = LocationRepository(locations_path, schedule_path).rename_group(
+        "group-001", "Laboratório D", "laboratorios"
+    )
+
+    assert updated == {"id": "group-001", "name": "Laboratório D", "category": "laboratorios"}
+    assert LocationRepository(locations_path, schedule_path).list()[0]["groupId"] == "group-001"
+
+
 @pytest.mark.parametrize(
     ("repository_name", "duplicate"),
     [("location", "  AUDITÓRIO   CENTRAL  "), ("axis", "  EDUCAÇÃO   ESPECIAL  ")],
@@ -654,5 +678,9 @@ def test_seed_catalog_splits_auditoriums_between_block_groups():
     }
 
     assert auditorium_names == {"Auditório do Bloco A", "Auditório do Bloco B"}
-    assert all(item["category"] == "blocos" for item in catalog["locations"] if item["name"] in auditorium_names)
+    assert all(
+        item["category"] == "blocos"
+        for item in catalog["locations"]
+        if item["name"] in auditorium_names
+    )
     assert all(item["groupId"] != "group-001" for item in catalog["locations"])

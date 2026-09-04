@@ -37,6 +37,7 @@ let nextStaleReference = 1;
 const catalogKeys = new WeakMap();
 let nextCatalogKey = 1;
 let activeEditorSection = "schedule";
+let selectedLocationGroupId = null;
 let announceTimer = null;
 
 function readEditorViewState() {
@@ -224,7 +225,8 @@ function actionIcon(name) {
     delete: '<path d="M5 7h14M10 11v6M14 11v6M7 7l1 13h8l1-13M9 7V4h6v3"/>',
     chevron: '<path d="M7 9.5 12 14.5 17 9.5"/>',
   };
-  return `<svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
+  const modifier = name === "more" ? " action-icon--more" : "";
+  return `<svg class="action-icon${modifier}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
 }
 
 function draftKey(record) {
@@ -423,55 +425,78 @@ function renderSections() {
   updateScheduleSaveState();
 }
 
-function renderLocations() {
+function locationGroupEditAction(group) {
+  if (!group || !state.locationGroups.some((item) => item.id === group.id)) return "";
+  return `<button class="secondary-action location-group-edit" type="button" data-action="edit-location-group" data-key="${escapeHtml(group.id)}">${actionIcon("edit")}<span>Editar grupo</span></button>`;
+}
+
+function renderLocations(searchQuery = "") {
   const categoryLabels = {
     blocos: "Blocos",
     laboratorios: "Laboratórios",
     estacionamentos: "Estacionamentos",
     outros: "Outros",
   };
-  const cards = state.locations.length || state.locationGroups.length
-    ? ["blocos", "laboratorios", "estacionamentos", "outros"]
-        .map((category) => {
-          const locations = state.locations.filter(
-            (location) => (location.category || "outros") === category,
-          );
-          const groups = state.locationGroups
-            .filter((group) => group.category === category)
-            .map((group) => ({name: group.name, locations: [], id: group.id}));
-          const groupsById = new Map(groups.map((group) => [group.id, group]));
-          if (category === "estacionamentos") {
-            if (!locations.length && !groups.length) return "";
-            return `<details class="location-group">
-              <summary class="location-group-trigger"><span><h3>${categoryLabels[category]}</h3><span class="location-group-hint">Clique para expandir</span></span><span class="location-group-chevron">${actionIcon("chevron")}</span></summary>
-              <div class="catalog-list">${locations.length ? locations.map((location) => locationCard(location)).join("") : '<p class="empty-state">Nenhum local cadastrado.</p>'}</div>
-            </details>`;
-          }
-          const grouped = new Map(groups.map((group) => [group.id, group]));
-          locations.forEach((location) => {
-            const key = location.groupId && groupsById.has(location.groupId)
-              ? location.groupId
-              : `ungrouped-${category}`;
-            if (!grouped.has(key)) grouped.set(key, {name: location.groupName || "Outros", locations: []});
-            grouped.get(key).locations.push(location);
-          });
-          if (!grouped.size) return "";
-          return `<div class="location-groups">${Array.from(grouped.values()).map((group) => `<details class="location-group">
-            <summary class="location-group-trigger"><span><h3>${escapeHtml(group.name)}</h3><span class="location-group-hint">Clique para expandir</span></span><span class="location-group-chevron">${actionIcon("chevron")}</span></summary>
-            <div class="catalog-list">${group.locations.length ? group.locations.map((location) => locationCard(location)).join("") : '<p class="empty-state">Nenhum local cadastrado.</p>'}</div>
-          </details>`).join("")}</div>`;
-        })
-        .join("")
-    : '<p class="empty-state">Nenhum local cadastrado.</p>';
+  const groups = state.locationGroups.map((group) => ({...group, locations: []}));
+  const groupsById = new Map(groups.map((group) => [group.id, group]));
+  state.locations.forEach((location) => {
+    const category = location.category || "outros";
+    const fallbackId = `ungrouped-${category}`;
+    const group = location.groupId && groupsById.has(location.groupId)
+      ? groupsById.get(location.groupId)
+      : groups.find((item) => item.id === fallbackId) || {
+          id: fallbackId,
+          name: categoryLabels[category],
+          category,
+          locations: [],
+        };
+    if (!groupsById.has(group.id)) {
+      groupsById.set(group.id, group);
+      groups.push(group);
+    }
+    group.locations.push(location);
+  });
+  selectedLocationGroupId = groups.some((group) => group.id === selectedLocationGroupId)
+    ? selectedLocationGroupId
+    : groups[0]?.id || null;
+  const selectedGroup = groups.find((group) => group.id === selectedLocationGroupId);
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+  const visibleLocations = selectedGroup?.locations.filter((location) => {
+    const searchable = `${location.name} ${location.roomNumber || ""} ${location.description || ""}`;
+    return searchable.toLocaleLowerCase().includes(normalizedQuery);
+  }) || [];
+  const cards = selectedGroup
+    ? visibleLocations.length
+      ? visibleLocations.map((location) => locationCard(location, " location-room-card")).join("")
+      : '<p class="empty-state">Nenhuma sala encontrada neste grupo.</p>'
+    : '<p class="empty-state">Nenhum grupo cadastrado.</p>';
   editorContent.innerHTML = `
-    <header class="content-header">
+    <header class="content-header locations-page-header">
       <div><p class="eyebrow">Catálogo da agenda</p><h2>Locais</h2></div>
       <div class="toolbar-actions">
-        <button type="button" data-action="add-location-group">Adicionar grupo</button>
-        <button type="button" class="primary-action" data-action="add-location">Adicionar local</button>
+        <button type="button" class="primary-action" data-action="add-location">Adicionar sala</button>
       </div>
     </header>
-    <div class="catalog-list" id="locations-list">${cards}</div>`;
+    <div class="locations-workspace">
+      <div class="location-toolbar">
+        <input id="location-search" type="search" placeholder="Buscar sala, grupo ou descrição" value="${escapeHtml(searchQuery)}" aria-label="Buscar salas">
+      </div>
+      <div class="locations-workspace-body">
+        <nav id="location-group-nav" class="location-group-nav" aria-label="Grupos de locais">
+          <div class="location-group-nav-heading"><h3>Grupos</h3><span>${groups.length}</span></div>
+          <div class="location-group-nav-list">
+            ${groups.map((group) => `<div class="location-group-nav-item">
+              <button class="location-group-select" type="button" data-action="select-location-group" data-key="${escapeHtml(group.id)}" aria-current="${group.id === selectedLocationGroupId}"><span>${escapeHtml(group.name)}</span><small>${group.locations.length}</small></button>
+            </div>`).join("")}
+          </div>
+          <button class="location-group-add-card" type="button" data-action="add-location-group" aria-label="Adicionar novo grupo"><span aria-hidden="true">+</span><span>Novo grupo</span></button>
+        </nav>
+        <section class="locations-room-panel" aria-labelledby="selected-location-group">
+          <header><div><h3 id="selected-location-group">${escapeHtml(selectedGroup?.name || "Locais")}</h3><p>${selectedGroup?.locations.length || 0} ${selectedGroup?.locations.length === 1 ? "sala cadastrada" : "salas cadastradas"}</p></div>${locationGroupEditAction(selectedGroup)}</header>
+          <div class="catalog-list location-rooms-grid" id="locations-list">${cards}</div>
+      </section>
+      </div>
+    </div>`;
 }
 
 function axisGroupCount(axisId) {
@@ -513,16 +538,16 @@ function renderKnowledgeAxes() {
     <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
 }
 
-function locationCard(location) {
+function locationCard(location, extraClass = "") {
   const key = catalogKey(location);
-  return `<article class="catalog-card">
+  return `<article class="catalog-card${extraClass}">
     <div><strong>${escapeHtml(location.roomNumber ? `Sala ${location.roomNumber}` : location.name)}</strong>
       ${location.roomNumber ? `<span class="secondary-text">Sala/local: ${escapeHtml(location.roomNumber)}</span>` : ""}
       ${location.description ? `<p class="secondary-text">${escapeHtml(location.description)}</p>` : ""}
     </div>
     <div class="card-actions">
       <details class="menu card-menu">
-        <summary class="menu-trigger card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}"><span>Ações</span><span class="menu-chevron">${actionIcon("chevron")}</span></summary>
+        <summary class="menu-trigger card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}">${actionIcon("more")}</summary>
         <div class="menu-panel card-menu-panel" role="menu">
           <button class="menu-item" type="button" role="menuitem" data-action="edit-location" data-key="${key}">${actionIcon("edit")}Editar</button>
           <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-location" data-key="${key}">${actionIcon("delete")}Excluir</button>
@@ -654,6 +679,8 @@ function openCatalogEditor(type, record = null, opener = null) {
   modalWorkingActivity = null;
   addSessionButton.hidden = true;
   const location = type === "location";
+  const selectedGroup = state.locationGroups.find((item) => item.id === selectedLocationGroupId);
+  const selectedGroupId = record?.groupId ?? (location ? selectedGroup?.id : null);
   const formId = location ? "location-form" : "knowledge-axis-form";
   const fieldId = location ? "location-name" : "knowledge-axis-name";
   const label = location ? "Nome do local" : "Nome do eixo";
@@ -662,7 +689,7 @@ function openCatalogEditor(type, record = null, opener = null) {
         <select name="groupId">
           <option value="">Sem grupo</option>
           ${state.locationGroups
-            .map((item) => `<option value="${escapeHtml(item.id)}"${item.id === record?.groupId ? " selected" : ""}>${escapeHtml(item.name)}</option>`)
+            .map((item) => `<option value="${escapeHtml(item.id)}"${item.id === selectedGroupId ? " selected" : ""}>${escapeHtml(item.name)}</option>`)
             .join("")}
         </select>
       </label>
@@ -671,7 +698,7 @@ function openCatalogEditor(type, record = null, opener = null) {
           <option value="blocos"${record?.category === "blocos" ? " selected" : ""}>Blocos</option>
           <option value="laboratorios"${record?.category === "laboratorios" ? " selected" : ""}>Laboratórios</option>
           <option value="estacionamentos"${record?.category === "estacionamentos" ? " selected" : ""}>Estacionamentos</option>
-          <option value="outros"${record?.category === "outros" || !record ? " selected" : ""}>Outros</option>
+          <option value="outros"${record?.category === "outros" || (!record && selectedGroup?.category === "outros") ? " selected" : ""}>Outros</option>
         </select>
       </label>
       <label>Número da sala/local <input name="roomNumber" maxlength="80" value="${escapeHtml(record?.roomNumber)}"></label>
@@ -692,20 +719,20 @@ function openLocationEditor(record = null, opener = null) {
   openCatalogEditor("location", record, opener);
 }
 
-function openLocationGroupEditor(opener = null) {
+function openLocationGroupEditor(record = null, opener = null) {
   modalReferenceValues.clear();
-  modalContext = {type: "location-group"};
+  modalContext = {type: "location-group", groupId: record?.id || null};
   addSessionButton.hidden = true;
   showModal(
-    "Adicionar grupo de locais",
+    record ? "Editar grupo de locais" : "Adicionar grupo de locais",
     `<form id="location-group-form" class="editor-form">
-      <label>Nome do grupo <input name="name" required maxlength="200"></label>
+      <label>Nome do grupo <input name="name" required maxlength="200" value="${escapeHtml(record?.name)}"></label>
       <label>Tipo
         <select name="category" required>
-          <option value="blocos">Blocos</option>
-          <option value="laboratorios">Laboratórios</option>
-          <option value="estacionamentos">Estacionamentos</option>
-          <option value="outros">Outros</option>
+          <option value="blocos"${record?.category === "blocos" || (!record && selectedGroup?.category === "blocos") ? " selected" : ""}>Blocos</option>
+          <option value="laboratorios"${record?.category === "laboratorios" || (!record && selectedGroup?.category === "laboratorios") ? " selected" : ""}>Laboratórios</option>
+          <option value="estacionamentos"${record?.category === "estacionamentos" || (!record && selectedGroup?.category === "estacionamentos") ? " selected" : ""}>Estacionamentos</option>
+          <option value="outros"${record?.category === "outros" ? " selected" : ""}>Outros</option>
         </select>
       </label>
     </form>`,
@@ -1105,18 +1132,24 @@ function isMinuteTime(value) {
 async function saveLocationGroup(form = modalContent.querySelector("#location-group-form")) {
   const name = formValue(form, "name");
   if (!name) return announce("O nome do grupo é obrigatório.");
+  const groupId = modalContext.groupId;
   try {
-    const response = await apiFetch("/admin/api/locations/groups", {
-      method: "POST",
+    const response = await apiFetch(groupId ? `/admin/api/locations/groups/${encodeURIComponent(groupId)}` : "/admin/api/locations/groups", {
+      method: groupId ? "PUT" : "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({name, category: formValue(form, "category")}),
     });
     if (!response.ok) return showCatalogApiError(response);
     const group = await response.json();
-    state.locationGroups.push(group);
+    if (groupId) {
+      const index = state.locationGroups.findIndex((item) => item.id === groupId);
+      if (index >= 0) state.locationGroups[index] = group;
+    } else {
+      state.locationGroups.push(group);
+    }
     renderLocations();
     editorModal.close();
-    announce("Grupo criado com sucesso.");
+    announce(groupId ? "Grupo atualizado com sucesso." : "Grupo criado com sucesso.");
   } catch (error) {
     if (error.message !== "unauthorized") announce("Não foi possível salvar as alterações.");
   }
@@ -1303,7 +1336,15 @@ async function handleEditorClick(event) {
   if (action === "add-group") return openGroupEditor(null, selectedSection(), button);
   if (action === "add-activity") return openActivityEditor(null, null, button);
   if (action === "add-location") return openLocationEditor(null, button);
-  if (action === "add-location-group") return openLocationGroupEditor(button);
+  if (action === "add-location-group") return openLocationGroupEditor(null, button);
+  if (action === "edit-location-group") {
+    const group = state.locationGroups.find((item) => item.id === key);
+    return group ? openLocationGroupEditor(group, button) : announce("Grupo não encontrado.");
+  }
+  if (action === "select-location-group") {
+    selectedLocationGroupId = key;
+    return renderLocations(document.querySelector("#location-search")?.value || "");
+  }
   if (action === "edit-location") return openLocationEditor(catalogRecord("location", key), button);
   if (action === "delete-location") return deleteLocation(catalogRecord("location", key));
   if (action === "add-axis") return openKnowledgeAxisEditor(null, button);
@@ -1378,6 +1419,26 @@ function closeOpenMenus(exceptMenu = null) {
   });
 }
 
+function positionLocationMenu(menu) {
+  const trigger = menu.querySelector(".menu-trigger");
+  const panel = menu.querySelector(".menu-panel");
+  if (!trigger || !panel) return;
+  const triggerRect = trigger.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const margin = 8;
+  const panelWidth = panel.offsetWidth || 192;
+  const panelHeight = panel.offsetHeight || 96;
+  const left = triggerRect.right + panelWidth <= viewportWidth - margin
+    ? triggerRect.right
+    : Math.max(margin, triggerRect.left - panelWidth);
+  const top = triggerRect.bottom + panelHeight <= viewportHeight - margin
+    ? triggerRect.bottom + margin
+    : Math.max(margin, triggerRect.top - panelHeight - margin);
+  panel.style.setProperty("--location-menu-left", `${left}px`);
+  panel.style.setProperty("--location-menu-top", `${top}px`);
+}
+
 editorContent.addEventListener("click", handleEditorClick);
 editorContent.addEventListener("click", (event) => {
   const toolbarTrigger = event.target.closest?.("summary.menu-trigger");
@@ -1388,6 +1449,13 @@ editorContent.addEventListener("click", (event) => {
       closeOpenMenus(menu);
       if (menu.toggleAttribute) menu.toggleAttribute("open");
       else menu.open = !menu.open;
+      if (menu.open) {
+        requestAnimationFrame(() => {
+          if (menu.closest(".location-room-card") || menu.closest(".group-nav-menu")) {
+            positionLocationMenu(menu);
+          }
+        });
+      }
     }
     return;
   }
@@ -1414,6 +1482,18 @@ editorContent.addEventListener("change", (event) => {
   if (event.target.id === "schedule-version") state.schedule.version = Number(event.target.value);
   if (event.target.id === "schedule-date") state.schedule.eventDate = event.target.value;
   markScheduleChanged();
+});
+editorContent.addEventListener("input", (event) => {
+  if (event.target.id !== "location-search") return;
+  const searchInput = event.target;
+  const selectionStart = searchInput.selectionStart;
+  const selectionEnd = searchInput.selectionEnd;
+  renderLocations(searchInput.value);
+  const nextSearchInput = document.querySelector("#location-search");
+  nextSearchInput?.focus();
+  if (Number.isInteger(selectionStart) && Number.isInteger(selectionEnd)) {
+    nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);
+  }
 });
 
 editorView.addEventListener("click", (event) => {

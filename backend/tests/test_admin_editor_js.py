@@ -296,7 +296,7 @@ def test_settings_contains_event_metadata_outside_schedule_workspace():
     )
 
 
-def test_locations_render_as_category_dropdowns_with_room_metadata():
+def test_locations_render_group_navigation_with_room_metadata():
     run_node_case(
         """
         api.state.locations = [
@@ -305,7 +305,7 @@ def test_locations_render_as_category_dropdowns_with_room_metadata():
         ];
         api.renderEditorSection("locations");
         assert.match(elementFor("#editor-content").innerHTML, /Bloco B/);
-        assert.equal(elementFor("#editor-content").innerHTML.includes(">Blocos<"), false);
+        assert.match(elementFor("#editor-content").innerHTML, />Blocos</);
         assert.match(elementFor("#editor-content").innerHTML, /Sala prática/);
         assert.match(elementFor("#editor-content").innerHTML, /111/);
         assert.match(elementFor("#editor-content").innerHTML, /<details/);
@@ -323,7 +323,7 @@ def test_parking_locations_are_listed_without_an_intermediate_group():
         const html = elementFor("#editor-content").innerHTML;
         assert.match(html, /Estacionamentos/);
         assert.match(html, /Estacionamento em frente à Cantina/);
-        assert.match(html, /class="location-group"/);
+        assert.match(html, /class="location-group-nav"/);
         """
     )
 
@@ -333,7 +333,6 @@ def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client
     assert 'id="add-session"' in html
     assert 'id="modal-apply"' in html
     assert 'id="modal-close"' not in html
-    assert "Fechar" not in html
     assert ">Salvar<" in html
     script = client.get("/admin/static/admin.js").text
     assert 'editorModal.addEventListener("click"' in script
