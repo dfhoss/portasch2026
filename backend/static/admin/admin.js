@@ -347,6 +347,7 @@ function renderSections() {
       return `<button type="button" data-action="select-section" data-key="${key}" aria-current="${current}">${escapeHtml(item.title || "Seção sem título")}</button>`;
     })
     .join("");
+  const addSectionButton = `<button id="add-section" class="section-add-button" type="button" data-action="add-section" aria-label="Adicionar seção">${actionIcon("add")}<span>Adicionar seção</span></button>`;
 
   const sectionPanel = section
     ? `<section class="schedule-section">
@@ -375,19 +376,13 @@ function renderSections() {
     <header class="content-header">
       <div><p class="eyebrow">Agenda do evento</p><h2>Programação</h2></div>
       <div class="toolbar-actions">
-        <details id="add-schedule-actions" class="toolbar-menu">
-          <summary class="toolbar-menu-trigger">Adicionar</summary>
-          <div class="toolbar-menu-panel" role="menu">
-            <button type="button" role="menuitem" data-action="add-section">Adicionar seção</button>
-          </div>
-        </details>
         <div class="save-status-group">
           <span id="schedule-save-status" class="save-status" role="status">Salvo</span>
           <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule" disabled>Salvar alterações</button>
         </div>
       </div>
     </header>
-    <nav id="section-list" class="section-list" aria-label="Seções da programação">${sectionButtons}</nav>
+    <nav id="section-list" class="section-list" aria-label="Seções da programação">${sectionButtons}${addSectionButton}</nav>
     <div id="schedule-sections">${sectionPanel}</div>`;
   updateScheduleSaveState();
 }
@@ -1394,7 +1389,7 @@ addSessionButton.addEventListener("click", () => {
 function restoreModalFocus() {
   if (modalOpener?.isConnected) {
     if (modalOpener.dataset?.action === "add-section") {
-      editorContent.querySelector("#add-schedule-actions .toolbar-menu-trigger")?.focus();
+      editorContent.querySelector("#add-section")?.focus();
       return;
     }
     const menu = modalOpener.closest?.(".toolbar-menu, .card-menu");

@@ -376,6 +376,31 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   color: var(--color-navigation);
   font-weight: var(--font-weight-bold);
 }
+.section-add-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: var(--control-height);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-action-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-action-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+.section-add-button .action-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+}
+.section-add-button:hover { background: var(--color-surface-selected); }
 .section-toolbar { margin: var(--space-2) 0 var(--space-4); }
 .section-create-menu { flex: 0 0 auto; }
 .schedule-section { display: grid; gap: var(--space-4); }

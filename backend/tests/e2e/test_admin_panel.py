@@ -31,10 +31,6 @@ def apply_modal(page: Page) -> None:
     expect(page.locator("#editor-modal")).to_be_hidden(timeout=500)
 
 
-def open_schedule_add_menu(page: Page) -> None:
-    page.locator("#add-schedule-actions .toolbar-menu-trigger").click()
-
-
 def open_section_add_menu(page: Page) -> None:
     page.locator(".section-heading .section-create-menu .toolbar-menu-trigger").click()
 
@@ -215,19 +211,17 @@ def test_navigation_and_modal_escape_apply_restore_focus(admin_page: Page) -> No
         if heading:
             expect(admin_page.get_by_role("heading", name=heading)).to_be_visible()
     admin_page.get_by_role("button", name="Programação").click()
-    open_schedule_add_menu(admin_page)
-    add_section = admin_page.get_by_role("menuitem", name="Adicionar seção")
+    add_section = admin_page.get_by_role("button", name="Adicionar seção")
     add_section.click()
     expect(admin_page.locator("#editor-modal")).to_be_visible()
     expect(admin_page.get_by_label("Título")).to_be_focused()
     admin_page.keyboard.press("Escape")
     expect(admin_page.locator("#editor-modal")).to_be_hidden()
-    expect(admin_page.locator("#add-schedule-actions .toolbar-menu-trigger")).to_be_focused()
-    open_schedule_add_menu(admin_page)
-    add_section.click()
+    expect(admin_page.locator("#add-section")).to_be_focused()
+    admin_page.locator("#add-section").click()
     admin_page.get_by_label("Título").fill("Foco E2E")
     apply_modal(admin_page)
-    expect(admin_page.locator("#add-schedule-actions .toolbar-menu-trigger")).to_be_focused()
+    expect(admin_page.locator("#add-section")).to_be_focused()
 
 
 def test_delayed_initial_data_keeps_editor_hidden_until_schedule_exists(admin_page: Page) -> None:
@@ -251,8 +245,7 @@ def test_delayed_initial_data_keeps_editor_hidden_until_schedule_exists(admin_pa
 
 def test_schedule_create_edit_session_validation_and_reload_persistence(admin_page: Page) -> None:
     login(admin_page)
-    open_schedule_add_menu(admin_page)
-    add_section = admin_page.get_by_role("menuitem", name="Adicionar seção")
+    add_section = admin_page.get_by_role("button", name="Adicionar seção")
     add_section.click()
     title = admin_page.get_by_label("Título")
     title.fill("Seção E2E")
@@ -310,8 +303,7 @@ def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
     expect(admin_page.get_by_text(scenario["axis"])).to_be_visible()
 
     admin_page.get_by_role("button", name="Programação").click()
-    open_schedule_add_menu(admin_page)
-    admin_page.get_by_role("menuitem", name="Adicionar seção").click()
+    admin_page.get_by_role("button", name="Adicionar seção").click()
     admin_page.get_by_label("Título").fill(scenario["section"])
     admin_page.get_by_label("Descrição").fill(scenario["sectionDescription"])
     apply_modal(admin_page)

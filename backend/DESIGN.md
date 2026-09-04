@@ -187,7 +187,10 @@ with it when implementing or changing the interface.
 - Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
   `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
 - The schedule workspace keeps only one creation action in the page header: `Adicionar seção` is
-  inside an `Adicionar` menu. Group and activity creation belongs to the selected section's
+  represented by a compact pill button with a plus icon and visible text at the end of the section list, with an accessible name
+  of `Adicionar seção`. The shell and loaded state use the same SVG icon, centered with the visible
+  label and no extra margin. Its typography must match the other section pills: `--font-size-sm`
+  and `--font-weight-regular`. Group and activity creation belongs to the selected section's
   contextual `Adicionar` menu. The primary save action is `Salvar alterações`, disabled when the
   draft matches the loaded schedule, with a visible `Salvo`/`Alterações não salvas` status.
 

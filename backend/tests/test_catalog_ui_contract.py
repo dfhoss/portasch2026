@@ -178,6 +178,24 @@ def test_links_do_not_use_underlines():
     assert "a { text-decoration: none; }" in css
 
 
+def test_section_add_button_centers_its_icon_inside_the_pill():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    button_css = css.split(".section-add-button {", 1)[1].split("}", 1)[0]
+    assert "align-items: center;" in button_css
+    assert "justify-content: center;" in button_css
+    assert "line-height: var(--line-height-normal);" in button_css
+    assert "margin: 0;" in button_css
+
+
+def test_section_add_button_uses_a_pill_shape_for_visible_clarity():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    button_css = css.split(".section-add-button {", 1)[1].split("}", 1)[0]
+    assert "border-radius: var(--radius-md);" in button_css
+    assert "gap: var(--space-2);" in button_css
+    assert "font-size: var(--font-size-sm);" in button_css
+    assert "font-weight: var(--font-weight-regular);" in button_css
+
+
 def test_dialog_save_uses_shared_primary_button_contract_and_stays_right():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     shared_rule = css.split(".primary-action", 1)[0]

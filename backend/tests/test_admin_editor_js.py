@@ -131,7 +131,7 @@ def run_node_case(case: str) -> None:
 def test_editor_contains_every_required_control(client):
     """Removing any required editor action from the rendered shell must make this fail."""
     html = client.get("/admin").text
-    required = ["add-schedule-actions", "add-session", "save-schedule"]
+    required = ["add-section", "add-session", "save-schedule"]
     for control_id in required:
         assert f'id="{control_id}"' in html
 
@@ -143,14 +143,29 @@ def test_schedule_creation_actions_are_grouped_by_context():
         api.state.selectedSectionId = "secao";
         api.renderSections();
         const html = elementFor("#editor-content").innerHTML;
-        assert.match(html, /id="add-schedule-actions"/);
-        assert.match(html, /data-action="add-section"/);
+        assert.match(html, /id="add-section"[^>]*aria-label="Adicionar seção"/);
+        assert.equal(html.includes('id="add-schedule-actions"'), false);
         assert.match(html, /data-action="add-group"/);
         assert.match(html, /data-action="add-activity"/);
         assert.equal((html.match(/data-action="add-group"/g) || []).length, 1);
         assert.equal((html.match(/data-action="add-activity"/g) || []).length, 1);
         assert.match(html, /id="save-schedule"[^>]*disabled/);
         assert.match(html, /id="schedule-save-status"[^>]*>Salvo/);
+        """
+    )
+
+
+def test_section_add_button_is_after_existing_sections():
+    run_node_case(
+        """
+        api.state.schedule = validSchedule();
+        api.renderSections();
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /data-action="select-section"[\s\S]*id="add-section"/);
+         assert.match(html, /class="section-add-button"/);
+         assert.match(html, /aria-label="Adicionar seção"/);
+         assert.match(html, />\s*<svg[^>]+aria-hidden="true"[\s\S]*<\/svg>\s*<span>Adicionar seção<\/span>\s*<\/button>/);
+         assert.match(html, /<svg[^>]+aria-hidden="true"/);
         """
     )
 
