@@ -34,7 +34,10 @@
             <button id="logout-button" type="button"><svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M14 8l4 4-4 4M8 12h10"/></svg>Sair</button>
           </nav>
         </aside>
-        <div id="editor-message" role="status" aria-live="polite"></div>
+        <div id="editor-toast" role="status" aria-live="polite" hidden>
+          <div id="editor-message"></div>
+          <button id="editor-message-close" type="button" aria-label="Fechar notificação">×</button>
+        </div>
         <section id="editor-content" aria-live="polite">
           <header class="content-header">
             <div>

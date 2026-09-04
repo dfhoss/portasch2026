@@ -282,6 +282,9 @@ ele ao implementar ou alterar a interface.
 - Em menus e toolbars, agrupe ações relacionadas, mantenha a ação primária mais proeminente e
   reduza ações secundárias para evitar excesso de escolha. Os menus devem continuar disponíveis
   por teclado, toque e foco visível em todos os viewports.
+- Mensagens de feedback do editor usam um toast fixo no canto superior direito, fora do fluxo do
+  conteúdo. Sucessos desaparecem após alguns segundos e erros permanecem até serem fechados; o
+  toast mantém texto acessível e um controle explícito para dispensá-lo.
 - Edição do evento e data do evento pertencem a `Configurações`: são campos de configuração,
   não ações da programação. O mesmo fluxo de persistência usa `Salvar alterações`, cujo estado
   fica neutro como `Tudo salvo` quando o rascunho corresponde à agenda carregada e ganha ênfase

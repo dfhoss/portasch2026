@@ -5,6 +5,8 @@ const loginUsername = document.querySelector("#username");
 const loginPassword = document.querySelector("#password");
 const loginMessage = document.querySelector("#login-message");
 const editorMessage = document.querySelector("#editor-message");
+const editorToast = document.querySelector("#editor-toast");
+const editorMessageClose = document.querySelector("#editor-message-close");
 const editorContent = document.querySelector("#editor-content");
 const editorModal = document.querySelector("#editor-modal");
 const modalTitle = document.querySelector("#modal-title");
@@ -35,6 +37,7 @@ let nextStaleReference = 1;
 const catalogKeys = new WeakMap();
 let nextCatalogKey = 1;
 let activeEditorSection = "schedule";
+let announceTimer = null;
 
 function readEditorViewState() {
   try {
@@ -101,7 +104,26 @@ function showLogin(message = "") {
 
 function announce(message) {
   editorMessage.textContent = message;
+  const isError = /não foi possível|obrigatório|não encontrado|informe|selecione|falha|ainda está|carregando/i.test(message);
+  editorToast.classList?.toggle("is-error", isError);
+  editorToast.hidden = false;
+  if (announceTimer) globalThis.clearTimeout?.(announceTimer);
+  if (!isError) {
+    announceTimer = globalThis.setTimeout?.(() => {
+      editorToast.hidden = true;
+    }, 5000);
+    announceTimer?.unref?.();
+  }
 }
+
+function dismissEditorToast() {
+  editorToast.hidden = true;
+  if (announceTimer) globalThis.clearTimeout?.(announceTimer);
+  announceTimer = null;
+}
+
+editorToast.hidden = true;
+editorMessageClose.addEventListener("click", dismissEditorToast);
 
 function scheduleSnapshot(schedule = state.schedule) {
   return JSON.stringify(schedule || null);

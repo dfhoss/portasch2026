@@ -220,16 +220,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   color: var(--color-navigation);
 }
 
-#editor-message, #editor-content {
+#editor-content {
   grid-column: 2;
   width: min(100%, var(--content-width));
   padding: var(--content-padding);
 }
-#editor-message { grid-area: message; }
 #editor-content { grid-area: content; }
-#editor-message { align-self: start; padding-bottom: var(--space-0); }
-#editor-message:empty { display: none; padding: var(--space-0); }
-#editor-message:not(:empty), #login-message:not(:empty) {
+#login-message:not(:empty) {
   padding: var(--space-3);
   border: var(--border-width) solid var(--green-200);
   border-radius: var(--radius-sm);
@@ -241,6 +238,41 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   color: var(--color-danger-text);
 }
 #login-message:empty { display: none; }
+#editor-toast {
+  position: fixed;
+  z-index: 30;
+  top: var(--space-5);
+  right: var(--space-5);
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+  width: min(calc(100vw - var(--space-8)), 26rem);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--green-200);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-selected);
+  color: var(--color-text);
+  box-shadow: var(--shadow-dialog);
+  animation: editor-toast-in var(--duration-normal) var(--ease-standard);
+}
+#editor-toast.is-error {
+  border-color: var(--color-danger);
+  background: var(--color-danger-surface);
+  color: var(--color-danger-text);
+}
+#editor-message { flex: 1; font-size: var(--font-size-sm); line-height: var(--line-height-normal); }
+#editor-message-close {
+  min-width: var(--control-height);
+  min-height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+#editor-message-close:hover { background: var(--color-surface); }
 #editor-content { min-width: 0; padding-top: var(--space-4); }
 .content-header, .toolbar-actions, .section-toolbar, .card-actions, .session-summary {
   display: flex;
@@ -642,6 +674,11 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
   margin-top: var(--space-4);
 }
 
+@keyframes editor-toast-in {
+  from { opacity: 0; transform: translateY(calc(var(--space-2) * -1)); }
+  to { opacity: 1; transform: translateY(var(--space-0)); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
@@ -689,8 +726,8 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
     background: var(--color-surface-selected);
     color: var(--color-navigation);
   }
-  #editor-message, #editor-content { width: 100%; padding: var(--content-padding); }
-  #editor-message { padding-bottom: var(--space-0); }
+  #editor-content { width: 100%; padding: var(--content-padding); }
+  #editor-toast { top: var(--space-3); right: var(--space-3); }
   .schedule-metadata { grid-template-columns: 1fr; }
   .section-heading, .schedule-activity { display: grid; grid-template-columns: 1fr; }
   .section-heading .card-actions { align-items: start; flex-wrap: wrap; }

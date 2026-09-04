@@ -86,7 +86,7 @@ vm.createContext(context);
 const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, openActivityEditor,
-  addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor,
+  addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
   openGroupEditor, handleEditorClick, showApiError, logout
 };`, context, {filename: "admin.js"});
 
@@ -197,6 +197,27 @@ def test_schedule_save_feedback_only_highlights_unsaved_draft_and_protects_exit(
         windowListeners.get("beforeunload")(beforeUnload);
         assert.equal(beforeUnload.defaultPrevented, true);
         assert.equal(beforeUnload.returnValue, "");
+        """
+    )
+
+
+def test_editor_messages_are_toasts_with_explicit_error_and_dismiss_states():
+    run_node_case(
+        """
+        const toast = elementFor("#editor-toast");
+        const message = elementFor("#editor-message");
+        const close = elementFor("#editor-message-close");
+        assert.equal(toast.hidden, true);
+
+        api.announce("Programação salva com sucesso.");
+        assert.equal(toast.hidden, false);
+        assert.equal(message.textContent, "Programação salva com sucesso.");
+        assert.equal(toast["class-is-error"], false);
+
+        api.announce("Não foi possível salvar a programação");
+        assert.equal(toast["class-is-error"], true);
+        close.dispatchEvent({type: "click"});
+        assert.equal(toast.hidden, true);
         """
     )
 
