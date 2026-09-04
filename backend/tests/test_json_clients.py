@@ -645,6 +645,32 @@ def test_repository_seed_catalogs_and_schedule_are_canonical(tmp_path: Path):
     assert used_axes == {axis_id for axis_id, _ in AXIS_PAIRS}
 
 
+def test_location_group_can_be_renamed_without_changing_its_id(tmp_path: Path):
+    locations_path = tmp_path / "locations.json"
+    schedule_path = tmp_path / "schedule.json"
+    write_json(
+        locations_path,
+        {
+            "nextId": 2,
+            "nextGroupId": 2,
+            "groups": [{"id": "group-001", "name": "Bloco C", "category": "blocos"}],
+            "locations": [
+                {"id": "loc-001", "name": "Sala 1", "category": "blocos", "groupId": "group-001"}
+            ],
+        },
+    )
+    write_json(schedule_path, empty_schedule())
+
+    updated = LocationRepository(locations_path, schedule_path).rename_group(
+        "group-001", "Laboratório C", "laboratorios"
+    )
+
+    assert updated == {"id": "group-001", "name": "Laboratório C", "category": "laboratorios"}
+    catalog = LocationRepository(locations_path, schedule_path)
+    assert catalog.list_groups() == [updated]
+    assert catalog.list()[0]["groupName"] == "Laboratório C"
+
+
 def test_seed_catalog_splits_auditoriums_between_block_groups():
     catalog = read_json(Path(__file__).parents[1] / "db" / "locations.json")
     auditorium_names = {
