@@ -172,8 +172,9 @@ ele ao implementar ou alterar a interface.
   navegação usam `--color-surface` e `--color-border` para uma borda sutil em repouso; reserve
   `--color-surface-selected` e `--color-navigation` para o item ativo e sua ênfase, evitando uma
   barra lateral totalmente verde saturada.
-- Os itens da barra lateral usam um ícone consistente ao lado de cada rótulo, e a ação “Sair” é o
-  último item da lista de navegação, com o mesmo tratamento de foco acessível e contraste.
+- Os itens da barra lateral usam um ícone consistente ao lado de cada rótulo. A navegação principal
+  fica no topo; “Configurações” e “Sair” compartilham um único dropdown “Perfil” no rodapé, sem
+  criar uma tela de perfil por enquanto. O gatilho e as opções mantêm foco acessível e contraste.
 - A edição e a data do evento pertencem a “Configurações”, não ao espaço de trabalho da
   programação. Rotule a edição como “Edição do evento” para deixar sua finalidade explícita; salve-a
   pelo mesmo fluxo de persistência da agenda.
@@ -195,6 +196,10 @@ ele ao implementar ou alterar a interface.
   cartões, preservando foco visível, contraste e alvos de toque.
 - Busca, navegação e salas compartilham um único canvas `.locations-workspace`, com a superfície
   principal `--color-surface`; somente a navegação usa `--color-surface-subtle` para criar hierarquia.
+  O cabeçalho da página de Locais não usa recuo à direita, para terminar junto ao workspace; o
+  cabeçalho do painel usa `--space-1` (4px) à esquerda e `--space-2` (8px) à direita, conforme
+  as bordas internas da grade. A barra de busca mantém o recuo esquerdo original e usa `--space-2`
+  adicional à direita para alinhar seu fim aos cartões da lista.
   O card `Novo grupo` fica no fim da navegação e é a ação contextual de criação de grupos; ele permanece
   reservado no rodapé da coluna enquanto a lista de grupos ocupa o espaço flexível restante. A lista
   só mostra rolagem quando o conteúdo excede a altura disponível, inclusive em zooms e viewports menores.
@@ -242,9 +247,10 @@ ele ao implementar ou alterar a interface.
   seção. Opções com texto maior expandem o painel. Um limite relativo à viewport evita transbordamento
   em telas estreitas. Diálogos de edição usam
   `--dialog-width-default: 672px` como largura padrão, com `max-width` responsivo.
-- Nos cards de locais e na navegação de grupos, o menu de ações usa o ícone SVG de três pontos já
-  estabelecido no projeto, com rótulo acessível contextual. O menu de grupo oferece `Editar grupo`,
-  que permite alterar nome e categoria sem trocar o ID nem romper os vínculos das salas.
+- Nos cards de locais, o menu de ações usa o ícone SVG de três pontos já estabelecido no projeto,
+  com rótulo acessível contextual. A edição do grupo selecionado fica como ação secundária explícita
+  à direita do cabeçalho de `.locations-room-panel`, permitindo alterar nome e categoria sem trocar
+  o ID nem romper os vínculos das salas.
 - Em cada momento, mantenha no máximo um menu popup aberto dentro do editor: abrir qualquer
   outro gatilho, inclusive um dropdown da barra, fecha o menu anterior; clicar fora ou executar
   uma opção também fecha o menu atual. Essa regra deve ser implementada no comportamento
@@ -274,6 +280,9 @@ ele ao implementar ou alterar a interface.
   `place-items: center`, `line-height: 0` e SVG como `display: block`. Se o resultado visual de um
   ajuste não corresponder ao pedido, não acumule tentativas empíricas: pesquise referências
   técnicas confiáveis e registre a solução baseada nessa pesquisa.
+- O ícone de três pontos (`more`) é uma exceção visual aos demais ícones de ação: seus círculos
+  devem ser sólidos (`fill: currentColor` e `stroke: none`) para permanecerem legíveis em zoom alto.
+  Os outros ícones continuam usando o traço padrão de `.action-icon`.
 - Diálogos precisam de título claro, gerenciamento de foco pelo teclado e uma ação primária
   explícita com o rótulo “Salvar” no canto inferior direito do rodapé. “Salvar” deve compartilhar
   o contrato completo de botão primário com as demais ações primárias: `--control-height`, tokens

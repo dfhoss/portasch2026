@@ -173,6 +173,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
+  align-self: start;
+  position: sticky;
+  top: var(--space-0);
+  height: 100vh;
   gap: var(--space-6);
   padding: var(--space-6) var(--space-4);
   color: var(--color-text);
@@ -221,6 +225,69 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: var(--color-surface-selected);
   color: var(--color-navigation);
 }
+.sidebar-profile {
+  position: relative;
+  margin-top: auto;
+}
+.sidebar-profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  list-style: none;
+}
+.sidebar-profile-trigger::-webkit-details-marker { display: none; }
+.sidebar-profile-trigger:hover,
+.sidebar-profile[open] .sidebar-profile-trigger {
+  background: var(--color-surface-selected);
+  color: var(--color-navigation);
+}
+.sidebar-profile-trigger:focus-visible,
+.sidebar-profile-menu button:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.sidebar-profile-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.sidebar-profile-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  left: 0;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-dialog);
+}
+.sidebar-profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+.sidebar-profile-menu button:hover { background: var(--color-surface-selected); color: var(--color-navigation); }
 
 #editor-content {
   grid-column: 2;
@@ -285,6 +352,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .content-header {
   justify-content: space-between;
   margin-bottom: var(--space-5);
+}
+.locations-page-header {
+  padding-left: var(--space-1);
+  padding-right: var(--space-0);
 }
 .content-header h2, .content-header p, .section-heading h3, .section-heading p {
   margin: var(--space-0);
@@ -586,6 +657,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   stroke-linejoin: round;
   stroke-width: 1.8;
 }
+.action-icon--more { fill: currentColor; stroke: none; }
 .card-menu .menu-panel {
   top: auto;
   bottom: calc(100% + var(--space-1));
@@ -691,6 +763,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 }
 .locations-workspace .location-toolbar {
   margin: var(--space-4) var(--space-4) var(--space-3);
+  padding-right: var(--space-2);
 }
 .location-group-nav {
   display: flex;
@@ -751,8 +824,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: var(--color-surface-selected);
   color: var(--color-navigation);
 }
-.location-group-nav-item .group-nav-menu { justify-self: end; }
-.group-nav-menu .card-menu-trigger { color: var(--color-text-muted); }
 .location-group-add-card {
   display: flex;
   align-items: center;
@@ -772,11 +843,25 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .location-group-add-card:hover { background: var(--color-surface-selected); }
 .location-group-nav small,
 .locations-room-panel header p { color: var(--color-text-muted); }
-.locations-room-panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: var(--space-4); }
-.locations-room-panel > header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.locations-room-panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: var(--panel-padding); }
+.locations-room-panel > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-1);
+  padding-right: var(--space-2);
+  color: var(--color-navigation);
+}
 .locations-room-panel > header h3,
 .locations-room-panel > header p { margin: var(--space-0); }
-.locations-room-panel > header { color: var(--color-navigation); }
+.location-group-edit {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+}
 .location-rooms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
@@ -882,7 +967,12 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
 @media (max-width: 749px) {
   :root { --content-padding: var(--space-4); }
   .editor-view { display: block; }
-  .editor-sidebar { display: block; padding: var(--space-0); }
+  .editor-sidebar {
+    display: block;
+    position: static;
+    height: auto;
+    padding: var(--space-0);
+  }
   .editor-header {
     flex-direction: row;
     align-items: center;
@@ -915,7 +1005,7 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
   .catalog-card { align-items: start; flex-direction: column; }
   .locations-workspace { height: calc(100vh - 17rem); }
   .locations-workspace-body { grid-template-columns: 9rem minmax(0, 1fr); }
-  .locations-room-panel { padding: var(--space-3); }
+  .locations-room-panel { padding: var(--panel-padding); }
   .locations-room-panel > header { align-items: start; flex-direction: column; }
   .location-rooms-grid { grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
   .session-editor { grid-template-columns: 1fr 1fr; }

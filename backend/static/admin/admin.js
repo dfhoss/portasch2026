@@ -225,7 +225,8 @@ function actionIcon(name) {
     delete: '<path d="M5 7h14M10 11v6M14 11v6M7 7l1 13h8l1-13M9 7V4h6v3"/>',
     chevron: '<path d="M7 9.5 12 14.5 17 9.5"/>',
   };
-  return `<svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
+  const modifier = name === "more" ? " action-icon--more" : "";
+  return `<svg class="action-icon${modifier}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
 }
 
 function draftKey(record) {
@@ -424,14 +425,9 @@ function renderSections() {
   updateScheduleSaveState();
 }
 
-function locationGroupActions(group) {
-  if (!state.locationGroups.some((item) => item.id === group.id)) return "";
-  return `<details class="menu group-nav-menu">
-    <summary class="menu-trigger card-menu-trigger" aria-label="Ações do grupo ${escapeHtml(group.name)}">${actionIcon("more")}</summary>
-    <div class="menu-panel card-menu-panel" role="menu">
-      <button class="menu-item" type="button" role="menuitem" data-action="edit-location-group" data-key="${escapeHtml(group.id)}">${actionIcon("edit")}Editar grupo</button>
-    </div>
-  </details>`;
+function locationGroupEditAction(group) {
+  if (!group || !state.locationGroups.some((item) => item.id === group.id)) return "";
+  return `<button class="secondary-action location-group-edit" type="button" data-action="edit-location-group" data-key="${escapeHtml(group.id)}">${actionIcon("edit")}<span>Editar grupo</span></button>`;
 }
 
 function renderLocations(searchQuery = "") {
@@ -475,7 +471,7 @@ function renderLocations(searchQuery = "") {
       : '<p class="empty-state">Nenhuma sala encontrada neste grupo.</p>'
     : '<p class="empty-state">Nenhum grupo cadastrado.</p>';
   editorContent.innerHTML = `
-    <header class="content-header">
+    <header class="content-header locations-page-header">
       <div><p class="eyebrow">Catálogo da agenda</p><h2>Locais</h2></div>
       <div class="toolbar-actions">
         <button type="button" class="primary-action" data-action="add-location">Adicionar sala</button>
@@ -491,13 +487,12 @@ function renderLocations(searchQuery = "") {
           <div class="location-group-nav-list">
             ${groups.map((group) => `<div class="location-group-nav-item">
               <button class="location-group-select" type="button" data-action="select-location-group" data-key="${escapeHtml(group.id)}" aria-current="${group.id === selectedLocationGroupId}"><span>${escapeHtml(group.name)}</span><small>${group.locations.length}</small></button>
-              ${locationGroupActions(group)}
             </div>`).join("")}
           </div>
           <button class="location-group-add-card" type="button" data-action="add-location-group" aria-label="Adicionar novo grupo"><span aria-hidden="true">+</span><span>Novo grupo</span></button>
         </nav>
         <section class="locations-room-panel" aria-labelledby="selected-location-group">
-          <header><div><h3 id="selected-location-group">${escapeHtml(selectedGroup?.name || "Locais")}</h3><p>${selectedGroup?.locations.length || 0} ${selectedGroup?.locations.length === 1 ? "sala cadastrada" : "salas cadastradas"}</p></div></header>
+          <header><div><h3 id="selected-location-group">${escapeHtml(selectedGroup?.name || "Locais")}</h3><p>${selectedGroup?.locations.length || 0} ${selectedGroup?.locations.length === 1 ? "sala cadastrada" : "salas cadastradas"}</p></div>${locationGroupEditAction(selectedGroup)}</header>
           <div class="catalog-list location-rooms-grid" id="locations-list">${cards}</div>
       </section>
       </div>

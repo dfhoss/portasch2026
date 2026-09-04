@@ -132,6 +132,8 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
 
     desktop_css, _, mobile_css = css.partition("@media (max-width: 749px)")
     assert "grid-column: 1" in css_rule(desktop_css, ".editor-sidebar")
+    assert "height: 100vh" in css_rule(desktop_css, ".editor-sidebar")
+    assert "position: sticky" in css_rule(desktop_css, ".editor-sidebar")
     assert "flex-direction: column" in css_rule(desktop_css, ".editor-sidebar nav")
     nav_rule = (
         ".editor-sidebar nav button {\n"
@@ -144,6 +146,20 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     )
     assert nav_rule in desktop_css
     assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
+
+
+def test_sidebar_groups_account_and_logout_under_profile_at_the_bottom(client):
+    page = client.get("/admin").text
+    css = client.get("/admin/static/admin.css").text
+    nav = page.split('<nav aria-label="Seções administrativas">', 1)[1].split("</nav>", 1)[0]
+    profile = page.split('<details class="sidebar-profile">', 1)[1].split("</details>", 1)[0]
+
+    assert 'data-editor-section="account"' not in nav
+    assert 'id="logout-button"' not in nav
+    assert 'class="sidebar-profile-trigger"' in profile
+    assert 'data-editor-section="account"' in profile
+    assert 'id="logout-button"' in profile
+    assert "margin-top: auto;" in css_rule(css, ".sidebar-profile")
 
 
 def test_browser_authentication_contract_validates_identity_before_loading_data(client):

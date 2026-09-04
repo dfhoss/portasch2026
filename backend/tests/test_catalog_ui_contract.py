@@ -40,6 +40,17 @@ def test_catalog_script_exposes_crud_and_safe_in_use_feedback(client):
     assert "escapeHtml" in script
 
 
+def test_more_action_icon_is_solid_without_changing_other_icons():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    more_css = css.split(".action-icon--more", 1)[1].split("}", 1)[0]
+    assert 'name === "more"' in script
+    assert "fill: currentColor;" in more_css
+    assert "stroke: none;" in more_css
+    assert ".action-icon {" in css
+    assert "fill: none;" in css.split("\n.action-icon {", 1)[1].split("}", 1)[0]
+
+
 def run_node_case(case: str) -> None:
     harness = r"""
 const assert = require("node:assert/strict");
@@ -209,6 +220,23 @@ def test_locations_use_group_navigation_and_compact_room_grid():
     )
 
 
+def test_location_group_edit_action_lives_in_selected_panel_header():
+    run_node_case(
+        """
+        api.state.locations = [{id: "loc-1", name: "Sala 101", groupId: "group-a", category: "blocos"}];
+        api.state.locationGroups = [{id: "group-a", name: "Bloco A", category: "blocos"}];
+        api.renderLocations();
+        const html = elementFor("#editor-content").innerHTML;
+        const nav = html.slice(html.indexOf('id="location-group-nav"'), html.indexOf("</nav>"));
+        const panel = html.slice(html.indexOf('class="locations-room-panel"'), html.indexOf("</section>"));
+        assert.equal(nav.includes('data-action="edit-location-group"'), false);
+        assert.match(panel, /class="secondary-action location-group-edit"/);
+        assert.match(panel, /data-action="edit-location-group"/);
+        assert.match(panel, /Editar grupo/);
+        """
+    )
+
+
 def test_location_search_restores_focus_and_selection_after_filter_render():
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
     input_handler = script.split('editorContent.addEventListener("input"', 1)[1].split(
@@ -244,6 +272,22 @@ def test_location_group_navigation_reserves_space_for_add_card_before_scrolling_
     assert "overflow-y: auto;" in list_css
     assert "min-height: 0;" in list_css
     assert "flex: 0 0 auto;" in add_css
+
+
+def test_locations_search_and_room_header_share_catalog_card_inset():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    toolbar_css = css.split(".locations-workspace .location-toolbar {", 1)[1].split("}", 1)[0]
+    panel_css = css.split(".locations-room-panel {", 1)[1].split("}", 1)[0]
+    header_css = css.split(".locations-page-header {", 1)[1].split("}", 1)[0]
+    room_header_css = css.split(".locations-room-panel > header {", 1)[1].split("}", 1)[0]
+    assert "padding-left: var(--space-1);" in header_css
+    assert "padding-right: var(--space-0);" in header_css
+    assert "padding-left: var(--space-1);" in room_header_css
+    assert "padding-right: var(--space-2);" in room_header_css
+    assert "margin: var(--space-4) var(--space-4) var(--space-3);" in toolbar_css
+    assert "padding-right: var(--space-2);" in toolbar_css
+    assert "padding: var(--panel-padding);" in panel_css
+    assert ".locations-room-panel { padding: var(--panel-padding); }" in css
 
 
 def test_group_navigation_styles_do_not_override_three_dot_menu_alignment():
