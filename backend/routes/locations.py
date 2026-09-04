@@ -104,6 +104,16 @@ def create_location_group(
     return _run(lambda: repository.create_group(payload.name, payload.category))
 
 
+@router.put("/groups/{group_id}", response_model=LocationGroupResponse)
+def rename_location_group(
+    group_id: str,
+    payload: LocationGroupInput,
+    _: CurrentTokenData,
+    repository: LocationRepo,
+) -> dict:
+    return _run(lambda: repository.rename_group(group_id, payload.name, payload.category))
+
+
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=LocationResponse)
 def create_location(payload: LocationInput, _: CurrentTokenData, repository: LocationRepo) -> dict:
     return _run(

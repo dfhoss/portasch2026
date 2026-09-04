@@ -54,6 +54,17 @@ class LocationRepository:
         self._persist_catalog(catalog)
         return deepcopy(group)
 
+    def rename_group(self, group_id: str, name: str, category: str) -> dict:
+        catalog = self._load_catalog()
+        group = self._find_group(catalog["groups"], group_id)
+        cleaned_name = clean_resource_name(name, "grupo")
+        ensure_unique_name(catalog["groups"], cleaned_name, "grupo", group_id)
+        group["name"] = cleaned_name
+        group["category"] = category
+        catalog["groups"].sort(key=lambda item: normalized_resource_name(item["name"]))
+        self._persist_catalog(catalog)
+        return deepcopy(group)
+
     def create(
         self,
         name: str,
@@ -229,6 +240,12 @@ class LocationRepository:
             if location["id"] == location_id:
                 return location
         raise ResourceNotFoundError("Local", location_id)
+
+    def _find_group(self, groups: builtins.list[dict], group_id: str) -> dict:
+        for group in groups:
+            if group["id"] == group_id:
+                return group
+        raise ResourceNotFoundError("Grupo", group_id)
 
     def _persist_catalog(self, catalog: dict) -> None:
         self._validate_catalog(catalog)
