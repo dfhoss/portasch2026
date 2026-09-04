@@ -1,6 +1,6 @@
-# Repository Guidelines
+# Diretrizes do repositório
 
-## Development Commands
+## Comandos de desenvolvimento
 
 - `uv sync --dev` — instala o ambiente e as ferramentas travadas em `uv.lock`.
 - `uv run uvicorn app:app --reload --env-file .env` — inicia a API local; a documentação fica em `/api/docs`.
@@ -12,13 +12,14 @@
 
 O `TOKEN_JWT` já está configurado em `.env`; mantenha o arquivo fora do versionamento e nunca versione credenciais ou hashes reais.
 
-## Design Rules
+## Regras de design
 
 - Leia `ARCHITECTURE.md` antes de adicionar ou reorganizar funcionalidades; atualize-o se mudar responsabilidades, fluxo, fronteiras de persistência ou o padrão de feature.
-- Para mudanças em `static/admin/`, leia `DESIGN.md` e mantenha tokens semânticos, acessibilidade, foco, responsividade e reduced motion; altere `DESIGN.md` junto com novos tokens CSS.
+- Para mudanças em `static/admin/`, leia `DESIGN.md` e mantenha tokens semânticos, acessibilidade, foco, responsividade e animações reduzidas; altere `DESIGN.md` junto com novos tokens CSS.
+- Se um ajuste visual não produzir o efeito esperado, pare de acumular tentativas locais e pesquise referências técnicas confiáveis antes de propor outra alteração; registre a regra resultante em `DESIGN.md` quando ela for específica da interface.
 - Mantenha handlers finos e lance `HTTPException` apenas na fronteira HTTP; regras e acesso a dados ficam nos módulos apropriados.
 
-## Gotchas & Landmines
+## Armadilhas e pontos de atenção
 
 ### Configuração e persistência
 
@@ -37,7 +38,8 @@ O `TOKEN_JWT` já está configurado em `.env`; mantenha o arquivo fora do versio
 - `/admin` entrega somente o shell público; o navegador valida o JWT antes de buscar os catálogos protegidos em `/admin/api/*`.
 - Dados de usuários e hashes são sensíveis. Não embuta catálogos ou credenciais no HTML inicial nem em fixtures versionadas.
 
-## Conventions
+## Convenções
 
 - Use `uv` para ambiente e comandos, quatro espaços, type hints públicos e o limite de 100 caracteres configurado no Ruff.
+- Toda documentação Markdown de orientação do agente deve usar exclusivamente português. Preserve em outros idiomas apenas nomes técnicos, identificadores de código, comandos, URLs, citações e textos que precisem corresponder literalmente à interface.
 - Commits devem ser curtos, imperativos e em português. PRs devem listar validações e destacar alterações de ambiente ou formato de dados.

@@ -289,10 +289,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: var(--color-action-primary-hover) !important;
 }
 #modal-apply { margin-left: auto; }
-.toolbar-menu { position: relative; }
-.toolbar-menu-trigger {
-  display: flex;
+.menu { position: relative; z-index: 3; }
+.menu-trigger {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   min-height: var(--control-height);
   padding: var(--space-2) var(--space-3);
   border: var(--border-width) solid var(--color-border-strong);
@@ -302,33 +304,55 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   cursor: pointer;
   list-style: none;
 }
-.toolbar-menu-trigger::-webkit-details-marker { display: none; }
-.toolbar-menu-trigger::after { content: "⌄"; margin-left: var(--space-2); }
-.toolbar-menu-trigger:hover { background: var(--color-surface-selected); }
-.toolbar-menu-panel {
+.menu-trigger::-webkit-details-marker { display: none; }
+.menu-trigger:hover { background: var(--color-surface-selected); }
+.menu-trigger:focus-visible,
+.menu-item:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.menu-chevron {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  line-height: 0;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.menu-chevron .action-icon { display: block; width: 100%; height: 100%; }
+.menu[open] .menu-chevron { transform: rotate(180deg); }
+.menu-panel {
   position: absolute;
   z-index: 20;
   top: calc(100% + var(--space-1));
   right: 0;
   display: grid;
   min-width: 13rem;
-  padding: var(--space-1) 0;
+  padding-block: var(--space-0);
+  padding-inline: var(--space-0);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-dialog);
 }
-.toolbar-menu-panel button {
+.menu-item {
   display: flex;
+  align-items: center;
+  gap: var(--space-2);
   width: 100%;
+  min-height: var(--control-height);
   padding: var(--space-2) var(--space-3);
   border: 0;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text);
   text-align: left;
   cursor: pointer;
 }
-.toolbar-menu-panel button:hover { background: var(--color-surface-selected); }
+.menu-panel .menu-item { border: 0; }
+.menu-item:hover { background: var(--color-surface-selected); }
+.menu-item .action-icon { flex: 0 0 auto; }
+.toolbar-menu { flex: 0 0 auto; }
+.toolbar-menu-trigger { border-color: var(--color-border-strong); }
+.toolbar-menu-trigger .action-icon:first-child { color: var(--color-action-primary); }
+.toolbar-menu-panel { min-width: 13rem; }
 .save-status-group { display: flex; align-items: center; gap: var(--space-2); }
 .save-status { color: var(--color-text-muted); font-size: var(--font-size-sm); }
 .save-status.is-dirty { color: var(--color-navigation); font-weight: var(--font-weight-semibold); }
@@ -377,8 +401,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   font-weight: var(--font-weight-bold);
 }
 .section-add-button {
-  display: inline-flex;
+  display: inline-grid;
   flex: 0 0 auto;
+  grid-template-columns: auto auto;
   min-height: var(--control-height);
   align-items: center;
   justify-content: center;
@@ -393,12 +418,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   line-height: var(--line-height-normal);
   margin: 0;
 }
-.section-add-button .action-icon {
-  display: block;
-  flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
+.section-add-icon {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
   margin: 0;
+}
+.section-add-icon .action-icon {
+  width: 100%;
+  height: 100%;
 }
 .section-add-button:hover { background: var(--color-surface-selected); }
 .section-toolbar { margin: var(--space-2) 0 var(--space-4); }
@@ -416,6 +445,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 }
 .schedule-groups { display: grid; gap: var(--space-3); }
 .schedule-group {
+  position: relative;
   overflow: visible;
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -427,26 +457,40 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   gap: var(--space-3);
   align-items: center;
   padding: var(--panel-padding);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: var(--color-surface-subtle);
 }
+.schedule-group.is-collapsed .group-header { border-radius: var(--radius-lg); }
 .group-toggle {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-1);
   min-width: 0;
+  min-height: var(--control-height);
   padding: var(--space-0);
   border: 0;
   background: transparent;
   color: var(--color-text);
   text-align: left;
 }
-.group-toggle .secondary-text { grid-column: 1 / -1; }
+.group-toggle-copy {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+.group-header > .menu { align-self: center; }
 .group-toggle-indicator {
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
+  width: 1.15rem;
+  height: 1.15rem;
+  line-height: 0;
   color: var(--color-navigation);
   transition: transform var(--duration-fast) var(--ease-standard);
 }
+.group-toggle-indicator .action-icon { display: block; width: 100%; height: 100%; }
 .group-toggle[aria-expanded="true"] .group-toggle-indicator { transform: rotate(180deg); }
 .group-toggle strong, .activity-copy strong { overflow-wrap: anywhere; }
 .secondary-text { color: var(--color-text-muted); font-size: var(--font-size-sm); }
@@ -455,6 +499,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   gap: var(--space-3);
   padding: 0 var(--space-4) var(--space-4);
   border-top: var(--border-width) solid var(--color-border);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 .group-body[hidden] { display: none; }
 .activity-list { display: grid; gap: var(--space-3); padding-top: var(--space-4); }
@@ -468,23 +513,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   border-radius: var(--radius-md);
   background: var(--green-50);
 }
-.card-menu { position: relative; z-index: 3; justify-self: end; }
+.card-menu { justify-self: end; }
 .card-menu-trigger {
-  display: grid;
+  display: inline-grid;
   min-width: var(--control-height);
-  min-height: var(--control-height);
   place-items: center;
   padding: var(--space-2);
   border: 0;
   border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  list-style: none;
 }
-.card-menu-trigger::-webkit-details-marker { display: none; }
-.card-menu-trigger:hover { background: var(--color-surface-selected); }
 .action-icon {
+  display: block;
   width: 1.15rem;
   height: 1.15rem;
   fill: none;
@@ -493,38 +532,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   stroke-linejoin: round;
   stroke-width: 1.8;
 }
-.card-menu-panel {
-  position: absolute;
-  z-index: 20;
+.card-menu .menu-panel {
   top: auto;
   bottom: calc(100% + var(--space-1));
-  right: 0;
-  display: grid;
   min-width: 12rem;
-  padding: var(--space-1) 0;
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: none;
   pointer-events: auto;
 }
-.group-header .card-menu-panel { right: calc(-1 * var(--panel-padding)); }
-.schedule-activity .card-menu-panel { right: calc(-1 * var(--space-3)); }
-.card-menu-panel button {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text);
-  text-align: left;
-  cursor: pointer;
-}
-.card-menu-panel button:hover { background: var(--color-surface-selected); }
-.card-menu-panel .danger-action { color: var(--color-danger); }
+.group-header .card-menu .menu-panel { right: calc(-1 * var(--panel-padding)); }
+.schedule-activity .card-menu .menu-panel { right: calc(-1 * var(--space-3)); }
+.menu-panel .danger-action { color: var(--color-danger); }
 .activity-copy { display: grid; gap: var(--space-1); min-width: 0; }
 .activity-copy p { margin: var(--space-0); white-space: pre-line; }
 .session-summary { color: var(--color-text-muted); font-size: var(--font-size-sm); }

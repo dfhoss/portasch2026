@@ -1,37 +1,38 @@
-# Admin Design System
+# Sistema de design administrativo
 
-## Purpose
+## Objetivo
 
-This document is the source of truth for the visual identity of the Portas Abertas
-administrative interface in `static/admin/`. Read it before creating or changing any UI.
+Este documento é a fonte oficial da identidade visual da interface administrativa do Portas
+Abertas em `static/admin/`. Leia-o antes de criar ou alterar qualquer elemento da UI.
 
-The interface should feel institutional, calm, clear, and dependable. It uses deep green to
-anchor navigation, a brighter green for actions, warm off-white surfaces, and restrained
-feedback colors. Prefer hierarchy, legibility, and task completion over decorative effects.
+A interface deve transmitir uma sensação institucional, calma, clara e confiável. Ela usa verde
+escuro para ancorar a navegação, verde mais vivo para ações, superfícies em branco quente e cores
+de feedback discretas. Priorize hierarquia, legibilidade e conclusão das tarefas em vez de efeitos
+decorativos.
 
-## Token model
+## Modelo de tokens
 
-Tokens have two layers:
+Os tokens têm duas camadas:
 
-- **Primitive tokens** describe the available palette and scales. Do not use them directly in
-  component rules unless no semantic token describes the intended role.
-- **Semantic tokens** describe purpose, such as text, surface, border, or action. Components
-  should consume these tokens so the visual identity can change without rewriting selectors.
+- **Tokens primitivos** descrevem a paleta e as escalas disponíveis. Não os use diretamente nas
+  regras de componentes quando houver um token semântico para a função pretendida.
+- **Tokens semânticos** descrevem a finalidade, como texto, superfície, borda ou ação. Os
+  componentes devem consumi-los para que a identidade visual possa mudar sem reescrever seletores.
 
-Use lowercase kebab-case names. Define global tokens on `:root` and consume them with
-`var(--token-name)`. Do not duplicate a literal value merely to give it a component-specific
-name.
+Use nomes em kebab-case minúsculo. Defina tokens globais em `:root` e consuma-os com
+`var(--token-name)`. Não duplique um valor literal apenas para criar um nome específico de
+componente.
 
-## CSS tokens
+## Tokens CSS
 
-The following block is canonical. Keep the corresponding declarations in `admin.css` aligned
-with it when implementing or changing the interface.
+O bloco a seguir é canônico. Mantenha as declarações correspondentes em `admin.css` alinhadas a
+ele ao implementar ou alterar a interface.
 
 ```css
 :root {
   color-scheme: light;
 
-  /* Primitive colors */
+  /* Cores primitivas */
   --green-50: #f5faf7;
   --green-100: #e5f1eb;
   --green-200: #cfe3d8;
@@ -55,7 +56,7 @@ with it when implementing or changing the interface.
   --red-800: #7f1d1d;
   --overlay-green: #17251f88;
 
-  /* Typography */
+  /* Tipografia */
   --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -70,7 +71,7 @@ with it when implementing or changing the interface.
   --line-height-tight: 1.2;
   --line-height-normal: 1.5;
 
-  /* Spacing */
+  /* Espaçamento */
   --space-0: 0;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -82,7 +83,7 @@ with it when implementing or changing the interface.
   --space-10: 2.5rem;
   --space-12: 3rem;
 
-  /* Shape, borders, and elevation */
+  /* Forma, bordas e elevação */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -91,12 +92,12 @@ with it when implementing or changing the interface.
   --shadow-dialog: 0 1rem 3rem rgb(23 60 45 / 24%);
   --shadow-card: 0 0.5rem 1.5rem rgb(23 60 45 / 8%);
 
-  /* Motion */
+  /* Movimento */
   --duration-fast: 120ms;
   --duration-normal: 200ms;
   --ease-standard: ease-out;
 
-  /* Semantic colors */
+  /* Cores semânticas */
   --color-page: var(--neutral-100);
   --color-surface: var(--neutral-0);
   --color-surface-subtle: var(--neutral-50);
@@ -118,7 +119,7 @@ with it when implementing or changing the interface.
   --color-warning-border: var(--yellow-400);
   --color-backdrop: var(--overlay-green);
 
-  /* Semantic layout */
+  /* Layout semântico */
   --sidebar-width: 13.75rem;
   --content-width: 75rem;
   --control-height: 2.5rem;
@@ -128,101 +129,135 @@ with it when implementing or changing the interface.
 }
 ```
 
-## Usage rules
+## Regras de uso
 
-### Components
+### Componentes
 
-- Semantic variants such as `.primary-action` and `.danger-action` carry their complete visual
-  contract (spacing, border, radius, surface, and typography), independent of their container.
+- Variantes semânticas como `.primary-action` e `.danger-action` carregam seu contrato visual
+  completo (espaçamento, borda, raio, superfície e tipografia), independentemente do contêiner.
 
-### Color
+### Cor
 
-- Use `--color-navigation` only for persistent navigation or similarly strong brand anchors.
-- Use `--color-action-primary` for the single primary action in a context. Secondary actions
-  use a surface, text, and border token rather than another saturated fill.
-- Use `--color-danger` for destructive actions and errors, never for ordinary emphasis.
-- Use semantic text and surface tokens instead of primitive colors in component selectors.
-- Do not communicate status through color alone; pair it with text, an icon, or both.
+- Use `--color-navigation` apenas para navegação persistente ou âncoras de marca igualmente fortes.
+- Use `--color-action-primary` para a única ação primária de um contexto. Ações secundárias usam
+  tokens de superfície, texto e borda em vez de outro preenchimento saturado.
+- Use `--color-danger` para ações destrutivas e erros, nunca para ênfase comum.
+- Use tokens semânticos de texto e superfície, em vez de cores primitivas, nos seletores de
+  componentes.
+- Não comunique o estado somente pela cor; combine-a com texto, ícone ou ambos.
 
-### Typography
+### Tipografia
 
-- Use the system font stack; the admin must not depend on a font download to remain usable.
-- Page titles use `--font-size-xl` and `--font-weight-bold`. Section titles use
-  `--font-size-lg` and `--font-weight-semibold`. Body copy uses `--font-size-sm` or
-  `--font-size-md` with `--line-height-normal`.
-- Avoid uppercase body text. Uppercase is reserved for short labels and eyebrows.
+- Use a pilha de fontes do sistema; o painel não deve depender do download de uma fonte para
+  continuar utilizável.
+- Títulos de página usam `--font-size-xl` e `--font-weight-bold`. Títulos de seção usam
+  `--font-size-lg` e `--font-weight-semibold`. O texto corrido usa `--font-size-sm` ou
+  `--font-size-md` com `--line-height-normal`.
+- Evite texto corrido em caixa alta. A caixa alta fica reservada para rótulos curtos e eyebrows.
 
-### Spacing and layout
+### Espaçamento e layout
 
-- Use the spacing scale instead of arbitrary pixel values. Add a primitive token only when a
-  recurring need cannot be represented by the existing scale.
-- Keep the main content at or below `--content-width`; allow dense tables to scroll rather than
-  shrinking text below `--font-size-sm`.
-- On desktop widths above 1024px, use explicit `sidebar`, `message`, and `content` grid areas. The
-  content must follow the status message immediately; sidebar height must not create an implicit
-  empty row above it.
-- Between 750px and 1024px, keep the two-column layout but reduce the sidebar to `12rem` and the
-  content padding to `--space-6`.
-- At 749px and below, convert the sidebar to horizontal navigation, stack forms, and keep primary
-  actions visible. Do not rely on hover for access to actions.
-- The admin sidebar uses `--color-surface-subtle` with `--color-text`. Navigation items use
-  `--color-surface` and `--color-border` for a subtle resting boundary; reserve
-  `--color-surface-selected` and `--color-navigation` for the active navigation item and its
-  emphasis, avoiding a fully saturated green sidebar.
-- Sidebar selectors use a consistent icon alongside each label, and the “Sair” action is the last
-  item in the navigation list with the same accessible focus and contrast treatment.
-- Event edition and event date belong to “Configurações”, not the programming workspace. Label the
-  edition as “Edição do evento” so its purpose is explicit; save it through the same schedule
-  persistence flow.
-- Locais are organized by explicit groups stored in `locations.json`. A group has a name and one
-  category (`blocos`, `laboratorios`, `estacionamentos`, or `outros`); each room belongs to a group
-  through `groupId` and stores `roomNumber` and `description`. The locations page shows groups as
-  accordions (`Bloco A`, `LAB 01`, etc.) and their child rooms; “Estacionamentos” is also an
-  accordion containing its parking locations directly, without a nested group. Use the same
-  spacing token between every group, regardless of category. Room names remain the schedule
-  references.
-- A schedule session stores `locations` as a list. Multiple rooms can share one time slot; rooms
-  with different times use separate session entries for the same activity. Legacy `location` input
-  is accepted only for migration to the list form.
-- Every page-level `.content-header` uses `--space-5` below it. Primary header actions belong in
-  `.toolbar-actions` so schedule and catalog views share dimensions and alignment.
-- The schedule workspace keeps only one creation action in the page header: `Adicionar seção` is
-  represented by a compact pill button with a plus icon and visible text at the end of the section list, with an accessible name
-  of `Adicionar seção`. The shell and loaded state use the same SVG icon, centered with the visible
-  label and no extra margin. Its typography must match the other section pills: `--font-size-sm`
-  and `--font-weight-regular`. Group and activity creation belongs to the selected section's
-  contextual `Adicionar` menu. The primary save action is `Salvar alterações`, disabled when the
-  draft matches the loaded schedule, with a visible `Salvo`/`Alterações não salvas` status.
+- Use a escala de espaçamento em vez de valores arbitrários em pixels. Adicione um token primitivo
+  somente quando uma necessidade recorrente não puder ser representada pela escala existente.
+- Mantenha o conteúdo principal em `--content-width` ou abaixo dele; permita que tabelas densas
+  rolem em vez de reduzir o texto abaixo de `--font-size-sm`.
+- Em larguras de desktop acima de 1024px, use áreas explícitas de grid `sidebar`, `message` e
+  `content`. O conteúdo deve seguir imediatamente a mensagem de status; a altura da barra lateral
+  não deve criar uma linha vazia implícita acima dele.
+- Entre 750px e 1024px, mantenha o layout de duas colunas, mas reduza a barra lateral para `12rem`
+  e o padding do conteúdo para `--space-6`.
+- Em 749px ou menos, converta a barra lateral em navegação horizontal, empilhe os formulários e
+  mantenha as ações primárias visíveis. Não dependa de hover para dar acesso às ações.
+- A barra lateral administrativa usa `--color-surface-subtle` com `--color-text`. Itens de
+  navegação usam `--color-surface` e `--color-border` para uma borda sutil em repouso; reserve
+  `--color-surface-selected` e `--color-navigation` para o item ativo e sua ênfase, evitando uma
+  barra lateral totalmente verde saturada.
+- Os itens da barra lateral usam um ícone consistente ao lado de cada rótulo, e a ação “Sair” é o
+  último item da lista de navegação, com o mesmo tratamento de foco acessível e contraste.
+- A edição e a data do evento pertencem a “Configurações”, não ao espaço de trabalho da
+  programação. Rotule a edição como “Edição do evento” para deixar sua finalidade explícita; salve-a
+  pelo mesmo fluxo de persistência da agenda.
+- Os locais são organizados por grupos explícitos armazenados em `locations.json`. Um grupo tem
+  nome e uma categoria (`blocos`, `laboratorios`, `estacionamentos` ou `outros`); cada sala pertence
+  a um grupo por meio de `groupId` e armazena `roomNumber` e `description`. A página de locais
+  exibe grupos como accordions (`Bloco A`, `LAB 01` etc.) e suas salas; “Estacionamentos” também é
+  um accordion que contém diretamente seus locais de estacionamento, sem grupo aninhado. Use o
+  mesmo token de espaçamento entre todos os grupos, independentemente da categoria. Os nomes das
+  salas continuam sendo as referências da agenda.
+- Uma sessão da agenda armazena `locations` como lista. Várias salas podem compartilhar um horário;
+  salas com horários diferentes usam entradas de sessão separadas para a mesma atividade. A entrada
+  legada `location` é aceita somente para migração ao formato de lista.
+- Todo `.content-header` no nível da página usa `--space-5` abaixo dele. Ações primárias do
+  cabeçalho pertencem a `.toolbar-actions` para que as telas de agenda e catálogo compartilhem
+  dimensões e alinhamento.
+- O espaço de trabalho da programação mantém uma única ação de criação no cabeçalho da página:
+  `Adicionar seção` é representado por um botão compacto em formato de pílula, com ícone de mais e
+  texto visível, ao final da lista de seções, com nome acessível `Adicionar seção`. O shell e o
+  estado carregado usam o mesmo ícone SVG, centralizado com o rótulo visível e sem margem extra.
+  Sua tipografia deve corresponder às outras pílulas de seção: `--font-size-sm` e
+  `--font-weight-regular`. A criação de grupo e atividade pertence ao menu contextual `Adicionar`
+  da seção selecionada. A ação primária de salvamento é `Salvar alterações`, desabilitada quando o
+  rascunho corresponde à agenda carregada, com status visível `Salvo`/`Alterações não salvas`.
+- Para manter o alinhamento do botão `section-add-button` em diferentes níveis de zoom, use
+  `inline-grid` com colunas explícitas e uma caixa `.section-add-icon` centralizada por
+  `place-items: center`. Não corrija o alinhamento com deslocamentos manuais em pixels ou
+  dependência de baseline/`vertical-align`.
 
-### Components and interaction
+### Componentes e interação
 
-- Interactive controls must have a visible `:focus-visible` treatment using `--color-focus`.
-- Buttons and fields must be at least `--control-height` tall. Labels remain visible; placeholders
-  do not replace labels.
-- Cards and panels use `--color-surface`, `--color-border`, and `--radius-lg`. Reserve shadows for
-  overlays or cases where a boundary cannot be communicated with a border.
-- Menus popup de ações usam um menu compacto de três pontos (`.card-menu`) em qualquer viewport.
-  O gatilho `.card-menu-trigger` deve ter rótulo acessível, ícone vertical e foco visível, sem
-  moldura quadrada. O painel `.card-menu-panel` deve ser vertical, clicável, ter fundo opaco
-  `--color-surface`, borda `--border-width`/`--color-border`, raio `--radius-md` e camada acima
-  dos cards adjacentes; deve abrir para cima quando houver espaço. Cada ação deve ter um ícone
-  acompanhando o rótulo, e ações destrutivas usam `--color-danger` sem depender apenas da cor.
+- Controles interativos devem ter um tratamento visível de `:focus-visible` usando `--color-focus`.
+- Botões e campos devem ter pelo menos a altura `--control-height`. Os rótulos permanecem visíveis;
+  placeholders não substituem rótulos.
+- Cards e painéis usam `--color-surface`, `--color-border` e `--radius-lg`. Reserve sombras para
+  overlays ou casos em que uma borda não consiga comunicar o limite.
+- Todo menu popup ou dropdown compartilha o componente `.menu`, com `.menu-trigger`, `.menu-panel`
+  e `.menu-item`; classes de contexto podem existir apenas para posicionamento. O gatilho deve
+  ter rótulo acessível, ícone SVG adequado ao tipo de ação e chevron SVG para indicar abertura,
+  nunca um caractere ASCII. Dropdowns com múltiplas opções de criação, como `Adicionar` na seção,
+  usam somente o chevron no gatilho; o ícone da ação fica nas opções internas. O painel deve ser
+  vertical, clicável, ter fundo opaco `--color-surface`, borda
+  `--border-width`/`--color-border`, raio `--radius-md`, sombra `--shadow-dialog` e camada acima
+  dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço.
+- Toda opção de um menu deve usar `.menu-item`, ter um ícone SVG acompanhando o rótulo e foco
+  visível. O painel com `role="menu"` não tem padding superior ou inferior (`padding-block: 0`);
+  cada item define sua própria altura mínima, espaçamento e área clicável. Os itens não têm
+  borda própria; a borda pertence somente ao painel do menu. O ícone de `+` fica reservado para
+  a criação principal; opções contextuais como grupo e atividade usam ícones específicos. Para
+  grupo de atividades, use coleção/camadas, nunca pessoas ou usuários, pois o grupo não representa
+  participantes.
 - Grupos de atividades devem deixar claro que são expansíveis: o botão `.group-toggle` informa
-  `aria-expanded`, exibe “Expandir” ou “Recolher” e usa um chevron que acompanha a mudança de
-  estado. A expansão não pode depender de hover.
-- Dialogs need a clear title, keyboard focus management, and an explicit primary action labeled
-  “Salvar” in the bottom-right of the footer. “Salvar” must share the complete primary-button
-  contract with other primary actions: `--control-height`, spacing tokens, border, radius, and
-  semantic action colors. Do not render a “Fechar” button; the backdrop and `Esc` close the dialog.
-  In activity dialogs, place “Adicionar horário” on the left of the same footer. Destructive
-  actions should be visually separated from confirmation actions.
-- Hide scrollbar chrome on the page and dialogs without disabling scrolling; preserve keyboard,
-  wheel, and touch scrolling.
-- Motion must be brief and informative. Respect `prefers-reduced-motion` for nonessential
-  transitions and animations.
-- Preserve the active admin view, selected schedule section, expanded groups, and scroll position
-  across reloads with `sessionStorage`. Validate restored IDs against fresh API data, never persist
-  unsaved form contents, and clear the view state on logout.
+  `aria-expanded`, usa somente um chevron que acompanha a mudança de estado e tem um rótulo
+  acessível contextual como “Abrir grupo X” ou “Fechar grupo X”. Não exiba “Expandir”/“Recolher”
+  como texto auxiliar: essa terminologia é abstrata e adiciona ruído ao cabeçalho. A expansão não
+  pode depender de hover. O `.schedule-group` deve manter `overflow: visible`, pois o painel do
+  menu precisa escapar do card e permanecer em primeiro plano. Feche os cantos aplicando raios
+  específicos ao `.group-header` — todos os cantos quando recolhido e somente os superiores quando
+  expandido — e ao `.group-body`, sem recortar o popup. O `.group-header` deve
+  usar uma grid com a coluna flexível do grupo e a coluna automática do menu, mantendo o dropdown
+  alinhado ao centro do cabeçalho em diferentes larguras e níveis de zoom. O
+  `.group-toggle-indicator` deve ter a mesma caixa explícita de `1.15rem` do `.action-icon`,
+  `line-height: 0` e centralizar o SVG como `display: block` dentro dela. O título e o eixo devem
+  ficar juntos em `.group-toggle-copy`, enquanto o indicador deve ser um segundo item explícito de
+  um layout flexível centralizado; não dependa do auto-placement de uma grid com três filhos.
+- O `.menu-chevron` deve seguir o mesmo contrato: caixa explícita de `1.15rem`, `display: grid`,
+  `place-items: center`, `line-height: 0` e SVG como `display: block`. Se o resultado visual de um
+  ajuste não corresponder ao pedido, não acumule tentativas empíricas: pesquise referências
+  técnicas confiáveis e registre a solução baseada nessa pesquisa.
+- Diálogos precisam de título claro, gerenciamento de foco pelo teclado e uma ação primária
+  explícita com o rótulo “Salvar” no canto inferior direito do rodapé. “Salvar” deve compartilhar
+  o contrato completo de botão primário com as demais ações primárias: `--control-height`, tokens
+  de espaçamento, borda, raio e cores semânticas de ação. Não renderize um botão “Fechar”; o
+  backdrop e `Esc` fecham o diálogo. Em diálogos de atividade, coloque “Adicionar horário” à
+  esquerda no mesmo rodapé. Ações destrutivas devem ficar visualmente separadas das ações de
+  confirmação.
+- Oculte a aparência da barra de rolagem na página e nos diálogos sem desabilitar a rolagem;
+  preserve a rolagem por teclado, mouse e toque.
+- O movimento deve ser breve e informativo. Respeite `prefers-reduced-motion` para transições e
+  animações não essenciais.
+- Preserve a tela administrativa ativa, a seção selecionada da agenda, os grupos expandidos e a
+  posição de rolagem entre recarregamentos usando `sessionStorage`. Valide IDs restaurados contra
+  os dados atuais da API, nunca persista conteúdo não salvo de formulários e limpe o estado da tela
+  ao sair.
 
 ### Hierarquia CRUD e ações contextuais
 
@@ -248,7 +283,7 @@ with it when implementing or changing the interface.
   indica `Salvo` ou `Alterações não salvas`; adicionar, editar e excluir no editor altera apenas
   o rascunho até essa confirmação explícita.
 
-## Example
+## Exemplo
 
 ```css
 .primary-action {
@@ -271,15 +306,45 @@ with it when implementing or changing the interface.
 }
 ```
 
-## Changing the system
+## Alteração do sistema
 
-Before adding a token, search for an existing token with the same visual purpose. Add a primitive
-only for a reusable scale value and add a semantic token only for a stable UI role. When changing
-a canonical token, update this document and the CSS declaration together, then inspect the login,
-navigation, schedule editor, catalog views, dialogs, focus states, and mobile layout.
+Antes de adicionar um token, procure um token existente com a mesma finalidade visual. Adicione um
+token primitivo somente para uma escala reutilizável e um token semântico somente para uma função
+estável da UI. Ao alterar um token canônico, atualize este documento e a declaração CSS juntos;
+depois inspecione o login, a navegação, o editor da agenda, as telas de catálogo, os diálogos, os
+estados de foco e o layout móvel.
 
-## References
+## Referências
 
-- [W3C CSS Custom Properties specification](https://www.w3.org/TR/css-variables-1/)
-- [Design Tokens Community Group format](https://www.designtokens.org/tr/drafts/format/)
-- [MDN: Using CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
+- [Material Design — botões](https://m2.material.io/go/design-buttons/) — hierarquia com uma
+  única ação de maior destaque e ações secundárias com menor ênfase.
+- [Material Design — diálogos](https://m2.material.io/develop/web/components/dialogs) — ações de
+  confirmação e cancelamento explícitas, com no máximo duas ações no diálogo.
+- [Fluent 2 — botões](https://fluent2.microsoft.design/components/web/react/core/button/usage) —
+  uma única ação primária por contexto, rótulos iniciados por verbos e ícones familiares.
+- [Fluent 2 — toolbar](https://fluent2.microsoft.design/components/web/react/core/toolbar/usage) —
+  ações destrutivas agrupadas e ícones acompanhados de rótulos acessíveis.
+- [Carbon Design System — ações comuns](https://carbondesignsystem.com/patterns/common-actions/)
+  — exclusão de baixo impacto pode ser imediata; exclusão de maior impacto deve explicar as
+  consequências e pedir confirmação.
+- [GOV.UK Design System — botões](https://design-system.service.gov.uk/components/button/) —
+  ações destrutivas devem ser usadas com parcimônia, com texto explícito e confirmação adicional.
+- [Especificação de propriedades personalizadas CSS da W3C](https://www.w3.org/TR/css-variables-1/)
+- [Formato do Design Tokens Community Group](https://www.designtokens.org/tr/drafts/format/)
+- [MDN: Uso de propriedades personalizadas CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
+- [web.dev: Renderização precisa com `devicePixelContentBox`](https://web.dev/articles/device-pixel-content-box)
+  — explica subpixels, `devicePixelRatio`, zoom e pixel snapping.
+- [W3C: CSS Inline Layout](https://www.w3.org/TR/css-inline-3/) — documenta baseline e alinhamento
+  vertical de elementos inline e SVG.
+- [MDN: Flexbox](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox)
+  — referência para centralização no eixo transversal com `align-items`.
+- [MDN: `overflow`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/overflow)
+  — diferencia conteúdo visível de conteúdo recortado e explica por que um popup não pode escapar
+  de um ancestral com `overflow: hidden`.
+- [W3C: CSS Overflow Module Level 3](https://www.w3.org/TR/css-overflow/)
+  — especifica o recorte e a relação entre overflow e regiões arredondadas.
+- [MDN: `vertical-align`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/vertical-align)
+  — documenta o alinhamento por baseline de elementos inline e por que ele não deve ser implícito
+  para esse SVG.
+- [MDN: `alignment-baseline` em SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/alignment-baseline)
+  — referência para o comportamento de baseline e alinhamento de objetos SVG.

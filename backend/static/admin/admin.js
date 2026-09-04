@@ -194,9 +194,11 @@ function actionIcon(name) {
   const paths = {
     more: '<circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>',
     add: '<path d="M12 5v14M5 12h14"/>',
+    collection: '<rect x="5" y="5" width="14" height="4" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/><rect x="5" y="15" width="14" height="4" rx="1"/>',
+    activity: '<path d="M8 6h10M8 12h10M8 18h10"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
     edit: '<path d="m4 16.5-.8 3.3 3.3-.8L18.8 6.7a2.3 2.3 0 0 0-3.3-3.3L4 16.5Z"/><path d="m13.5 5.5 3 3"/>',
     delete: '<path d="M5 7h14M10 11v6M14 11v6M7 7l1 13h8l1-13M9 7V4h6v3"/>',
-    chevron: '<path d="m7 9 5 5 5-5"/>',
+    chevron: '<path d="M7 9.5 12 14.5 17 9.5"/>',
   };
   return `<svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name] || ""}</svg>`;
 }
@@ -286,11 +288,11 @@ function renderActivities(group) {
             ${activity.description ? `<p>${escapeHtml(activity.description)}</p>` : ""}
             <div class="session-summary">${renderSessions(activity)}</div>
           </div>
-          <details class="card-menu">
-            <summary class="card-menu-trigger" aria-label="Ações da atividade ${escapeHtml(activity.title || "Atividade sem título")}">${actionIcon("more")}</summary>
-            <div class="card-menu-panel" role="menu">
-              <button type="button" role="menuitem" data-action="edit-activity" data-key="${key}">${actionIcon("edit")}Editar</button>
-              <button class="danger-action" type="button" role="menuitem" data-action="delete-activity" data-key="${key}">${actionIcon("delete")}Excluir</button>
+          <details class="menu card-menu">
+            <summary class="menu-trigger card-menu-trigger" aria-label="Ações da atividade ${escapeHtml(activity.title || "Atividade sem título")}">${actionIcon("more")}</summary>
+            <div class="menu-panel card-menu-panel" role="menu">
+              <button class="menu-item" type="button" role="menuitem" data-action="edit-activity" data-key="${key}">${actionIcon("edit")}Editar</button>
+              <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-activity" data-key="${key}">${actionIcon("delete")}Excluir</button>
             </div>
           </details>
         </article>`;
@@ -307,19 +309,21 @@ function renderGroups(section = selectedSection()) {
       const key = draftKey(group);
       const expanded = expandedGroups.has(group);
       return `
-        <article class="schedule-group">
+        <article class="schedule-group ${expanded ? "is-expanded" : "is-collapsed"}">
           <header class="group-header">
-            <button class="group-toggle" type="button" data-action="toggle-group" data-key="${key}" aria-expanded="${expanded}" aria-label="${expanded ? "Recolher" : "Expandir"} grupo ${escapeHtml(group.title || "Grupo sem título")}">
-              <strong>${escapeHtml(group.title || "Grupo sem título")}</strong>
+            <button class="group-toggle" type="button" data-action="toggle-group" data-key="${key}" aria-expanded="${expanded}" aria-label="${expanded ? "Fechar" : "Abrir"} grupo ${escapeHtml(group.title || "Grupo sem título")}">
+              <span class="group-toggle-copy">
+                <strong>${escapeHtml(group.title || "Grupo sem título")}</strong>
+                <span class="secondary-text">${escapeHtml(axisName(group.knowledgeAxis))}</span>
+              </span>
               <span class="group-toggle-indicator">${actionIcon("chevron")}</span>
-              <span class="secondary-text">${escapeHtml(axisName(group.knowledgeAxis))} · ${expanded ? "Recolher" : "Expandir"}</span>
             </button>
-            <details class="card-menu">
-              <summary class="card-menu-trigger" aria-label="Ações do grupo ${escapeHtml(group.title || "Grupo sem título")}">${actionIcon("more")}</summary>
-              <div class="card-menu-panel" role="menu">
-                <button type="button" role="menuitem" data-action="add-activity-to-group" data-key="${key}">${actionIcon("add")}Adicionar atividade</button>
-                <button type="button" role="menuitem" data-action="edit-group" data-key="${key}">${actionIcon("edit")}Editar</button>
-                <button class="danger-action" type="button" role="menuitem" data-action="delete-group" data-key="${key}">${actionIcon("delete")}Excluir</button>
+            <details class="menu card-menu">
+              <summary class="menu-trigger card-menu-trigger" aria-label="Ações do grupo ${escapeHtml(group.title || "Grupo sem título")}">${actionIcon("more")}</summary>
+              <div class="menu-panel card-menu-panel" role="menu">
+                <button class="menu-item" type="button" role="menuitem" data-action="add-activity-to-group" data-key="${key}">${actionIcon("activity")}Adicionar atividade</button>
+                <button class="menu-item" type="button" role="menuitem" data-action="edit-group" data-key="${key}">${actionIcon("edit")}Editar</button>
+                <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-group" data-key="${key}">${actionIcon("delete")}Excluir</button>
               </div>
             </details>
           </header>
@@ -347,7 +351,7 @@ function renderSections() {
       return `<button type="button" data-action="select-section" data-key="${key}" aria-current="${current}">${escapeHtml(item.title || "Seção sem título")}</button>`;
     })
     .join("");
-  const addSectionButton = `<button id="add-section" class="section-add-button" type="button" data-action="add-section" aria-label="Adicionar seção">${actionIcon("add")}<span>Adicionar seção</span></button>`;
+  const addSectionButton = `<button id="add-section" class="section-add-button" type="button" data-action="add-section" aria-label="Adicionar seção"><span class="section-add-icon">${actionIcon("add")}</span><span>Adicionar seção</span></button>`;
 
   const sectionPanel = section
     ? `<section class="schedule-section">
@@ -357,18 +361,18 @@ function renderSections() {
             ${section.description ? `<p>${escapeHtml(section.description)}</p>` : ""}
           </div>
           <div class="card-actions">
-            <details class="toolbar-menu section-create-menu">
-              <summary class="toolbar-menu-trigger">Adicionar</summary>
-              <div class="toolbar-menu-panel" role="menu">
-                <button type="button" role="menuitem" data-action="add-group">Adicionar grupo</button>
-                <button type="button" role="menuitem" data-action="add-activity">Adicionar atividade</button>
+            <details class="menu toolbar-menu section-create-menu">
+              <summary class="menu-trigger toolbar-menu-trigger"><span>Adicionar</span><span class="menu-chevron">${actionIcon("chevron")}</span></summary>
+              <div class="menu-panel toolbar-menu-panel" role="menu">
+                <button class="menu-item" type="button" role="menuitem" data-action="add-group">${actionIcon("collection")}Adicionar grupo</button>
+                <button class="menu-item" type="button" role="menuitem" data-action="add-activity">${actionIcon("activity")}Adicionar atividade</button>
               </div>
             </details>
-            <details class="card-menu">
-              <summary class="card-menu-trigger" aria-label="Ações da seção ${escapeHtml(section.title || "Seção sem título")}">${actionIcon("more")}</summary>
-              <div class="card-menu-panel" role="menu">
-                <button type="button" role="menuitem" data-action="edit-section" data-key="${draftKey(section)}">${actionIcon("edit")}Editar seção</button>
-                <button class="danger-action" type="button" role="menuitem" data-action="delete-section" data-key="${draftKey(section)}">${actionIcon("delete")}Excluir seção</button>
+            <details class="menu card-menu">
+              <summary class="menu-trigger card-menu-trigger" aria-label="Ações da seção ${escapeHtml(section.title || "Seção sem título")}">${actionIcon("more")}</summary>
+              <div class="menu-panel card-menu-panel" role="menu">
+                <button class="menu-item" type="button" role="menuitem" data-action="edit-section" data-key="${draftKey(section)}">${actionIcon("edit")}Editar seção</button>
+                <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-section" data-key="${draftKey(section)}">${actionIcon("delete")}Excluir seção</button>
               </div>
             </details>
           </div>
@@ -454,11 +458,11 @@ function renderKnowledgeAxes() {
           const count = axisGroupCount(axis.id);
           return `<article class="catalog-card">
             <div><strong>${escapeHtml(axis.name)}</strong><span class="secondary-text">${count} ${count === 1 ? "grupo" : "grupos"}</span></div>
-            <details class="card-menu">
-              <summary class="card-menu-trigger" aria-label="Ações do eixo ${escapeHtml(axis.name)}">${actionIcon("more")}</summary>
-              <div class="card-menu-panel" role="menu">
-                <button type="button" role="menuitem" data-action="edit-axis" data-key="${key}">${actionIcon("edit")}Editar</button>
-                <button class="danger-action" type="button" role="menuitem" data-action="delete-axis" data-key="${key}">${actionIcon("delete")}Excluir</button>
+            <details class="menu card-menu">
+              <summary class="menu-trigger card-menu-trigger" aria-label="Ações do eixo ${escapeHtml(axis.name)}">${actionIcon("more")}</summary>
+              <div class="menu-panel card-menu-panel" role="menu">
+                <button class="menu-item" type="button" role="menuitem" data-action="edit-axis" data-key="${key}">${actionIcon("edit")}Editar</button>
+                <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-axis" data-key="${key}">${actionIcon("delete")}Excluir</button>
               </div>
             </details>
           </article>`;
@@ -483,11 +487,11 @@ function locationCard(location) {
       ${location.description ? `<p class="secondary-text">${escapeHtml(location.description)}</p>` : ""}
     </div>
     <div class="card-actions">
-      <details class="card-menu">
-        <summary class="card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}">${actionIcon("more")}</summary>
-        <div class="card-menu-panel" role="menu">
-          <button type="button" role="menuitem" data-action="edit-location" data-key="${key}">${actionIcon("edit")}Editar</button>
-          <button class="danger-action" type="button" role="menuitem" data-action="delete-location" data-key="${key}">${actionIcon("delete")}Excluir</button>
+      <details class="menu card-menu">
+        <summary class="menu-trigger card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}">${actionIcon("more")}</summary>
+        <div class="menu-panel card-menu-panel" role="menu">
+          <button class="menu-item" type="button" role="menuitem" data-action="edit-location" data-key="${key}">${actionIcon("edit")}Editar</button>
+          <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-location" data-key="${key}">${actionIcon("delete")}Excluir</button>
         </div>
       </details>
     </div>
@@ -1236,7 +1240,7 @@ async function handleEditorClick(event) {
   if (!button) return;
   const { action, key } = button.dataset;
 
-  button.closest(".toolbar-menu")?.removeAttribute("open");
+  button.closest(".menu")?.removeAttribute("open");
 
   if (action === "save-schedule") return saveSchedule();
   if (action === "add-section") {
@@ -1320,37 +1324,37 @@ async function handleEditorClick(event) {
 
 editorContent.addEventListener("click", handleEditorClick);
 editorContent.addEventListener("click", (event) => {
-  const toolbarTrigger = event.target.closest?.("summary.toolbar-menu-trigger");
+  const toolbarTrigger = event.target.closest?.("summary.menu-trigger");
   if (toolbarTrigger?.tagName === "SUMMARY") {
     event.preventDefault?.();
-    const menu = toolbarTrigger.closest(".toolbar-menu");
+    const menu = toolbarTrigger.closest(".menu");
     if (menu) {
       if (menu.toggleAttribute) menu.toggleAttribute("open");
       else menu.open = !menu.open;
     }
     return;
   }
-  const trigger = event.target.closest?.("summary.card-menu-trigger");
-  const menu = event.target.closest?.(".card-menu");
+  const trigger = event.target.closest?.("summary.menu-trigger");
+  const menu = event.target.closest?.(".menu");
   if (trigger) {
-    editorContent.querySelectorAll(".card-menu[open]").forEach((openMenu) => {
+    editorContent.querySelectorAll(".menu[open]").forEach((openMenu) => {
       if (openMenu !== menu) openMenu.removeAttribute("open");
     });
     return;
   }
 
   if (!menu) {
-    editorContent.querySelectorAll(".card-menu[open]").forEach((openMenu) => {
+    editorContent.querySelectorAll(".menu[open]").forEach((openMenu) => {
       openMenu.removeAttribute("open");
     });
   }
 });
 editorContent.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
-  const menu = event.target.closest?.(".card-menu[open]");
+  const menu = event.target.closest?.(".menu[open]");
   if (!menu) return;
   menu.removeAttribute("open");
-  menu.querySelector(".card-menu-trigger")?.focus();
+  menu.querySelector(".menu-trigger")?.focus();
 });
 editorContent.addEventListener("change", (event) => {
   if (!state.schedule) return;
@@ -1405,7 +1409,7 @@ function restoreModalFocus() {
       editorContent.querySelector("#add-section")?.focus();
       return;
     }
-    const menu = modalOpener.closest?.(".toolbar-menu, .card-menu");
+    const menu = modalOpener.closest?.(".menu");
     if (menu) {
       menu.querySelector("summary")?.focus();
       return;
@@ -1425,8 +1429,8 @@ function restoreModalFocus() {
   }
   if (!selector) return;
   const target = editorContent.querySelector(selector);
-  if (target?.closest?.(".toolbar-menu, .card-menu")) {
-    const menu = target.closest(".toolbar-menu, .card-menu");
+  if (target?.closest?.(".menu")) {
+    const menu = target.closest(".menu");
     menu.querySelector("summary")?.focus();
     setTimeout(() => menu.querySelector("summary")?.focus(), 0);
     return;

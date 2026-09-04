@@ -277,7 +277,7 @@ def test_schedule_create_edit_session_validation_and_reload_persistence(admin_pa
     admin_page.reload(wait_until="networkidle")
     admin_page.get_by_role("button", name="Seção E2E").click()
     admin_page.locator(".schedule-group").filter(has_text="Grupo E2E").get_by_role(
-        "button", name=re.compile("Expandir")
+        "button", name=re.compile("Abrir grupo")
     ).click()
     expect(admin_page.get_by_text("Atividade E2E")).to_be_visible(timeout=10_000)
     expect(admin_page.get_by_text("10:00–11:00")).to_be_visible()
@@ -330,7 +330,7 @@ def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
     admin_page.reload(wait_until="networkidle")
     admin_page.get_by_role("button", name=scenario["section"]).click()
     group = admin_page.locator(".schedule-group").filter(has_text=scenario["group"])
-    group.get_by_role("button", name=re.compile("Expandir")).click()
+    group.get_by_role("button", name=re.compile("Abrir grupo")).click()
     activity = admin_page.locator(".schedule-activity").filter(has_text=scenario["activity"])
     expect(activity).to_contain_text("08:00–09:00")
     expect(activity).to_contain_text("10:30–12:00")
@@ -346,7 +346,7 @@ def test_created_location_can_be_selected_in_a_session(admin_page: Page) -> None
 
     admin_page.get_by_role("button", name="Programação").click()
     group = admin_page.locator(".schedule-group").filter(has_text="ADMINISTRAÇÃO")
-    group.get_by_role("button", name=re.compile("Expandir")).click()
+    group.get_by_role("button", name=re.compile("Abrir grupo")).click()
     activity = admin_page.locator(".schedule-activity").filter(
         has_text="Voz e Ação: conhecendo o curso de Administração"
     )
@@ -390,7 +390,7 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
     admin_page.route("**/admin/api/schedule", add_stale_reference)
     login(admin_page)
     group = admin_page.locator(".schedule-group").filter(has_text="Atividades gerais")
-    group.get_by_role("button", name=re.compile("Expandir")).click()
+    group.get_by_role("button", name=re.compile("Abrir grupo")).click()
     group.locator(".card-menu-trigger").click()
     group.get_by_role("menuitem", name="Editar").first.click()
     expect(admin_page.locator('select[name="knowledgeAxis"] option:checked')).to_have_text(

@@ -126,7 +126,7 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
         api.renderLocations();
         let html = elementFor("#editor-content").innerHTML;
         assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar local/);
-        assert.match(html, /class="card-menu"[\s\S]*data-action="edit-location"[\s\S]*data-action="delete-location"/);
+        assert.match(html, /class="menu card-menu"[\s\S]*data-action="edit-location"[\s\S]*data-action="delete-location"/);
         assert.equal((html.match(/data-action="edit-location"/g) || []).length, 1);
         assert.equal((html.match(/data-action="delete-location"/g) || []).length, 1);
 
@@ -134,7 +134,7 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
         api.renderKnowledgeAxes();
         html = elementFor("#editor-content").innerHTML;
         assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar eixo/);
-        assert.match(html, /class="card-menu"[\s\S]*data-action="edit-axis"[\s\S]*data-action="delete-axis"/);
+        assert.match(html, /class="menu card-menu"[\s\S]*data-action="edit-axis"[\s\S]*data-action="delete-axis"/);
         assert.equal((html.match(/data-action="edit-axis"/g) || []).length, 1);
         assert.equal((html.match(/data-action="delete-axis"/g) || []).length, 1);
         """
@@ -151,25 +151,93 @@ def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
 def test_card_menus_have_shared_accessible_design_contract():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     design = ADMIN_DESIGN.read_text(encoding="utf-8")
-    menu_css = css.split(".card-menu-panel {", 1)[1].split("}", 1)[0]
+    menu_css = css.split(".menu-panel {", 1)[1].split("}", 1)[0]
     for source in (css, design):
-        assert ".card-menu" in source
-        assert ".card-menu-trigger" in source
-        assert ".card-menu-panel" in source
+        assert ".menu" in source
+        assert ".menu-trigger" in source
+        assert ".menu-panel" in source
         assert "focus-visible" in source
     assert "três pontos" in design
+    assert "chevron SVG" in design
+    assert "ícone" in design
     assert "background: transparent" in css
     assert "background: var(--color-surface);" in menu_css
-    assert "box-shadow: none" in css
+    assert "padding-block: var(--space-0);" in menu_css
+    assert ".menu-panel .menu-item" in css
+    assert "border: 0;" in css.split(".menu-panel .menu-item", 1)[1].split("}", 1)[0]
+    assert "box-shadow: var(--shadow-dialog);" in menu_css
     assert "border: var(--border-width) solid var(--color-border);" in menu_css
     assert "border-radius: var(--radius-md);" in menu_css
     assert "border: 0" in css
     assert "pointer-events: auto" in css
-    assert "bottom: calc(100% + var(--space-1))" in css
-    assert "top: auto" in css
     assert "z-index: 20" in css
     assert ".schedule-group {" in css
     assert "overflow: visible" in css
+    assert "border-radius: var(--radius-lg) var(--radius-lg) 0 0;" in css
+    assert "border-radius: 0 0 var(--radius-lg) var(--radius-lg);" in css
+
+
+def test_schedule_group_header_aligns_toggle_and_menu_without_leaking_corners():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    header_css = css.split(".group-header {", 1)[1].split("}", 1)[0]
+    assert "grid-template-columns: minmax(0, 1fr) auto;" in header_css
+    assert "align-items: center;" in header_css
+
+
+def test_group_toggle_indicator_uses_the_same_explicit_icon_box_as_action_icon():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    indicator_css = css.split(".group-toggle-indicator {", 1)[1].split("}", 1)[0]
+    assert "width: 1.15rem;" in indicator_css
+    assert "height: 1.15rem;" in indicator_css
+    assert ".group-toggle-indicator .action-icon" in css
+    indicator_icon_css = css.split(".group-toggle-indicator .action-icon", 1)[1].split("}", 1)[0]
+    assert "display: block;" in indicator_icon_css
+    assert "line-height: 0;" in indicator_css
+    assert ".group-toggle-copy" in css
+
+
+def test_dropdown_chevron_uses_a_block_svg_inside_an_explicit_box():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    chevron_css = css.split(".menu-chevron {", 1)[1].split("}", 1)[0]
+    chevron_icon_css = css.split(".menu-chevron .action-icon", 1)[1].split("}", 1)[0]
+    assert "display: grid;" in chevron_css
+    assert "place-items: center;" in chevron_css
+    assert "width: 1.15rem;" in chevron_css
+    assert "height: 1.15rem;" in chevron_css
+    assert "line-height: 0;" in chevron_css
+    assert "display: block;" in chevron_icon_css
+
+
+def test_agent_rules_require_research_after_an_ineffective_visual_adjustment():
+    agents = (PROJECT_ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Se um ajuste visual não produzir o efeito esperado" in agents
+    assert "pesquise referências técnicas" in agents
+
+
+def test_schedule_group_menu_can_escape_its_card_and_stay_in_foreground():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    assert ".menu { position: relative; z-index: 3; }" in css
+    assert ".menu-panel {" in css
+    assert "z-index: 20;" in css
+
+
+def test_group_toggle_uses_only_stateful_accessible_label():
+    design = ADMIN_DESIGN.read_text(encoding="utf-8")
+    assert "Não exiba “Expandir”/“Recolher”" in design
+    assert "Abrir grupo" in design
+
+
+def test_dropdown_menu_items_define_their_own_vertical_size():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    item_css = css.split(".menu-item {", 1)[1].split("}", 1)[0]
+    assert "padding: var(--space-2) var(--space-3);" in item_css
+    assert "min-height: var(--control-height);" in item_css
+
+
+def test_contextual_creation_icons_are_not_generic_plus_icons():
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    assert 'collection: ' in script
+    assert 'activity: ' in script
 
 
 def test_crud_hierarchy_is_documented():
@@ -196,10 +264,16 @@ def test_links_do_not_use_underlines():
 def test_section_add_button_centers_its_icon_inside_the_pill():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     button_css = css.split(".section-add-button {", 1)[1].split("}", 1)[0]
+    icon_css = css.split(".section-add-icon {", 1)[1].split("}", 1)[0]
     assert "align-items: center;" in button_css
     assert "justify-content: center;" in button_css
-    assert "line-height: var(--line-height-normal);" in button_css
+    assert "display: inline-grid;" in button_css
+    assert "grid-template-columns: auto auto;" in button_css
     assert "margin: 0;" in button_css
+    assert "display: grid;" in icon_css
+    assert "place-items: center;" in icon_css
+    assert "width: 1rem;" in icon_css
+    assert "height: 1rem;" in icon_css
 
 
 def test_section_add_button_uses_a_pill_shape_for_visible_clarity():

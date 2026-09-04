@@ -147,6 +147,9 @@ def test_schedule_creation_actions_are_grouped_by_context():
         assert.equal(html.includes('id="add-schedule-actions"'), false);
         assert.match(html, /data-action="add-group"/);
         assert.match(html, /data-action="add-activity"/);
+        const sectionAddTrigger = html.match(/class="menu-trigger toolbar-menu-trigger"[^>]*>[\s\S]*?<\/summary>/)[0];
+        assert.match(sectionAddTrigger, /class="menu-chevron"/);
+        assert.equal(sectionAddTrigger.includes('d="M12 5v14M5 12h14"'), false);
         assert.equal((html.match(/data-action="add-group"/g) || []).length, 1);
         assert.equal((html.match(/data-action="add-activity"/g) || []).length, 1);
         assert.match(html, /id="save-schedule"[^>]*disabled/);
@@ -164,7 +167,7 @@ def test_section_add_button_is_after_existing_sections():
         assert.match(html, /data-action="select-section"[\s\S]*id="add-section"/);
          assert.match(html, /class="section-add-button"/);
          assert.match(html, /aria-label="Adicionar seção"/);
-         assert.match(html, />\s*<svg[^>]+aria-hidden="true"[\s\S]*<\/svg>\s*<span>Adicionar seção<\/span>\s*<\/button>/);
+        assert.match(html, /<span class="section-add-icon">\s*<svg[^>]+aria-hidden="true"[\s\S]*<\/svg>\s*<\/span>\s*<span>Adicionar seção<\/span>\s*<\/button>/);
          assert.match(html, /<svg[^>]+aria-hidden="true"/);
         """
     )
@@ -177,18 +180,25 @@ def test_schedule_cards_render_actions_inside_three_dot_menus():
         api.state.locations = [{id: "loc-1", name: "Auditório"}];
         api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
         const html = api.renderGroups(schedule.sections[0]);
-        assert.match(html, /class="card-menu"/);
-        assert.match(html, /aria-label="Ações do grupo Grupo"/);
+        assert.match(html, /class="menu card-menu"/);
+        assert.match(html, /aria-label="Ações do grupo Grupo"[^>]*>[\s\S]*class="action-icon"/);
         assert.match(html, /data-action="add-activity-to-group"/);
+        assert.match(html, /data-action="add-activity-to-group"[^>]*>\s*<svg[^>]*>/);
         assert.match(html, /data-action="edit-group"/);
         assert.match(html, /data-action="delete-group"/);
-        assert.match(html, /aria-label="Ações da atividade Atividade"/);
+        assert.match(html, /aria-label="Ações da atividade Atividade"[^>]*>[\s\S]*class="action-icon"/);
         assert.match(html, /data-action="edit-activity"/);
         assert.match(html, /data-action="delete-activity"/);
         assert.match(html, /<svg[^>]+aria-hidden="true"/);
         assert.match(html, /circle cx="12" cy="5"/);
-        assert.match(html, /aria-label="Expandir grupo Grupo"/);
-        assert.equal((html.match(/class="card-menu-trigger"/g) || []).length, 2);
+        assert.match(html, /path d="M7 9\.5 12 14\.5 17 9\.5"/);
+        assert.match(html, /aria-label="Abrir grupo Grupo"/);
+        assert.match(html, /class="group-toggle-copy"[\s\S]*<strong>Grupo<\/strong>[\s\S]*Geral[\s\S]*class="group-toggle-indicator"/);
+        assert.equal(html.includes("· Expandir"), false);
+        assert.equal(html.includes("· Recolher"), false);
+        assert.equal((html.match(/class="menu-trigger card-menu-trigger"/g) || []).length, 2);
+        const addActivityItem = html.match(/data-action="add-activity-to-group"[\s\S]*?<\/button>/)[0];
+        assert.equal(addActivityItem.includes("M12 5v14M5 12h14"), false);
         """
     )
 
@@ -199,10 +209,11 @@ def test_section_actions_render_inside_three_dot_menu():
         api.state.schedule = validSchedule();
         api.renderSections();
         const html = elementFor("#editor-content").innerHTML;
-        assert.match(html, /class="card-menu"[\s\S]*aria-label="Ações da seção Seção"/);
+        assert.match(html, /class="menu card-menu"[\s\S]*aria-label="Ações da seção Seção"/);
         assert.match(html, /data-action="edit-section"[\s\S]*data-action="delete-section"/);
         assert.equal((html.match(/data-action="edit-section"/g) || []).length, 1);
         assert.equal((html.match(/data-action="delete-section"/g) || []).length, 1);
+        assert.match(html, /data-action="edit-section"[^>]*>\s*<svg[^>]*>/);
         """
     )
 
