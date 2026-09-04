@@ -442,8 +442,8 @@ function renderLocations() {
           const groupsById = new Map(groups.map((group) => [group.id, group]));
           if (category === "estacionamentos") {
             if (!locations.length && !groups.length) return "";
-            return `<details class="location-group" open>
-              <summary><h3>${categoryLabels[category]}</h3></summary>
+            return `<details class="location-group">
+              <summary class="location-group-trigger"><span><h3>${categoryLabels[category]}</h3><span class="location-group-hint">Clique para expandir</span></span><span class="location-group-chevron">${actionIcon("chevron")}</span></summary>
               <div class="catalog-list">${locations.length ? locations.map((location) => locationCard(location)).join("") : '<p class="empty-state">Nenhum local cadastrado.</p>'}</div>
             </details>`;
           }
@@ -456,8 +456,8 @@ function renderLocations() {
             grouped.get(key).locations.push(location);
           });
           if (!grouped.size) return "";
-          return `<div class="location-groups">${Array.from(grouped.values()).map((group) => `<details class="location-group" open>
-            <summary><h3>${escapeHtml(group.name)}</h3></summary>
+          return `<div class="location-groups">${Array.from(grouped.values()).map((group) => `<details class="location-group">
+            <summary class="location-group-trigger"><span><h3>${escapeHtml(group.name)}</h3><span class="location-group-hint">Clique para expandir</span></span><span class="location-group-chevron">${actionIcon("chevron")}</span></summary>
             <div class="catalog-list">${group.locations.length ? group.locations.map((location) => locationCard(location)).join("") : '<p class="empty-state">Nenhum local cadastrado.</p>'}</div>
           </details>`).join("")}</div>`;
         })
@@ -522,7 +522,7 @@ function locationCard(location) {
     </div>
     <div class="card-actions">
       <details class="menu card-menu">
-        <summary class="menu-trigger card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}">${actionIcon("more")}</summary>
+        <summary class="menu-trigger card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}"><span>Ações</span><span class="menu-chevron">${actionIcon("chevron")}</span></summary>
         <div class="menu-panel card-menu-panel" role="menu">
           <button class="menu-item" type="button" role="menuitem" data-action="edit-location" data-key="${key}">${actionIcon("edit")}Editar</button>
           <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-location" data-key="${key}">${actionIcon("delete")}Excluir</button>

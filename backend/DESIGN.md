@@ -180,12 +180,14 @@ ele ao implementar ou alterar a interface.
 - Os locais são organizados por grupos explícitos armazenados em `locations.json`. Um grupo tem
   nome e uma categoria (`blocos`, `laboratorios`, `estacionamentos` ou `outros`); cada sala pertence
   a um grupo por meio de `groupId` e armazena `roomNumber` e `description`. A página de locais
-  exibe grupos como accordions (`Bloco A`, `LAB 01` etc.) e suas salas; “Estacionamentos” também é
-  um accordion que contém diretamente seus locais de estacionamento, sem grupo aninhado. Use o
-  mesmo token de espaçamento entre todos os grupos, independentemente da categoria. Os nomes das
-  salas continuam sendo as referências da agenda. Grupos sem salas continuam visíveis após o
-  carregamento e exibem o estado vazio “Nenhum local cadastrado”, para confirmar que o grupo foi
-  criado e permitir que o usuário adicione locais a ele.
+  exibe grupos como accordions inicialmente fechados (`Bloco A`, `LAB 01` etc.) e suas salas;
+  “Estacionamentos” também é um accordion que contém diretamente seus locais de estacionamento,
+  sem grupo aninhado. O título de cada accordion deve mostrar um chevron e a dica “Clique para
+  expandir”; ao abrir, o chevron gira e o conteúdo fica disponível. Use o mesmo token de
+  espaçamento entre todos os grupos, independentemente da categoria. Os nomes das salas continuam
+  sendo as referências da agenda. Grupos sem salas continuam visíveis após o carregamento e
+  exibem o estado vazio “Nenhum local cadastrado”, para confirmar que o grupo foi criado e permitir
+  que o usuário adicione locais a ele.
 - Uma sessão da agenda armazena `locations` como lista. Várias salas podem compartilhar um horário;
   salas com horários diferentes usam entradas de sessão separadas para a mesma atividade. A entrada
   legada `location` é aceita somente para migração ao formato de lista.
@@ -220,6 +222,8 @@ ele ao implementar ou alterar a interface.
   vertical, clicável, ter fundo opaco `--color-surface`, borda
   `--border-width`/`--color-border`, raio `--radius-md`, sombra `--shadow-dialog` e camada acima
   dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço.
+- Nos cards de locais, o menu de ações deve exibir o rótulo “Ações” e um chevron; não use somente
+  um ícone de três pontos, pois isso reduz a descoberta das operações disponíveis.
 - Em cada momento, mantenha no máximo um menu popup aberto dentro do editor: abrir qualquer
   outro gatilho, inclusive um dropdown da barra, fecha o menu anterior; clicar fora ou executar
   uma opção também fecha o menu atual. Essa regra deve ser implementada no comportamento

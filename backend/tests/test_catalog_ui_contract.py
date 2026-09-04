@@ -154,6 +154,22 @@ def test_empty_location_group_is_rendered_after_reload():
     )
 
 
+def test_location_groups_start_collapsed_and_explain_interactions():
+    run_node_case(
+        """
+        api.state.locations = [{id: "loc-1", name: "Sala 101", category: "blocos", groupId: "group-c", groupName: "Bloco C"}];
+        api.state.locationGroups = [{id: "group-c", name: "Bloco C", category: "blocos"}];
+        api.renderLocations();
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /<details class="location-group">/);
+        assert.match(html, /Clique para expandir/);
+        assert.match(html, /class="location-group-chevron/);
+        assert.match(html, /class="menu-trigger card-menu-trigger"[^>]*>[\s\S]*>Ações<\/span>/);
+        assert.equal((html.match(/class="location-group" open/g) || []).length, 0);
+        """
+    )
+
+
 def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     shared_rule = css.split(".primary-action", 1)[0]
