@@ -430,28 +430,35 @@ function renderLocations() {
     estacionamentos: "Estacionamentos",
     outros: "Outros",
   };
-  const cards = state.locations.length
+  const cards = state.locations.length || state.locationGroups.length
     ? ["blocos", "laboratorios", "estacionamentos", "outros"]
         .map((category) => {
           const locations = state.locations.filter(
             (location) => (location.category || "outros") === category,
           );
-          if (!locations.length) return "";
+          const groups = state.locationGroups
+            .filter((group) => group.category === category)
+            .map((group) => ({name: group.name, locations: [], id: group.id}));
+          const groupsById = new Map(groups.map((group) => [group.id, group]));
           if (category === "estacionamentos") {
+            if (!locations.length && !groups.length) return "";
             return `<details class="location-group" open>
               <summary><h3>${categoryLabels[category]}</h3></summary>
-              <div class="catalog-list">${locations.map((location) => locationCard(location)).join("")}</div>
+              <div class="catalog-list">${locations.length ? locations.map((location) => locationCard(location)).join("") : '<p class="empty-state">Nenhum local cadastrado.</p>'}</div>
             </details>`;
           }
-          const grouped = new Map();
+          const grouped = new Map(groups.map((group) => [group.id, group]));
           locations.forEach((location) => {
-            const key = location.groupId || `ungrouped-${category}`;
+            const key = location.groupId && groupsById.has(location.groupId)
+              ? location.groupId
+              : `ungrouped-${category}`;
             if (!grouped.has(key)) grouped.set(key, {name: location.groupName || "Outros", locations: []});
             grouped.get(key).locations.push(location);
           });
+          if (!grouped.size) return "";
           return `<div class="location-groups">${Array.from(grouped.values()).map((group) => `<details class="location-group" open>
             <summary><h3>${escapeHtml(group.name)}</h3></summary>
-            <div class="catalog-list">${group.locations.map((location) => locationCard(location)).join("")}</div>
+            <div class="catalog-list">${group.locations.length ? group.locations.map((location) => locationCard(location)).join("") : '<p class="empty-state">Nenhum local cadastrado.</p>'}</div>
           </details>`).join("")}</div>`;
         })
         .join("")
@@ -817,6 +824,20 @@ function isCanonicalCatalogRecord(record) {
 
 function isCanonicalCatalogList(records) {
   return Array.isArray(records) && records.every((record) => isCanonicalCatalogRecord(record));
+}
+
+function isCanonicalLocationGroupList(groups) {
+  return (
+    Array.isArray(groups) &&
+    groups.every(
+      (group) =>
+        group &&
+        typeof group === "object" &&
+        nonEmptyString(group.id) &&
+        nonEmptyString(group.name) &&
+        ["blocos", "laboratorios", "estacionamentos", "outros"].includes(group.category),
+    )
+  );
 }
 
 function nonEmptyString(value) {
@@ -1203,22 +1224,31 @@ async function saveSchedule() {
 
 async function loadAdminData() {
   const viewState = readEditorViewState();
-  const [scheduleResponse, locationsResponse, knowledgeAxesResponse] = await Promise.all([
-    apiFetch("/admin/api/schedule"),
-    apiFetch("/admin/api/locations"),
-    apiFetch("/admin/api/knowledge-axes"),
-  ]);
-  if (!scheduleResponse.ok || !locationsResponse.ok || !knowledgeAxesResponse.ok) {
+  const [scheduleResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse] =
+    await Promise.all([
+      apiFetch("/admin/api/schedule"),
+      apiFetch("/admin/api/locations"),
+      apiFetch("/admin/api/locations/groups"),
+      apiFetch("/admin/api/knowledge-axes"),
+    ]);
+  if (
+    !scheduleResponse.ok ||
+    !locationsResponse.ok ||
+    !locationGroupsResponse.ok ||
+    !knowledgeAxesResponse.ok
+  ) {
     throw new Error("load-failed");
   }
-  const [schedule, locations, knowledgeAxes] = await Promise.all([
+  const [schedule, locations, locationGroups, knowledgeAxes] = await Promise.all([
     scheduleResponse.json(),
     locationsResponse.json(),
+    locationGroupsResponse.json(),
     knowledgeAxesResponse.json(),
   ]);
   if (
     !isCanonicalSchedule(schedule) ||
     !isCanonicalCatalogList(locations) ||
+    !isCanonicalLocationGroupList(locationGroups) ||
     !isCanonicalCatalogList(knowledgeAxes)
   ) {
     throw new Error("load-failed");
@@ -1226,14 +1256,7 @@ async function loadAdminData() {
   state.schedule = schedule;
   savedScheduleSnapshot = scheduleSnapshot();
   state.locations = locations;
-  state.locationGroups = locations
-    .filter((location) => location.groupId)
-    .reduce((groups, location) => {
-      if (!groups.some((group) => group.id === location.groupId)) {
-        groups.push({id: location.groupId, name: location.groupName, category: location.category});
-      }
-      return groups;
-    }, []);
+  state.locationGroups = locationGroups;
   state.knowledgeAxes = knowledgeAxes;
   restoreScheduleViewState(viewState);
   renderEditorSection(viewState?.section || "schedule");

@@ -183,7 +183,9 @@ ele ao implementar ou alterar a interface.
   exibe grupos como accordions (`Bloco A`, `LAB 01` etc.) e suas salas; “Estacionamentos” também é
   um accordion que contém diretamente seus locais de estacionamento, sem grupo aninhado. Use o
   mesmo token de espaçamento entre todos os grupos, independentemente da categoria. Os nomes das
-  salas continuam sendo as referências da agenda.
+  salas continuam sendo as referências da agenda. Grupos sem salas continuam visíveis após o
+  carregamento e exibem o estado vazio “Nenhum local cadastrado”, para confirmar que o grupo foi
+  criado e permitir que o usuário adicione locais a ele.
 - Uma sessão da agenda armazena `locations` como lista. Várias salas podem compartilhar um horário;
   salas com horários diferentes usam entradas de sessão separadas para a mesma atividade. A entrada
   legada `location` é aceita somente para migração ao formato de lista.

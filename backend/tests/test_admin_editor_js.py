@@ -354,8 +354,9 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         """
         const schedule = validSchedule();
         const locations = [{id: "loc-1", name: "Auditório"}];
+        const groups = [{id: "group-1", name: "Bloco C", category: "blocos"}];
         const axes = [{id: "geral", name: "Geral"}];
-        const responses = [schedule, locations, axes].map((payload) => ({
+        const responses = [schedule, locations, groups, axes].map((payload) => ({
           ok: true,
           status: 200,
           json: async () => payload,
@@ -366,6 +367,7 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
 
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), schedule);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), locations);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.locationGroups)), groups);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
         assert.equal(api.state.selectedSectionId, "secao");
         assert.match(elementFor("#editor-content").innerHTML, /Seção/);

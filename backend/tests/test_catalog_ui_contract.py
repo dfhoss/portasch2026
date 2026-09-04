@@ -141,6 +141,19 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
     )
 
 
+def test_empty_location_group_is_rendered_after_reload():
+    run_node_case(
+        """
+        api.state.locations = [];
+        api.state.locationGroups = [{id: "group-c", name: "Bloco C", category: "blocos"}];
+        api.renderLocations();
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /Bloco C/);
+        assert.match(html, /Nenhum local cadastrado/);
+        """
+    )
+
+
 def test_danger_action_uses_shared_button_tokens_outside_catalog_cards():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     shared_rule = css.split(".primary-action", 1)[0]
