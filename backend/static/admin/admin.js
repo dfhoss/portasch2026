@@ -114,12 +114,14 @@ function scheduleIsDirty() {
 function updateScheduleSaveState() {
   const saveButton = editorContent.querySelector?.("#save-schedule");
   const status = editorContent.querySelector?.("#schedule-save-status");
+  const warning = editorContent.querySelector?.("#schedule-unsaved-warning");
   const dirty = scheduleIsDirty();
   if (saveButton) saveButton.disabled = !dirty;
   if (status) {
-    status.textContent = dirty ? "Alterações não salvas" : "Salvo";
+    status.textContent = dirty ? "Alterações não salvas" : "Tudo salvo";
     status.classList?.toggle("is-dirty", dirty);
   }
+  if (warning) warning.hidden = !dirty;
 }
 
 function markScheduleChanged() {
@@ -386,12 +388,15 @@ function renderSections() {
       <div><p class="eyebrow">Agenda do evento</p><h2>Programação</h2></div>
       <div class="toolbar-actions">
         <div class="save-status-group">
-          <span id="schedule-save-status" class="save-status" role="status">Salvo</span>
+          <span id="schedule-save-status" class="save-status" role="status"></span>
           <button id="save-schedule" class="primary-action" type="button" data-action="save-schedule" disabled>Salvar alterações</button>
         </div>
       </div>
     </header>
     <nav id="section-list" class="section-list" aria-label="Seções da programação">${sectionButtons}${addSectionButton}</nav>
+    <p id="schedule-unsaved-warning" class="schedule-unsaved-warning" role="alert" hidden>
+      Há alterações não salvas. Se você atualizar ou sair da página, o rascunho será descartado.
+    </p>
     <div id="schedule-sections">${sectionPanel}</div>`;
   updateScheduleSaveState();
 }
@@ -1379,6 +1384,12 @@ editorView.addEventListener("click", (event) => {
 globalThis.addEventListener?.("pagehide", () => {
   saveEditorViewState();
   clearLoginCredentials();
+});
+
+globalThis.addEventListener?.("beforeunload", (event) => {
+  if (!scheduleIsDirty()) return;
+  event.preventDefault?.();
+  event.returnValue = "";
 });
 
 modalContent.addEventListener("submit", (event) => {

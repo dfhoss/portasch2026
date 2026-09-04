@@ -284,8 +284,11 @@ ele ao implementar ou alterar a interface.
   por teclado, toque e foco visível em todos os viewports.
 - Edição do evento e data do evento pertencem a `Configurações`: são campos de configuração,
   não ações da programação. O mesmo fluxo de persistência usa `Salvar alterações`, cujo estado
-  indica `Salvo` ou `Alterações não salvas`; adicionar, editar e excluir no editor altera apenas
-  o rascunho até essa confirmação explícita.
+  fica neutro como `Tudo salvo` quando o rascunho corresponde à agenda carregada e ganha ênfase
+  somente como `Alterações não salvas` quando há mudanças. Nesse estado, a programação exibe um
+  aviso persistente informando que atualizar ou sair da página descarta o rascunho; o alerta nativo
+  de saída só é registrado enquanto houver alterações. Adicionar, editar e excluir no editor altera
+  apenas o rascunho até essa confirmação explícita.
 
 ## Exemplo
 

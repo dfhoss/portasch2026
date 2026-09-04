@@ -23,6 +23,9 @@ class FakeElement {
     this.listeners = new Map();
     this.children = [];
     this.elements = {namedItem: () => null};
+    this.classList = {
+      toggle: (name, force) => { this[`class-${name}`] = force; },
+    };
   }
       addEventListener(type, callback) { this.listeners.set(type, callback); }
       setAttribute(name, value) { this[name] = value; }
@@ -33,7 +36,9 @@ class FakeElement {
   replaceChildren() {}
   setAttribute() {}
   removeAttribute() {}
-  querySelector() { return null; }
+  querySelector(selector) {
+    return selector.startsWith("#") ? elementFor(selector) : null;
+  }
   querySelectorAll() { return []; }
   closest() { return null; }
   focus() { this.focused = true; }
@@ -48,6 +53,7 @@ function elementFor(selector) {
 }
 
 const storage = new Map();
+const windowListeners = new Map();
 let confirmResult = true;
 const context = {
   console,
@@ -67,6 +73,7 @@ const context = {
     createElement: () => new FakeElement(),
     createDocumentFragment: () => new FakeElement(),
   },
+  addEventListener: (type, callback) => windowListeners.set(type, callback),
   CSS: {escape: (value) => value},
   FormData: class FormData {
     constructor() {}
@@ -153,7 +160,43 @@ def test_schedule_creation_actions_are_grouped_by_context():
         assert.equal((html.match(/data-action="add-group"/g) || []).length, 1);
         assert.equal((html.match(/data-action="add-activity"/g) || []).length, 1);
         assert.match(html, /id="save-schedule"[^>]*disabled/);
-        assert.match(html, /id="schedule-save-status"[^>]*>Salvo/);
+        assert.match(html, /id="schedule-save-status"[^>]*><\/span>/);
+        assert.match(html, /id="schedule-unsaved-warning"[^>]*hidden/);
+        """
+    )
+
+
+def test_schedule_save_feedback_only_highlights_unsaved_draft_and_protects_exit():
+    run_node_case(
+        """
+        api.state.schedule = validSchedule();
+        api.renderSections();
+        const status = elementFor("#schedule-save-status");
+        const warning = elementFor("#schedule-unsaved-warning");
+        assert.equal(status.textContent, "Tudo salvo");
+        assert.equal(warning.hidden, true);
+
+        const cleanBeforeUnload = {
+          defaultPrevented: false,
+          preventDefault() { this.defaultPrevented = true; },
+        };
+        windowListeners.get("beforeunload")(cleanBeforeUnload);
+        assert.equal(cleanBeforeUnload.defaultPrevented, false);
+        assert.equal(cleanBeforeUnload.returnValue, undefined);
+
+        api.state.schedule.eventDate = "2026-11-26";
+        api.renderSections();
+        assert.equal(status.textContent, "Alterações não salvas");
+        assert.equal(warning.hidden, false);
+        assert.match(elementFor("#editor-content").innerHTML, /atualizar ou sair da página/);
+
+        const beforeUnload = {
+          defaultPrevented: false,
+          preventDefault() { this.defaultPrevented = true; },
+        };
+        windowListeners.get("beforeunload")(beforeUnload);
+        assert.equal(beforeUnload.defaultPrevented, true);
+        assert.equal(beforeUnload.returnValue, "");
         """
     )
 
