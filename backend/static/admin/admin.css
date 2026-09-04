@@ -310,6 +310,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 #login-message:empty { display: none; }
 #editor-toast {
   position: fixed;
+  pointer-events: none;
   z-index: 30;
   top: var(--space-5);
   right: var(--space-5);
@@ -325,12 +326,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   box-shadow: var(--shadow-dialog);
   animation: editor-toast-in var(--duration-normal) var(--ease-standard);
 }
+#editor-toast[hidden] { display: none; }
 #editor-toast.is-error {
   border-color: var(--color-danger);
   background: var(--color-danger-surface);
   color: var(--color-danger-text);
 }
-#editor-message { flex: 1; font-size: var(--font-size-sm); line-height: var(--line-height-normal); }
+#editor-message { flex: 1; pointer-events: none; font-size: var(--font-size-sm); line-height: var(--line-height-normal); }
 #editor-message-close {
   min-width: var(--control-height);
   min-height: var(--control-height);
@@ -339,6 +341,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: transparent;
   color: inherit;
   cursor: pointer;
+  pointer-events: auto;
   font-size: var(--font-size-lg);
   line-height: 1;
 }

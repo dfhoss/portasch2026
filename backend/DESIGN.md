@@ -321,7 +321,8 @@ ele ao implementar ou alterar a interface.
   por teclado, toque e foco visível em todos os viewports.
 - Mensagens de feedback do editor usam um toast fixo no canto superior direito, fora do fluxo do
   conteúdo. Sucessos desaparecem após alguns segundos e erros permanecem até serem fechados; o
-  toast mantém texto acessível e um controle explícito para dispensá-lo.
+  toast mantém texto acessível e um controle explícito para dispensá-lo. A caixa visual não deve
+  bloquear cliques no conteúdo atrás dela; somente o controle de fechamento recebe eventos de ponteiro.
 - Edição do evento e data do evento pertencem a `Configurações`: são campos de configuração,
   não ações da programação. O mesmo fluxo de persistência usa `Salvar alterações`, cujo estado
   fica neutro como `Tudo salvo` quando o rascunho corresponde à agenda carregada e ganha ênfase

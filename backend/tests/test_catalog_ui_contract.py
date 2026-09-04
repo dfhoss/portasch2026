@@ -258,7 +258,9 @@ def test_location_room_menu_escapes_scroll_grid_and_opens_below_trigger():
     assert "left: var(--location-menu-left);" in room_menu_css
     assert "function positionLocationMenu" in script
     assert "positionLocationMenu(menu);" in script
-    locations_render = script.split("function renderLocations", 1)[1].split("function axisGroupCount", 1)[0]
+    locations_render = script.split("function renderLocations", 1)[1].split(
+        "function axisGroupCount", 1
+    )[0]
     assert "initializeMenuDefaultWidth();" not in locations_render
 
 
@@ -405,10 +407,14 @@ def test_schedule_group_menu_can_escape_its_card_and_stay_in_foreground():
 
 def test_opening_any_popup_closes_other_open_popups_including_toolbar_menus():
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
-    toolbar_branch = script.split('const toolbarTrigger = event.target.closest?.("summary.menu-trigger");', 1)[1]
-    toolbar_branch = toolbar_branch.split('const trigger = event.target.closest?.("summary.menu-trigger");', 1)[0]
+    toolbar_branch = script.split(
+        'const toolbarTrigger = event.target.closest?.("summary.menu-trigger");', 1
+    )[1]
+    toolbar_branch = toolbar_branch.split(
+        'const trigger = event.target.closest?.("summary.menu-trigger");', 1
+    )[0]
     assert "closeOpenMenus(menu);" in toolbar_branch
-    assert "closeOpenMenus(menu);" in script.split('if (trigger) {', 1)[1].split("return;", 1)[0]
+    assert "closeOpenMenus(menu);" in script.split("if (trigger) {", 1)[1].split("return;", 1)[0]
 
 
 def test_group_toggle_uses_only_stateful_accessible_label():
@@ -426,8 +432,8 @@ def test_dropdown_menu_items_define_their_own_vertical_size():
 
 def test_contextual_creation_icons_are_not_generic_plus_icons():
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
-    assert 'collection: ' in script
-    assert 'activity: ' in script
+    assert "collection: " in script
+    assert "activity: " in script
 
 
 def test_crud_hierarchy_is_documented():

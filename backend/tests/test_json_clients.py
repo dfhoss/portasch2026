@@ -678,5 +678,9 @@ def test_seed_catalog_splits_auditoriums_between_block_groups():
     }
 
     assert auditorium_names == {"Auditório do Bloco A", "Auditório do Bloco B"}
-    assert all(item["category"] == "blocos" for item in catalog["locations"] if item["name"] in auditorium_names)
+    assert all(
+        item["category"] == "blocos"
+        for item in catalog["locations"]
+        if item["name"] in auditorium_names
+    )
     assert all(item["groupId"] != "group-001" for item in catalog["locations"])

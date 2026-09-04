@@ -83,7 +83,7 @@ def test_login_message_is_between_password_and_submit_and_uses_error_tone(client
     assert password_end < message_position < submit_position
 
     css = client.get("/admin/static/admin.css").text
-    message_rule = css_rule(css, "#editor-message:not(:empty), #login-message:not(:empty)")
+    message_rule = css_rule(css, "#login-message:not(:empty)")
     login_color_rule = css_rule(css, ".login-card #login-message:not(:empty)")
     assert "border: var(--border-width) solid var(--green-200)" in message_rule
     assert "background: var(--color-surface-selected)" in message_rule
@@ -143,16 +143,14 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     assert "height: 100vh" in css_rule(desktop_css, ".editor-sidebar")
     assert "position: sticky" in css_rule(desktop_css, ".editor-sidebar")
     assert "flex-direction: column" in css_rule(desktop_css, ".editor-sidebar nav")
-    nav_rule = (
-        ".editor-sidebar nav button {\n"
-        "  display: flex;\n"
-        "  align-items: center;\n"
-        "  gap: var(--space-2);\n"
-        "  border-color: var(--color-border);\n"
-        "  background: var(--color-surface);\n"
-        "  color: var(--color-text);"
-    )
-    assert nav_rule in desktop_css
+    nav_start = desktop_css.index("\n.editor-sidebar nav button {") + 1
+    nav_rule = css_rule(desktop_css, ".editor-sidebar nav button", start=nav_start)
+    assert "display: flex;" in nav_rule
+    assert "align-items: center;" in nav_rule
+    assert "gap: var(--space-2);" in nav_rule
+    assert "border-color: var(--color-border);" in nav_rule
+    assert "background: var(--color-surface);" in nav_rule
+    assert "color: var(--color-text);" in nav_rule
     assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
 
 
