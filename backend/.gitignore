@@ -203,6 +203,7 @@ pip-selfcheck.json
 # End of https://www.toptal.com/developers/gitignore/api/git,venv,python
 
 .playwright-mcp/
+.worktrees/
 .pytest-tmp-*/
 .uv-cache/
 .uv-cache-menu/
