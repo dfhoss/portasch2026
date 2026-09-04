@@ -218,6 +218,10 @@ ele ao implementar ou alterar a interface.
   vertical, clicável, ter fundo opaco `--color-surface`, borda
   `--border-width`/`--color-border`, raio `--radius-md`, sombra `--shadow-dialog` e camada acima
   dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço.
+- Em cada momento, mantenha no máximo um menu popup aberto dentro do editor: abrir qualquer
+  outro gatilho, inclusive um dropdown da barra, fecha o menu anterior; clicar fora ou executar
+  uma opção também fecha o menu atual. Essa regra deve ser implementada no comportamento
+  compartilhado de `.menu`, não em regras isoladas de cada contexto.
 - Toda opção de um menu deve usar `.menu-item`, ter um ícone SVG acompanhando o rótulo e foco
   visível. O painel com `role="menu"` não tem padding superior ou inferior (`padding-block: 0`);
   cada item define sua própria altura mínima, espaçamento e área clicável. Os itens não têm

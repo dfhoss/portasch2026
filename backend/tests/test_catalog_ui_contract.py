@@ -221,6 +221,14 @@ def test_schedule_group_menu_can_escape_its_card_and_stay_in_foreground():
     assert "z-index: 20;" in css
 
 
+def test_opening_any_popup_closes_other_open_popups_including_toolbar_menus():
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    toolbar_branch = script.split('const toolbarTrigger = event.target.closest?.("summary.menu-trigger");', 1)[1]
+    toolbar_branch = toolbar_branch.split('const trigger = event.target.closest?.("summary.menu-trigger");', 1)[0]
+    assert "closeOpenMenus(menu);" in toolbar_branch
+    assert "closeOpenMenus(menu);" in script.split('if (trigger) {', 1)[1].split("return;", 1)[0]
+
+
 def test_group_toggle_uses_only_stateful_accessible_label():
     design = ADMIN_DESIGN.read_text(encoding="utf-8")
     assert "Não exiba “Expandir”/“Recolher”" in design

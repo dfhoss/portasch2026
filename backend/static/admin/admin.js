@@ -1322,6 +1322,12 @@ async function handleEditorClick(event) {
   }
 }
 
+function closeOpenMenus(exceptMenu = null) {
+  editorContent.querySelectorAll(".menu[open]").forEach((openMenu) => {
+    if (openMenu !== exceptMenu) openMenu.removeAttribute("open");
+  });
+}
+
 editorContent.addEventListener("click", handleEditorClick);
 editorContent.addEventListener("click", (event) => {
   const toolbarTrigger = event.target.closest?.("summary.menu-trigger");
@@ -1329,6 +1335,7 @@ editorContent.addEventListener("click", (event) => {
     event.preventDefault?.();
     const menu = toolbarTrigger.closest(".menu");
     if (menu) {
+      closeOpenMenus(menu);
       if (menu.toggleAttribute) menu.toggleAttribute("open");
       else menu.open = !menu.open;
     }
@@ -1337,16 +1344,12 @@ editorContent.addEventListener("click", (event) => {
   const trigger = event.target.closest?.("summary.menu-trigger");
   const menu = event.target.closest?.(".menu");
   if (trigger) {
-    editorContent.querySelectorAll(".menu[open]").forEach((openMenu) => {
-      if (openMenu !== menu) openMenu.removeAttribute("open");
-    });
+    closeOpenMenus(menu);
     return;
   }
 
   if (!menu) {
-    editorContent.querySelectorAll(".menu[open]").forEach((openMenu) => {
-      openMenu.removeAttribute("open");
-    });
+    closeOpenMenus();
   }
 });
 editorContent.addEventListener("keydown", (event) => {
