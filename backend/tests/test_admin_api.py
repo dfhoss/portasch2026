@@ -214,6 +214,28 @@ def test_location_group_can_be_created_with_a_category(client, auth_headers):
     assert response.json()["category"] == "blocos"
 
 
+def test_location_group_can_be_updated_with_a_category(client, auth_headers):
+    created = client.post(
+        "/admin/api/locations/groups",
+        json={"name": "Grupo editável", "category": "blocos"},
+        headers=auth_headers,
+    )
+    group_id = created.json()["id"]
+
+    response = client.put(
+        f"/admin/api/locations/groups/{group_id}",
+        json={"name": "Laboratório editado", "category": "laboratorios"},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "id": group_id,
+        "name": "Laboratório editado",
+        "category": "laboratorios",
+    }
+
+
 def test_list_knowledge_axes_returns_catalog(client, auth_headers):
     """Returning anything except the real temporary axis catalog must make this fail."""
     response = client.get("/admin/api/knowledge-axes", headers=auth_headers)

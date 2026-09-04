@@ -133,7 +133,7 @@ ele ao implementar ou alterar a interface.
 
 ### Componentes
 
-- Variantes semânticas como `.primary-action` e `.danger-action` carregam seu contrato visual
+- Variantes semânticas como `.primary-action`, `.secondary-action` e `.danger-action` carregam seu contrato visual
   completo (espaçamento, borda, raio, superfície e tipografia), independentemente do contêiner.
 
 ### Cor
@@ -180,14 +180,29 @@ ele ao implementar ou alterar a interface.
 - Os locais são organizados por grupos explícitos armazenados em `locations.json`. Um grupo tem
   nome e uma categoria (`blocos`, `laboratorios`, `estacionamentos` ou `outros`); cada sala pertence
   a um grupo por meio de `groupId` e armazena `roomNumber` e `description`. A página de locais
-  exibe grupos como accordions inicialmente fechados (`Bloco A`, `LAB 01` etc.) e suas salas;
-  “Estacionamentos” também é um accordion que contém diretamente seus locais de estacionamento,
-  sem grupo aninhado. O título de cada accordion deve mostrar um chevron e a dica “Clique para
-  expandir”; ao abrir, o chevron gira e o conteúdo fica disponível. Use o mesmo token de
-  espaçamento entre todos os grupos, independentemente da categoria. Os nomes das salas continuam
+  exibe uma navegação de grupos à esquerda e as salas do grupo selecionado à direita;
+  “Estacionamentos” segue o mesmo padrão e contém diretamente seus locais de estacionamento,
+  sem grupo aninhado. Cada grupo é um botão claramente clicável, com nome e quantidade de salas; o
+  grupo ativo usa `aria-current="true"`. Use o mesmo token de espaçamento entre todos os grupos,
+  independentemente da categoria. Os nomes das salas continuam
   sendo as referências da agenda. Grupos sem salas continuam visíveis após o carregamento e
-  exibem o estado vazio “Nenhum local cadastrado”, para confirmar que o grupo foi criado e permitir
+  exibem o estado vazio “Nenhuma sala encontrada neste grupo”, para confirmar que o grupo foi criado e permitir
   que o usuário adicione locais a ele.
+- A lista de salas usa uma grade responsiva de cartões compactos, com rolagem limitada ao painel de
+  salas (`.location-rooms-grid`); a página e a navegação de grupos permanecem estáveis quando há
+  muitas salas. O campo de busca filtra as salas do grupo selecionado por nome, número ou descrição.
+  Em telas estreitas, a navegação de grupos fica mais compacta e a grade reduz o tamanho mínimo dos
+  cartões, preservando foco visível, contraste e alvos de toque.
+- Busca, navegação e salas compartilham um único canvas `.locations-workspace`, com a superfície
+  principal `--color-surface`; somente a navegação usa `--color-surface-subtle` para criar hierarquia.
+  O card `Novo grupo` fica no fim da navegação e é a ação contextual de criação de grupos; ele permanece
+  reservado no rodapé da coluna enquanto a lista de grupos ocupa o espaço flexível restante. A lista
+  só mostra rolagem quando o conteúdo excede a altura disponível, inclusive em zooms e viewports menores.
+  O cabeçalho
+  da página mantém apenas `Adicionar sala` como ação primária, vinculando a nova sala ao grupo ativo.
+- O menu de ações de uma sala deve escapar da área rolável da grade e abrir abaixo, à direita do botão
+  quando houver espaço. Seu posicionamento usa a viewport para evitar que o cartão ou a grade o recorte;
+  se não houver espaço inferior ou lateral, ele se reposiciona dentro da viewport.
 - Uma sessão da agenda armazena `locations` como lista. Várias salas podem compartilhar um horário;
   salas com horários diferentes usam entradas de sessão separadas para a mesma atividade. A entrada
   legada `location` é aceita somente para migração ao formato de lista.
@@ -221,9 +236,15 @@ ele ao implementar ou alterar a interface.
   usam somente o chevron no gatilho; o ícone da ação fica nas opções internas. O painel deve ser
   vertical, clicável, ter fundo opaco `--color-surface`, borda
   `--border-width`/`--color-border`, raio `--radius-md`, sombra `--shadow-dialog` e camada acima
-  dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço.
-- Nos cards de locais, o menu de ações deve exibir o rótulo “Ações” e um chevron; não use somente
-  um ícone de três pontos, pois isso reduz a descoberta das operações disponíveis.
+  dos cards adjacentes; menus contextuais devem abrir para cima quando houver espaço. Todos os
+  menus compartilham largura intrínseca (`max-content`) sem depender das dimensões de outro menu,
+  usando `--menu-default-width: 130.625px` como largura mínima padrão medida no menu de edição de
+  seção. Opções com texto maior expandem o painel. Um limite relativo à viewport evita transbordamento
+  em telas estreitas. Diálogos de edição usam
+  `--dialog-width-default: 672px` como largura padrão, com `max-width` responsivo.
+- Nos cards de locais e na navegação de grupos, o menu de ações usa o ícone SVG de três pontos já
+  estabelecido no projeto, com rótulo acessível contextual. O menu de grupo oferece `Editar grupo`,
+  que permite alterar nome e categoria sem trocar o ID nem romper os vínculos das salas.
 - Em cada momento, mantenha no máximo um menu popup aberto dentro do editor: abrir qualquer
   outro gatilho, inclusive um dropdown da barra, fecha o menu anterior; clicar fora ou executar
   uma opção também fecha o menu atual. Essa regra deve ser implementada no comportamento

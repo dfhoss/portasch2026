@@ -80,6 +80,8 @@
   --control-height: 2.5rem;
   --content-padding: var(--space-8);
   --panel-padding: var(--space-4);
+  --dialog-width-default: 672px;
+  --menu-default-width: 130.625px;
   --component-gap: var(--space-3);
   font-family: var(--font-family-sans);
   color: var(--color-text);
@@ -320,6 +322,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   border-color: var(--color-action-primary-hover) !important;
   background: var(--color-action-primary-hover) !important;
 }
+.secondary-action {
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.secondary-action:hover { background: var(--color-surface-selected); }
 #modal-apply { margin-left: auto; }
 .menu { position: relative; z-index: 3; }
 .menu-trigger {
@@ -356,7 +366,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   top: calc(100% + var(--space-1));
   right: 0;
   display: grid;
-  min-width: 13rem;
+  width: max-content;
+  min-width: var(--menu-default-width);
+  max-width: calc(100vw - var(--space-8));
   padding-block: var(--space-0);
   padding-inline: var(--space-0);
   border: var(--border-width) solid var(--color-border);
@@ -376,6 +388,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   background: transparent;
   color: var(--color-text);
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
 }
 .menu-panel .menu-item { border: 0; }
@@ -384,7 +397,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .toolbar-menu { flex: 0 0 auto; }
 .toolbar-menu-trigger { border-color: var(--color-border-strong); }
 .toolbar-menu-trigger .action-icon:first-child { color: var(--color-action-primary); }
-.toolbar-menu-panel { min-width: 13rem; }
+.toolbar-menu-panel { max-width: min(24rem, calc(100vw - var(--space-8))); }
 .save-status-group { display: flex; align-items: center; gap: var(--space-2); }
 .save-status { color: var(--color-text-muted); font-size: var(--font-size-sm); }
 .save-status.is-dirty { color: var(--color-navigation); font-weight: var(--font-weight-semibold); }
@@ -576,7 +589,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .card-menu .menu-panel {
   top: auto;
   bottom: calc(100% + var(--space-1));
-  min-width: 12rem;
   pointer-events: auto;
 }
 .group-header .card-menu .menu-panel { right: calc(-1 * var(--panel-padding)); }
@@ -651,10 +663,157 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .location-group { display: grid; gap: var(--space-2); }
 .location-group h4 { margin: var(--space-0); color: var(--color-text); }
 .catalog-card p { margin: var(--space-1) var(--space-0) var(--space-0); }
+.location-toolbar { display: flex; margin-bottom: var(--space-4); }
+.location-toolbar input {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.locations-workspace {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 14rem);
+  min-height: 25rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.locations-workspace-body {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  min-height: 0;
+  flex: 1;
+}
+.locations-workspace .location-toolbar {
+  margin: var(--space-4) var(--space-4) var(--space-3);
+}
+.location-group-nav {
+  display: flex;
+  flex-direction: column;
+  align-content: start;
+  min-height: 0;
+  padding: var(--space-3);
+  overflow: hidden;
+  background: var(--color-surface-subtle);
+  border-right: var(--border-width) solid var(--color-border);
+}
+.location-group-nav-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.location-group-nav-heading h3 { margin: var(--space-0); font-size: inherit; }
+.location-group-nav-list {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+.location-group-nav-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-width: 0;
+}
+.location-group-select {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+.location-group-select { min-width: 0; }
+.location-group-select:hover,
+.location-group-select[aria-current="true"] {
+  border-color: var(--color-border);
+  background: var(--color-surface-selected);
+  color: var(--color-navigation);
+}
+.location-group-nav-item .group-nav-menu { justify-self: end; }
+.group-nav-menu .card-menu-trigger { color: var(--color-text-muted); }
+.location-group-add-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height);
+  flex: 0 0 auto;
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-navigation);
+  font-weight: var(--font-weight-semibold);
+}
+.location-group-add-card:hover { background: var(--color-surface-selected); }
+.location-group-nav small,
+.locations-room-panel header p { color: var(--color-text-muted); }
+.locations-room-panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: var(--space-4); }
+.locations-room-panel > header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.locations-room-panel > header h3,
+.locations-room-panel > header p { margin: var(--space-0); }
+.locations-room-panel > header { color: var(--color-navigation); }
+.location-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+}
+.location-room-card {
+  min-width: 0;
+  min-height: 5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+.location-room-card > div:first-child { min-width: 0; }
+.location-room-card .card-actions { justify-content: end; }
+.location-room-card .secondary-text,
+.location-room-card p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.location-room-card .menu-panel,
+.group-nav-menu .menu-panel {
+  position: fixed;
+  top: var(--location-menu-top);
+  right: auto;
+  bottom: auto;
+  left: var(--location-menu-left);
+}
 .danger-action { color: var(--color-danger) !important; }
 
 dialog {
-  width: min(92vw, 42rem);
+  width: var(--dialog-width-default);
+  max-width: calc(100vw - var(--space-8));
   max-height: 90vh;
   overflow: auto;
   padding: var(--space-5);
@@ -754,6 +913,11 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
   .section-heading .card-actions { align-items: start; flex-wrap: wrap; }
   .save-status-group { align-items: stretch; flex-direction: column; }
   .catalog-card { align-items: start; flex-direction: column; }
+  .locations-workspace { height: calc(100vh - 17rem); }
+  .locations-workspace-body { grid-template-columns: 9rem minmax(0, 1fr); }
+  .locations-room-panel { padding: var(--space-3); }
+  .locations-room-panel > header { align-items: start; flex-direction: column; }
+  .location-rooms-grid { grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
   .session-editor { grid-template-columns: 1fr 1fr; }
   .session-editor label:nth-child(3), .session-editor .danger-action {
     grid-column: 1 / -1;
