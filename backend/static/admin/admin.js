@@ -1489,7 +1489,16 @@ editorContent.addEventListener("change", (event) => {
   markScheduleChanged();
 });
 editorContent.addEventListener("input", (event) => {
-  if (event.target.id === "location-search") renderLocations(event.target.value);
+  if (event.target.id !== "location-search") return;
+  const searchInput = event.target;
+  const selectionStart = searchInput.selectionStart;
+  const selectionEnd = searchInput.selectionEnd;
+  renderLocations(searchInput.value);
+  const nextSearchInput = document.querySelector("#location-search");
+  nextSearchInput?.focus();
+  if (Number.isInteger(selectionStart) && Number.isInteger(selectionEnd)) {
+    nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);
+  }
 });
 
 editorView.addEventListener("click", (event) => {

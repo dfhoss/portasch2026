@@ -209,6 +209,18 @@ def test_locations_use_group_navigation_and_compact_room_grid():
     )
 
 
+def test_location_search_restores_focus_and_selection_after_filter_render():
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    input_handler = script.split('editorContent.addEventListener("input"', 1)[1].split(
+        'editorView.addEventListener("click"', 1
+    )[0]
+    assert "const selectionStart = searchInput.selectionStart;" in input_handler
+    assert "const selectionEnd = searchInput.selectionEnd;" in input_handler
+    assert 'document.querySelector("#location-search")' in input_handler
+    assert "nextSearchInput?.focus();" in input_handler
+    assert "nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);" in input_handler
+
+
 def test_location_room_menu_escapes_scroll_grid_and_opens_below_trigger():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
