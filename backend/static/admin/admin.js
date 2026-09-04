@@ -364,8 +364,13 @@ function renderSections() {
                 <button type="button" role="menuitem" data-action="add-activity">Adicionar atividade</button>
               </div>
             </details>
-            <button type="button" data-action="edit-section" data-key="${draftKey(section)}">Editar seção</button>
-            <button class="danger-action" type="button" data-action="delete-section" data-key="${draftKey(section)}">Excluir seção</button>
+            <details class="card-menu">
+              <summary class="card-menu-trigger" aria-label="Ações da seção ${escapeHtml(section.title || "Seção sem título")}">${actionIcon("more")}</summary>
+              <div class="card-menu-panel" role="menu">
+                <button type="button" role="menuitem" data-action="edit-section" data-key="${draftKey(section)}">${actionIcon("edit")}Editar seção</button>
+                <button class="danger-action" type="button" role="menuitem" data-action="delete-section" data-key="${draftKey(section)}">${actionIcon("delete")}Excluir seção</button>
+              </div>
+            </details>
           </div>
         </header>
         <div class="schedule-groups">${renderGroups(section)}</div>
@@ -449,10 +454,13 @@ function renderKnowledgeAxes() {
           const count = axisGroupCount(axis.id);
           return `<article class="catalog-card">
             <div><strong>${escapeHtml(axis.name)}</strong><span class="secondary-text">${count} ${count === 1 ? "grupo" : "grupos"}</span></div>
-            <div class="card-actions">
-              <button type="button" data-action="edit-axis" data-key="${key}">Editar</button>
-              <button class="danger-action" type="button" data-action="delete-axis" data-key="${key}">Excluir</button>
-            </div>
+            <details class="card-menu">
+              <summary class="card-menu-trigger" aria-label="Ações do eixo ${escapeHtml(axis.name)}">${actionIcon("more")}</summary>
+              <div class="card-menu-panel" role="menu">
+                <button type="button" role="menuitem" data-action="edit-axis" data-key="${key}">${actionIcon("edit")}Editar</button>
+                <button class="danger-action" type="button" role="menuitem" data-action="delete-axis" data-key="${key}">${actionIcon("delete")}Excluir</button>
+              </div>
+            </details>
           </article>`;
         })
         .join("")
@@ -475,8 +483,13 @@ function locationCard(location) {
       ${location.description ? `<p class="secondary-text">${escapeHtml(location.description)}</p>` : ""}
     </div>
     <div class="card-actions">
-      <button type="button" data-action="edit-location" data-key="${key}">Editar</button>
-      <button class="danger-action" type="button" data-action="delete-location" data-key="${key}">Excluir</button>
+      <details class="card-menu">
+        <summary class="card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}">${actionIcon("more")}</summary>
+        <div class="card-menu-panel" role="menu">
+          <button type="button" role="menuitem" data-action="edit-location" data-key="${key}">${actionIcon("edit")}Editar</button>
+          <button class="danger-action" type="button" role="menuitem" data-action="delete-location" data-key="${key}">${actionIcon("delete")}Excluir</button>
+        </div>
+      </details>
     </div>
   </article>`;
 }

@@ -224,6 +224,30 @@ with it when implementing or changing the interface.
   across reloads with `sessionStorage`. Validate restored IDs against fresh API data, never persist
   unsaved form contents, and clear the view state on logout.
 
+### Hierarquia CRUD e ações contextuais
+
+- Cada contexto deve ter uma única ação primária de criação: use um botão visível com verbo e
+  entidade, como `Adicionar local` ou `Adicionar eixo`. Na programação, `Adicionar seção` é o
+  botão compacto com `+` ao final da lista; criação de grupo e atividade fica no menu contextual
+  `Adicionar` da seção selecionada.
+- `Editar` é uma ação secundária contextual. Em seções, grupos, atividades, locais e eixos,
+  deve ficar no menu de três pontos do próprio registro, com ícone de lápis e rótulo explícito.
+  Não exiba editar como botão paralelo à ação de excluir em cards ou cabeçalhos.
+- `Excluir` é sempre a última opção do menu, com ícone de lixeira, separação visual das ações
+  comuns e `--color-danger`. A cor nunca é o único sinal: o rótulo deve começar com `Excluir`
+  e a confirmação deve identificar o registro e o conteúdo afetado.
+- A confirmação é obrigatória quando a exclusão não puder ser facilmente desfeita ou recriada;
+  o título e o botão devem descrever o resultado (`Excluir seção`, não `Sim` ou `Tem certeza?`).
+  Depois de uma exclusão local no rascunho, informe o estado ao usuário e mantenha a alteração
+  pendente até `Salvar alterações`.
+- Em menus e toolbars, agrupe ações relacionadas, mantenha a ação primária mais proeminente e
+  reduza ações secundárias para evitar excesso de escolha. Os menus devem continuar disponíveis
+  por teclado, toque e foco visível em todos os viewports.
+- Edição do evento e data do evento pertencem a `Configurações`: são campos de configuração,
+  não ações da programação. O mesmo fluxo de persistência usa `Salvar alterações`, cujo estado
+  indica `Salvo` ou `Alterações não salvas`; adicionar, editar e excluir no editor altera apenas
+  o rascunho até essa confirmação explícita.
+
 ## Example
 
 ```css

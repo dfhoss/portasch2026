@@ -193,6 +193,20 @@ def test_schedule_cards_render_actions_inside_three_dot_menus():
     )
 
 
+def test_section_actions_render_inside_three_dot_menu():
+    run_node_case(
+        """
+        api.state.schedule = validSchedule();
+        api.renderSections();
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /class="card-menu"[\s\S]*aria-label="Ações da seção Seção"/);
+        assert.match(html, /data-action="edit-section"[\s\S]*data-action="delete-section"/);
+        assert.equal((html.match(/data-action="edit-section"/g) || []).length, 1);
+        assert.equal((html.match(/data-action="delete-section"/g) || []).length, 1);
+        """
+    )
+
+
 def test_settings_contains_event_metadata_outside_schedule_workspace():
     run_node_case(
         """

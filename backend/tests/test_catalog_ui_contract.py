@@ -122,15 +122,21 @@ def test_axis_group_counts_come_from_schedule_without_exposing_ids():
 def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
     run_node_case(
         r"""
-        api.state.locations = [];
+        api.state.locations = [{id: "loc-1", name: "Auditório"}];
         api.renderLocations();
         let html = elementFor("#editor-content").innerHTML;
         assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar local/);
+        assert.match(html, /class="card-menu"[\s\S]*data-action="edit-location"[\s\S]*data-action="delete-location"/);
+        assert.equal((html.match(/data-action="edit-location"/g) || []).length, 1);
+        assert.equal((html.match(/data-action="delete-location"/g) || []).length, 1);
 
-        api.state.knowledgeAxes = [];
+        api.state.knowledgeAxes = [{id: "axis-1", name: "Geral"}];
         api.renderKnowledgeAxes();
         html = elementFor("#editor-content").innerHTML;
         assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar eixo/);
+        assert.match(html, /class="card-menu"[\s\S]*data-action="edit-axis"[\s\S]*data-action="delete-axis"/);
+        assert.equal((html.match(/data-action="edit-axis"/g) || []).length, 1);
+        assert.equal((html.match(/data-action="delete-axis"/g) || []).length, 1);
         """
     )
 
@@ -164,6 +170,15 @@ def test_card_menus_have_shared_accessible_design_contract():
     assert "z-index: 20" in css
     assert ".schedule-group {" in css
     assert "overflow: visible" in css
+
+
+def test_crud_hierarchy_is_documented():
+    design = ADMIN_DESIGN.read_text(encoding="utf-8")
+    assert "Hierarquia CRUD" in design
+    assert "Adicionar" in design
+    assert "Editar" in design
+    assert "Excluir" in design
+    assert "última opção" in design
 
 
 def test_scrollbars_are_hidden_without_disabling_scroll():
