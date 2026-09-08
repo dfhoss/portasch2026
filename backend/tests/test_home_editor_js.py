@@ -3,7 +3,7 @@ import textwrap
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parents[1]
-ADMIN_SCRIPT = PROJECT_ROOT / "static" / "admin" / "admin.js"
+ADMIN_SCRIPT = PROJECT_ROOT / "static" / "home" / "home.js"
 
 
 NODE_HARNESS = r"""
@@ -137,7 +137,7 @@ def run_node_case(case: str) -> None:
 
 def test_editor_contains_every_required_control(client):
     """Removing any required editor action from the rendered shell must make this fail."""
-    html = client.get("/admin").text
+    html = client.get("/home").text
     required = ["add-section", "add-session", "save-schedule"]
     for control_id in required:
         assert f'id="{control_id}"' in html
@@ -329,12 +329,12 @@ def test_parking_locations_are_listed_without_an_intermediate_group():
 
 
 def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client):
-    html = client.get("/admin").text
+    html = client.get("/home").text
     assert 'id="add-session"' in html
     assert 'id="modal-apply"' in html
     assert 'id="modal-close"' not in html
     assert ">Salvar<" in html
-    script = client.get("/admin/static/admin.js").text
+    script = client.get("/home/static/home.js").text
     assert 'editorModal.addEventListener("click"' in script
     assert 'classList?.add("modal-open")' in script
     assert 'classList?.remove("modal-open")' in script
@@ -342,7 +342,7 @@ def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client
 
 def test_editor_script_uses_portuguese_error_messages(client):
     """Replacing the required user-facing failures with generic or English text must fail."""
-    script = client.get("/admin/static/admin.js").text
+    script = client.get("/home/static/home.js").text
     assert "O horário final deve ser posterior ao inicial" in script
     assert "Não foi possível salvar a programação" in script
 
@@ -509,7 +509,7 @@ def test_save_schedule_sends_idless_draft_and_adopts_canonical_response():
 
         await api.saveSchedule();
 
-        assert.equal(sent.path, "/admin/api/schedule");
+        assert.equal(sent.path, "/schedule");
         assert.equal(sent.options.method, "PUT");
         assert.equal("id" in sent.body.sections[0], false);
         assert.equal("id" in sent.body.sections[0].groups[0], false);

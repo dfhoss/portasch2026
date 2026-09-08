@@ -43,9 +43,9 @@ def canonical_schedule(
 @pytest.mark.parametrize(
     "path",
     [
-        "/admin/api/schedule",
-        "/admin/api/locations",
-        "/admin/api/knowledge-axes",
+        "/schedule",
+        "/locations",
+        "/knowledge-axes",
     ],
 )
 def test_admin_api_prefixes_require_authentication(client, path: str):
@@ -58,13 +58,13 @@ def test_admin_api_prefixes_require_authentication(client, path: str):
 @pytest.mark.parametrize(
     ("method", "path", "payload"),
     [
-        ("PUT", "/admin/api/schedule", canonical_schedule()),
-        ("POST", "/admin/api/locations", {"name": "Novo local"}),
-        ("PUT", "/admin/api/locations/loc-001", {"name": "Novo local"}),
-        ("DELETE", "/admin/api/locations/loc-001", None),
-        ("POST", "/admin/api/knowledge-axes", {"name": "Novo eixo"}),
-        ("PUT", "/admin/api/knowledge-axes/geral", {"name": "Novo eixo"}),
-        ("DELETE", "/admin/api/knowledge-axes/geral", None),
+        ("PUT", "/schedule", canonical_schedule()),
+        ("POST", "/locations", {"name": "Novo local"}),
+        ("PUT", "/locations/loc-001", {"name": "Novo local"}),
+        ("DELETE", "/locations/loc-001", None),
+        ("POST", "/knowledge-axes", {"name": "Novo eixo"}),
+        ("PUT", "/knowledge-axes/geral", {"name": "Novo eixo"}),
+        ("DELETE", "/knowledge-axes/geral", None),
     ],
 )
 def test_admin_mutation_routes_require_authentication(
@@ -78,7 +78,7 @@ def test_admin_mutation_routes_require_authentication(
 
 def test_get_schedule_returns_public_json(client, auth_headers):
     """Failing to register or serialize the schedule route must make this fail."""
-    response = client.get("/admin/api/schedule", headers=auth_headers)
+    response = client.get("/schedule", headers=auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
     payload = response.json()
@@ -108,7 +108,7 @@ def test_get_schedule_maps_read_failures_to_structured_non_leaking_500(
             encoding="utf-8",
         )
 
-    response = client.get("/admin/api/schedule", headers=auth_headers)
+    response = client.get("/schedule", headers=auth_headers)
 
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response.json() == {
@@ -127,7 +127,7 @@ def test_put_schedule_persists_and_returns_backend_generated_ids(
     payload["sections"][0]["groups"][0].pop("id")
     payload["sections"][0]["groups"][0]["items"][0]["id"] = None
 
-    response = client.put("/admin/api/schedule", json=payload, headers=auth_headers)
+    response = client.put("/schedule", json=payload, headers=auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
     returned = response.json()
@@ -155,7 +155,7 @@ def test_put_schedule_maps_invalid_catalog_references_to_structured_conflict(
 ):
     """Persisting dangling location or axis references must make this fail."""
     response = client.put(
-        "/admin/api/schedule",
+        "/schedule",
         json=canonical_schedule(location=location, axis=axis),
         headers=auth_headers,
     )
@@ -168,7 +168,7 @@ def test_put_schedule_maps_invalid_catalog_references_to_structured_conflict(
 
 def test_list_locations_returns_catalog(client, auth_headers):
     """Returning anything except the real temporary location catalog must make this fail."""
-    response = client.get("/admin/api/locations", headers=auth_headers)
+    response = client.get("/locations", headers=auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()[0]["id"] == "loc-001"
@@ -178,33 +178,30 @@ def test_list_locations_returns_catalog(client, auth_headers):
 
 def test_location_crud_create_rename_and_delete(client, auth_headers):
     """Breaking any successful location write contract must make this fail."""
-    created = client.post(
-        "/admin/api/locations", json={"name": "  Novo auditório  "}, headers=auth_headers
-    )
+    created = client.post("/locations", json={"name": "  Novo auditório  "}, headers=auth_headers)
     assert created.status_code == status.HTTP_201_CREATED
     assert created.json()["id"] == "loc-039"
     assert created.json()["name"] == "Novo auditório"
 
     renamed = client.put(
-        "/admin/api/locations/loc-039",
+        "/locations/loc-039",
         json={"name": "Auditório renovado"},
         headers=auth_headers,
     )
     assert renamed.status_code == status.HTTP_200_OK
     assert renamed.json()["name"] == "Auditório renovado"
 
-    deleted = client.delete("/admin/api/locations/loc-039", headers=auth_headers)
+    deleted = client.delete("/locations/loc-039", headers=auth_headers)
     assert deleted.status_code == status.HTTP_204_NO_CONTENT
     assert deleted.content == b""
     assert all(
-        item["id"] != "loc-039"
-        for item in client.get("/admin/api/locations", headers=auth_headers).json()
+        item["id"] != "loc-039" for item in client.get("/locations", headers=auth_headers).json()
     )
 
 
 def test_location_group_can_be_created_with_a_category(client, auth_headers):
     response = client.post(
-        "/admin/api/locations/groups",
+        "/locations/groups",
         json={"name": "Bloco novo", "category": "blocos"},
         headers=auth_headers,
     )
@@ -216,14 +213,14 @@ def test_location_group_can_be_created_with_a_category(client, auth_headers):
 
 def test_location_group_can_be_renamed_with_a_category(client, auth_headers):
     created = client.post(
-        "/admin/api/locations/groups",
+        "/locations/groups",
         json={"name": "Bloco para editar", "category": "blocos"},
         headers=auth_headers,
     )
     group_id = created.json()["id"]
 
     response = client.put(
-        f"/admin/api/locations/groups/{group_id}",
+        f"/locations/groups/{group_id}",
         json={"name": "Laboratório editado", "category": "laboratorios"},
         headers=auth_headers,
     )
@@ -238,7 +235,7 @@ def test_location_group_can_be_renamed_with_a_category(client, auth_headers):
 
 def test_list_knowledge_axes_returns_catalog(client, auth_headers):
     """Returning anything except the real temporary axis catalog must make this fail."""
-    response = client.get("/admin/api/knowledge-axes", headers=auth_headers)
+    response = client.get("/knowledge-axes", headers=auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
     assert {"id": "geral", "name": "Geral"} in response.json()
@@ -247,7 +244,7 @@ def test_list_knowledge_axes_returns_catalog(client, auth_headers):
 def test_knowledge_axis_crud_create_rename_and_delete(client, auth_headers):
     """Breaking any successful knowledge-axis write contract must make this fail."""
     created = client.post(
-        "/admin/api/knowledge-axes",
+        "/knowledge-axes",
         json={"name": "  Ciências do Mar  "},
         headers=auth_headers,
     )
@@ -255,27 +252,27 @@ def test_knowledge_axis_crud_create_rename_and_delete(client, auth_headers):
     assert created.json() == {"id": "ciencias-do-mar", "name": "Ciências do Mar"}
 
     renamed = client.put(
-        "/admin/api/knowledge-axes/ciencias-do-mar",
+        "/knowledge-axes/ciencias-do-mar",
         json={"name": "Ciências oceânicas"},
         headers=auth_headers,
     )
     assert renamed.status_code == status.HTTP_200_OK
     assert renamed.json() == {"id": "ciencias-do-mar", "name": "Ciências oceânicas"}
 
-    deleted = client.delete("/admin/api/knowledge-axes/ciencias-do-mar", headers=auth_headers)
+    deleted = client.delete("/knowledge-axes/ciencias-do-mar", headers=auth_headers)
     assert deleted.status_code == status.HTTP_204_NO_CONTENT
     assert deleted.content == b""
     assert all(
         item["id"] != "ciencias-do-mar"
-        for item in client.get("/admin/api/knowledge-axes", headers=auth_headers).json()
+        for item in client.get("/knowledge-axes", headers=auth_headers).json()
     )
 
 
 @pytest.mark.parametrize(
     ("prefix", "missing_id"),
     [
-        ("/admin/api/locations", "loc-999"),
-        ("/admin/api/knowledge-axes", "eixo-inexistente"),
+        ("/locations", "loc-999"),
+        ("/knowledge-axes", "eixo-inexistente"),
     ],
 )
 def test_catalog_missing_resource_maps_to_structured_404(
@@ -294,8 +291,8 @@ def test_catalog_missing_resource_maps_to_structured_404(
 @pytest.mark.parametrize(
     ("prefix", "name"),
     [
-        ("/admin/api/locations", "  AUDITÓRIO DO BLOCO A  "),
-        ("/admin/api/knowledge-axes", "  GERAL  "),
+        ("/locations", "  AUDITÓRIO DO BLOCO A  "),
+        ("/knowledge-axes", "  GERAL  "),
     ],
 )
 def test_catalog_normalized_duplicate_maps_to_structured_409(
@@ -312,8 +309,8 @@ def test_catalog_normalized_duplicate_maps_to_structured_409(
 @pytest.mark.parametrize(
     ("path", "resource_id"),
     [
-        ("/admin/api/locations/loc-001", "loc-001"),
-        ("/admin/api/knowledge-axes/geral", "geral"),
+        ("/locations/loc-001", "loc-001"),
+        ("/knowledge-axes/geral", "geral"),
     ],
 )
 def test_catalog_delete_in_use_maps_to_structured_409_with_references(
@@ -331,8 +328,8 @@ def test_catalog_delete_in_use_maps_to_structured_409_with_references(
 @pytest.mark.parametrize(
     ("prefix", "name"),
     [
-        ("/admin/api/locations", "   "),
-        ("/admin/api/knowledge-axes", "!!!"),
+        ("/locations", "   "),
+        ("/knowledge-axes", "!!!"),
     ],
 )
 def test_catalog_invalid_cleaned_name_maps_to_structured_422(
@@ -354,11 +351,11 @@ class FailingRepository:
 @pytest.mark.parametrize(
     ("dependency_module", "dependency_name", "prefix"),
     [
-        ("routes.locations", "get_location_repository", "/admin/api/locations"),
+        ("routes.locations", "get_location_repository", "/locations"),
         (
             "routes.knowledge_axes",
             "get_knowledge_axis_repository",
-            "/admin/api/knowledge-axes",
+            "/knowledge-axes",
         ),
     ],
 )
@@ -396,7 +393,7 @@ def test_schedule_persistence_failure_maps_to_non_leaking_500(client, auth_heade
 
     app.dependency_overrides[get_schedule_replacer] = lambda: fail_replace
 
-    response = client.put("/admin/api/schedule", json=canonical_schedule(), headers=auth_headers)
+    response = client.put("/schedule", json=canonical_schedule(), headers=auth_headers)
 
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response.json() == {

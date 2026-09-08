@@ -3,7 +3,7 @@
 ## Objetivo
 
 Este documento é a fonte oficial da identidade visual da interface administrativa do Portas
-Abertas em `static/admin/`. Leia-o antes de criar ou alterar qualquer elemento da UI.
+Abertas em `static/home/`. Leia-o antes de criar ou alterar qualquer elemento da UI.
 
 A interface deve transmitir uma sensação institucional, calma, clara e confiável. Ela usa verde
 escuro para ancorar a navegação, verde mais vivo para ações, superfícies em branco quente e cores
@@ -25,7 +25,7 @@ componente.
 
 ## Tokens CSS
 
-O bloco a seguir é canônico. Mantenha as declarações correspondentes em `admin.css` alinhadas a
+O bloco a seguir é canônico. Mantenha as declarações correspondentes em `home.css` alinhadas a
 ele ao implementar ou alterar a interface.
 
 ```css

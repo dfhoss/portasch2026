@@ -4,13 +4,13 @@ import textwrap
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parents[1]
-ADMIN_SCRIPT = PROJECT_ROOT / "static" / "admin" / "admin.js"
-ADMIN_STYLES = PROJECT_ROOT / "static" / "admin" / "admin.css"
+ADMIN_SCRIPT = PROJECT_ROOT / "static" / "home" / "home.js"
+ADMIN_STYLES = PROJECT_ROOT / "static" / "home" / "home.css"
 ADMIN_DESIGN = PROJECT_ROOT / "DESIGN.md"
 
 
 def test_location_form_only_asks_for_name(client):
-    html = client.get("/admin").text
+    html = client.get("/home").text
     fragment = html.split('id="location-form"', 1)[1].split("</form>", 1)[0]
     assert 'name="name"' in fragment
     assert 'name="block"' not in fragment
@@ -18,14 +18,14 @@ def test_location_form_only_asks_for_name(client):
 
 
 def test_axis_form_only_asks_for_name(client):
-    html = client.get("/admin").text
+    html = client.get("/home").text
     fragment = html.split('id="knowledge-axis-form"', 1)[1].split("</form>", 1)[0]
     assert 'name="name"' in fragment
     assert 'name="id"' not in fragment
 
 
 def test_catalog_script_exposes_crud_and_safe_in_use_feedback(client):
-    script = client.get("/admin/static/admin.js").text
+    script = client.get("/home/static/home.js").text
     for function_name in (
         "renderLocations",
         "saveLocation",
@@ -107,7 +107,7 @@ def test_location_create_adopts_canonical_and_sends_name_only():
         let request;
         context.fetch = async (path, options) => { request = {path, options}; return {ok: true, status: 201, json: async () => ({id: "loc-secret", name: "Auditório novo"})}; };
         await api.saveLocation(form);
-        assert.equal(request.path, "/admin/api/locations");
+        assert.equal(request.path, "/locations");
         assert.equal(request.options.method, "POST");
         assert.deepEqual(JSON.parse(request.options.body), {name: "Auditório novo"});
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), [{id: "loc-secret", name: "Auditório novo"}]);
@@ -506,11 +506,11 @@ def test_location_rename_refreshes_schedule_and_locations_atomically():
           return {ok: true, status: 200, json: async () => refreshedSchedule};
         };
         await api.saveLocation(form);
-        assert.equal(calls[0].path, "/admin/api/locations/loc-secret");
+        assert.equal(calls[0].path, "/locations/loc-secret");
         assert.equal(calls[0].options.method, "PUT");
         assert.deepEqual(JSON.parse(calls[0].options.body), {name: "Novo"});
-        assert.equal(calls.some((call) => call.path === "/admin/api/locations"), true);
-        assert.equal(calls.some((call) => call.path === "/admin/api/schedule"), true);
+        assert.equal(calls.some((call) => call.path === "/locations"), true);
+        assert.equal(calls.some((call) => call.path === "/schedule"), true);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), refreshedSchedule);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), refreshedLocations);
         """
@@ -582,7 +582,7 @@ def test_axis_crud_adopts_canonical_records_and_uses_private_id_for_paths():
           return {ok: true, status: 201, json: async () => ({id: "axis-secret", name: "Novo eixo"})};
         };
         await api.saveKnowledgeAxis(createForm);
-        assert.equal(request.path, "/admin/api/knowledge-axes");
+        assert.equal(request.path, "/knowledge-axes");
         assert.equal(request.options.method, "POST");
         assert.deepEqual(JSON.parse(request.options.body), {name: "Novo eixo"});
         const record = api.state.knowledgeAxes[0];
@@ -593,13 +593,13 @@ def test_axis_crud_adopts_canonical_records_and_uses_private_id_for_paths():
           return {ok: true, status: 200, json: async () => ({id: "axis-secret", name: "Eixo atualizado"})};
         };
         await api.saveKnowledgeAxis(renameForm);
-        assert.equal(request.path, "/admin/api/knowledge-axes/axis-secret");
+        assert.equal(request.path, "/knowledge-axes/axis-secret");
         assert.equal(request.options.method, "PUT");
         assert.deepEqual(JSON.parse(request.options.body), {name: "Eixo atualizado"});
         assert.equal(api.state.knowledgeAxes[0].name, "Eixo atualizado");
         context.fetch = async (path, options) => { request = {path, options}; return {ok: true, status: 204}; };
         await api.deleteKnowledgeAxis(api.state.knowledgeAxes[0]);
-        assert.equal(request.path, "/admin/api/knowledge-axes/axis-secret");
+        assert.equal(request.path, "/knowledge-axes/axis-secret");
         assert.equal(request.options.method, "DELETE");
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), []);
         """

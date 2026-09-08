@@ -930,8 +930,8 @@ function isCanonicalSchedule(schedule) {
 
 async function reloadLocationDependencies() {
   const [locationsResponse, scheduleResponse] = await Promise.all([
-    apiFetch("/admin/api/locations"),
-    apiFetch("/admin/api/schedule"),
+    apiFetch("/locations"),
+    apiFetch("/schedule"),
   ]);
   if (!locationsResponse.ok || !scheduleResponse.ok) throw new Error("reload-failed");
   const [locations, schedule] = await Promise.all([
@@ -960,7 +960,7 @@ async function saveLocation(form = modalContent.querySelector("#location-form"))
     return;
   }
   const record = modalContext?.type === "location" ? modalContext.record : null;
-  const path = record ? `/admin/api/locations/${encodeURIComponent(record.id)}` : "/admin/api/locations";
+  const path = record ? `/locations/${encodeURIComponent(record.id)}` : "/locations";
   const payload = {name};
   if (form.elements.namedItem("category")) {
     payload.category = formValue(form, "category") || "outros";
@@ -999,7 +999,7 @@ async function saveLocation(form = modalContent.querySelector("#location-form"))
 async function deleteLocation(record) {
   if (!record || !confirmDeletion(`Excluir o local “${record.name}”?`)) return;
   try {
-    const response = await apiFetch(`/admin/api/locations/${encodeURIComponent(record.id)}`, {method: "DELETE"});
+    const response = await apiFetch(`/locations/${encodeURIComponent(record.id)}`, {method: "DELETE"});
     if (!response.ok) return showCatalogApiError(response, "Não foi possível excluir o local.", "delete");
     state.locations = state.locations.filter((item) => item !== record);
     renderLocations();
@@ -1018,8 +1018,8 @@ async function saveKnowledgeAxis(form = modalContent.querySelector("#knowledge-a
   }
   const record = modalContext?.type === "axis" ? modalContext.record : null;
   const path = record
-    ? `/admin/api/knowledge-axes/${encodeURIComponent(record.id)}`
-    : "/admin/api/knowledge-axes";
+    ? `/knowledge-axes/${encodeURIComponent(record.id)}`
+    : "/knowledge-axes";
   try {
     const response = await apiFetch(path, {
       method: record ? "PUT" : "POST",
@@ -1049,7 +1049,7 @@ async function saveKnowledgeAxis(form = modalContent.querySelector("#knowledge-a
 async function deleteKnowledgeAxis(record) {
   if (!record || !confirmDeletion(`Excluir o eixo “${record.name}”?`)) return;
   try {
-    const response = await apiFetch(`/admin/api/knowledge-axes/${encodeURIComponent(record.id)}`, {method: "DELETE"});
+    const response = await apiFetch(`/knowledge-axes/${encodeURIComponent(record.id)}`, {method: "DELETE"});
     if (!response.ok) return showCatalogApiError(response, "Não foi possível excluir o eixo.", "delete");
     state.knowledgeAxes = state.knowledgeAxes.filter((item) => item !== record);
     renderKnowledgeAxes();
@@ -1134,7 +1134,7 @@ async function saveLocationGroup(form = modalContent.querySelector("#location-gr
   if (!name) return announce("O nome do grupo é obrigatório.");
   const groupId = modalContext.groupId;
   try {
-    const response = await apiFetch(groupId ? `/admin/api/locations/groups/${encodeURIComponent(groupId)}` : "/admin/api/locations/groups", {
+    const response = await apiFetch(groupId ? `/locations/groups/${encodeURIComponent(groupId)}` : "/locations/groups", {
       method: groupId ? "PUT" : "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({name, category: formValue(form, "category")}),
@@ -1231,7 +1231,7 @@ async function saveSchedule() {
 
   const selectedIndex = (state.schedule?.sections || []).indexOf(selectedSection());
   try {
-    const response = await apiFetch("/admin/api/schedule", {
+    const response = await apiFetch("/schedule", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(state.schedule),
@@ -1259,10 +1259,10 @@ async function loadAdminData() {
   const viewState = readEditorViewState();
   const [scheduleResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse] =
     await Promise.all([
-      apiFetch("/admin/api/schedule"),
-      apiFetch("/admin/api/locations"),
-      apiFetch("/admin/api/locations/groups"),
-      apiFetch("/admin/api/knowledge-axes"),
+      apiFetch("/schedule"),
+      apiFetch("/locations"),
+      apiFetch("/locations/groups"),
+      apiFetch("/knowledge-axes"),
     ]);
   if (
     !scheduleResponse.ok ||

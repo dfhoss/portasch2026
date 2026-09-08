@@ -57,7 +57,11 @@ def test_invalid_login_never_requests_admin_data(admin_page: Page) -> None:
     admin_page.get_by_label("Senha").fill("wrong-password")
     admin_page.get_by_role("button", name="Entrar").click()
     expect(admin_page.get_by_role("status").first).to_contain_text("inválidos")
-    assert not any("/admin/api/" in request for request in requests)
+    assert not any(
+        endpoint in request
+        for request in requests
+        for endpoint in ("/schedule", "/locations", "/knowledge-axes")
+    )
     assert admin_page.evaluate("Object.keys(sessionStorage)") == []
 
 
@@ -69,7 +73,11 @@ def test_valid_login_orders_identity_before_admin_requests_and_limits_storage(
     login(admin_page)
     token_index = next(index for index, path in enumerate(requests) if path.endswith("/auth/token"))
     identity_index = next(index for index, path in enumerate(requests) if "/auth/users/me/" in path)
-    first_admin_index = next(index for index, path in enumerate(requests) if "/admin/api/" in path)
+    first_admin_index = next(
+        index
+        for index, path in enumerate(requests)
+        if any(endpoint in path for endpoint in ("/schedule", "/locations", "/knowledge-axes"))
+    )
     assert token_index < identity_index < first_admin_index
     assert admin_page.evaluate("Object.keys(sessionStorage)") == ["adminToken"]
 
@@ -184,11 +192,15 @@ def test_malformed_token_is_removed_and_returns_to_login(live_server_url: str, b
     page.add_init_script("sessionStorage.setItem('adminToken', 'malformed-token')")
     requests: list[str] = []
     page.on("request", lambda request: requests.append(request.url))
-    page.goto(f"{live_server_url}/admin", wait_until="networkidle")
+    page.goto(f"{live_server_url}/home", wait_until="networkidle")
     expect(page.locator("#login-view")).to_be_visible()
     expect(page.get_by_text("Sua sessão expirou. Entre novamente.")).to_be_visible()
     assert page.evaluate("Object.keys(sessionStorage)") == []
-    assert not any("/admin/api/" in request for request in requests)
+    assert not any(
+        endpoint in request
+        for request in requests
+        for endpoint in ("/schedule", "/locations", "/knowledge-axes")
+    )
     page.close()
 
 
@@ -202,11 +214,15 @@ def test_expired_token_is_removed_and_never_loads_admin_data(live_server_url: st
     page.add_init_script(f"sessionStorage.setItem('adminToken', {json.dumps(expired_token)})")
     requests: list[str] = []
     page.on("request", lambda request: requests.append(request.url))
-    page.goto(f"{live_server_url}/admin", wait_until="networkidle")
+    page.goto(f"{live_server_url}/home", wait_until="networkidle")
     expect(page.locator("#login-view")).to_be_visible()
     expect(page.get_by_text("Sua sessão expirou. Entre novamente.")).to_be_visible()
     assert page.evaluate("Object.keys(sessionStorage)") == []
-    assert not any("/admin/api/" in request for request in requests)
+    assert not any(
+        endpoint in request
+        for request in requests
+        for endpoint in ("/schedule", "/locations", "/knowledge-axes")
+    )
     page.close()
 
 
@@ -242,7 +258,7 @@ def test_delayed_initial_data_keeps_editor_hidden_until_schedule_exists(admin_pa
         """() => {
           const originalFetch = window.fetch;
           window.fetch = async (...args) => {
-            if (String(args[0]).includes('/admin/api/schedule')) {
+            if (String(args[0]).includes('/schedule')) {
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
             return originalFetch(...args);
@@ -299,7 +315,7 @@ def test_schedule_create_edit_session_validation_and_reload_persistence(admin_pa
 def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
     admin_page: Page,
 ) -> None:
-    fixture_path = Path(__file__).parents[1] / "fixtures" / "admin_inclusion_scenario.json"
+    fixture_path = Path(__file__).parents[1] / "fixtures" / "home_inclusion_scenario.json"
     scenario = json.loads(fixture_path.read_text(encoding="utf-8"))
     login(admin_page)
 
@@ -400,7 +416,7 @@ def test_stale_catalog_references_are_visible_but_ids_remain_hidden(admin_page: 
         payload["sections"][0]["groups"][0]["items"][0]["sessions"][0]["locations"] = ["loc-secret"]
         route.fulfill(response=response, json=payload)
 
-    admin_page.route("**/admin/api/schedule", add_stale_reference)
+    admin_page.route("**/schedule", add_stale_reference)
     login(admin_page)
     group = admin_page.locator(".schedule-group").filter(has_text="Atividades gerais")
     group.get_by_role("button", name=re.compile("Abrir grupo")).click()
@@ -430,9 +446,7 @@ def test_year_zero_is_rejected_without_put_request(admin_page: Page) -> None:
     expect(admin_page.locator("#editor-message")).to_contain_text(
         "Informe uma data válida para o evento."
     )
-    assert not any(
-        request.startswith("PUT ") and "/admin/api/schedule" in request for request in requests
-    )
+    assert not any(request.startswith("PUT ") and "/schedule" in request for request in requests)
 
 
 def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page: Page) -> None:

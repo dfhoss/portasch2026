@@ -14,7 +14,7 @@ from dependencies import CurrentTokenData
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-router = APIRouter(prefix="/admin/api/locations", tags=["admin-locations"])
+router = APIRouter(prefix="/locations", tags=["locations"])
 
 
 class LocationInput(BaseModel):

@@ -8,8 +8,8 @@ from starlette.types import Scope
 
 router = APIRouter(tags=["admin"])
 
-ADMIN_STATIC_DIR = Path(__file__).parents[1] / "static" / "admin"
-ADMIN_INDEX_PATH = ADMIN_STATIC_DIR / "index.html"
+HOME_STATIC_DIR = Path(__file__).parents[1] / "static" / "home"
+HOME_INDEX_PATH = HOME_STATIC_DIR / "index.html"
 
 
 class AdminStaticFiles(StaticFiles):
@@ -17,12 +17,12 @@ class AdminStaticFiles(StaticFiles):
 
     def get_path(self, scope: Scope) -> str:
         request_path = scope["path"]
-        prefix = "/admin/static"
+        prefix = "/home/static"
         if request_path.startswith(prefix):
             return os.path.normpath(request_path.removeprefix(prefix).lstrip("/"))
         return super().get_path(scope)
 
 
-@router.get("/admin", include_in_schema=False)
+@router.get("/home", include_in_schema=False)
 def read_admin_page() -> FileResponse:
-    return FileResponse(ADMIN_INDEX_PATH)
+    return FileResponse(HOME_INDEX_PATH)

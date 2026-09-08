@@ -8,7 +8,7 @@ from dependencies import CurrentTokenData
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.schedule import ScheduleDocument
 
-router = APIRouter(prefix="/admin/api/schedule", tags=["admin-schedule"])
+router = APIRouter(prefix="/schedule", tags=["schedule"])
 
 ScheduleReplacerFunction = Callable[[ScheduleDocument, Path | None], ScheduleDocument]
 

@@ -7,7 +7,7 @@ from dependencies import validate_jwt_configured
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
-from routes import admin, auth, knowledge_axes, locations, schedule
+from routes import auth, home, knowledge_axes, locations, schedule
 from utils import brazil_time_formatter, get_brazil_time
 
 logger.configure(
@@ -58,10 +58,8 @@ app.include_router(auth.router)
 app.include_router(schedule.router)
 app.include_router(locations.router)
 app.include_router(knowledge_axes.router)
-app.mount(
-    "/admin/static", admin.AdminStaticFiles(directory=admin.ADMIN_STATIC_DIR), name="admin-static"
-)
-app.include_router(admin.router)
+app.mount("/home/static", home.AdminStaticFiles(directory=home.HOME_STATIC_DIR), name="home-static")
+app.include_router(home.router)
 
 
 @app.get("/", tags=["Root"])
@@ -72,13 +70,13 @@ async def read_root():
     Redireciona automaticamente para a interface de administração do evento.
     O painel permite gerenciar a programação, os locais e os eixos de conhecimento.
 
-    **Redireciona para:** `/admin`
+    **Redireciona para:** `/home`
 
     **Casos de Uso:**
     - Acesso ao editor da programação
     - Administração dos catálogos do evento
     """
-    return RedirectResponse(url="/admin", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/home", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/health", tags=["Health"])

@@ -141,7 +141,7 @@ def admin_page(browser: Browser, live_server: str) -> Iterator[Page]:
     page.set_default_navigation_timeout(
         _timeout_from_environment("E2E_NAVIGATION_TIMEOUT_MS", DEFAULT_NAVIGATION_TIMEOUT_MS)
     )
-    page.goto(f"{live_server}/admin", wait_until="domcontentloaded")
+    page.goto(f"{live_server}/home", wait_until="domcontentloaded")
     yield page
     page.close()
 

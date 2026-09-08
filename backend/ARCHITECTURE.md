@@ -17,7 +17,7 @@ flowchart LR
     Routes --> Models[ models/ ]
     Routes --> Clients[ clients/ ]
     Clients --> JSON[ db/*.json ]
-    App --> Static[ static/admin/ ]
+    App --> Static[ static/home/ ]
 ```
 
 ### Catálogo de elementos
@@ -30,7 +30,7 @@ flowchart LR
 | `models/`         | Contratos e validações de domínio reutilizáveis          | Pydantic                               |
 | `clients/`        | Ler, validar e persistir dados; encapsular erros         | Dicionários, listas e erros de domínio |
 | `db/*.json`       | Catálogos de desenvolvimento persistidos                 | Arquivos JSON                          |
-| `static/admin/`   | Shell build-free do painel administrativo                | HTML, CSS e JavaScript                 |
+| `static/home/`    | Shell build-free do painel administrativo                | HTML, CSS e JavaScript                 |
 
 As relações são direcionais: handlers usam clients e dependências; clients não devem
 depender da camada HTTP. Não importe routers novos em `dependencies.py`, pois isso pode
@@ -52,11 +52,11 @@ de domínio são convertidos em `HTTPException` somente na fronteira HTTP.
 
 ```text
 login -> /auth/token -> sessionStorage.adminToken
-      -> /auth/users/me/ -> /admin/api/* com Bearer JWT
+      -> /auth/users/me/ -> /api/* com Bearer JWT
       -> router -> client -> catálogo JSON
 ```
 
-`/admin` entrega somente o shell público; o navegador valida a identidade antes de
+`/home` entrega somente o shell público; o navegador valida a identidade antes de
 buscar dados protegidos. O HTML inicial não deve conter agenda, catálogos, credenciais,
 hashes ou IDs persistidos.
 
@@ -105,8 +105,8 @@ propagado para as sessões da agenda.
 
 ## 5. Deployment e configuração
 
-O ambiente local executa a aplicação com Uvicorn. O prefixo de API é `/api`; o painel é
-servido em `/admin`, com assets em `/admin/static`. Os catálogos JSON são substituíveis
+O ambiente local executa a aplicação com Uvicorn. A API é servida em `/api`; o painel é
+servido em `/home`, com assets em `/home/static`. Os catálogos JSON são substituíveis
 por caminhos de ambiente para testes e deployments isolados.
 
 O `TOKEN_JWT` já está configurado em `.env`. O segredo deve permanecer fora do Git e o

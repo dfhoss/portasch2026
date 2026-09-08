@@ -34,7 +34,7 @@ Acesse `http://localhost:8000/api/docs` para consultar a documentação interati
 
 ## Painel administrativo
 
-Com o servidor em execução, abra `http://localhost:8000/admin`. O painel exige login e mantém o
+Com o servidor em execução, abra `http://localhost:8000/home`. O painel exige login e mantém o
 token somente no `sessionStorage` do navegador. As alterações da programação, locais e eixos são
 validadas pela API e persistidas nos arquivos JSON configurados.
 
@@ -49,7 +49,7 @@ Comandos úteis, executados dentro de `backend`:
 
 ```powershell
 uv run pytest -v
-uv run pytest tests/e2e/test_admin_panel.py -v
+uv run pytest tests/e2e/test_home_panel.py -v
 uv run ruff check .
 uv run ruff format --check .
 uv run ty check

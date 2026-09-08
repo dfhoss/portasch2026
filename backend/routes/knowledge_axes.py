@@ -14,7 +14,7 @@ from dependencies import CurrentTokenData
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-router = APIRouter(prefix="/admin/api/knowledge-axes", tags=["admin-knowledge-axes"])
+router = APIRouter(prefix="/knowledge-axes", tags=["knowledge-axes"])
 
 
 class KnowledgeAxisInput(BaseModel):
