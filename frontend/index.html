@@ -1,171 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UFFS de Portas Abertas – Contraste</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      min-height: 100vh;
-      background: #f8f8f0;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-
-    /* ===== HEADER FULL WIDTH ===== */
-    .banner {
-      position: relative;
-      width: 100%;
-      height: clamp(280px, 36vw, 480px);
-      background-color: #393ce4;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Padrão de círculos */
-    .banner::before,
-    .banner::after {
-      content: "";
-      position: absolute;
-      inset: -60px;
-      background-image: radial-gradient(
-        circle,
-        #4f52e8 0%,
-        #4f52e8 42%,
-        transparent 43%
-      );
-      background-size: 110px 110px;
-      pointer-events: none;
-    }
-    .banner::before { background-position: 0 0; }
-    .banner::after  { background-position: 55px 55px; }
-
-    /* Conteúdo centralizado */
-    .content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-block;
-      background: #ed54ce;
-      color: #ffffff;
-      font-family: "Courier New", "Lucida Console", monospace;
-      font-weight: 700;
-      font-size: clamp(16px, 2.2vw, 32px);
-      letter-spacing: 0.18em;
-      padding: 0.42em 0.85em 0.38em;
-      line-height: 1;
-      margin-bottom: 0.25em;
-      text-transform: uppercase;
-    }
-
-    .title {
-      font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-      font-weight: 900;
-      color: #e3ff00;
-      font-size: clamp(48px, 9vw, 120px);
-      line-height: 0.88;
-      letter-spacing: -0.025em;
-      text-transform: uppercase;
-      margin: 0;
-    }
-    .title span { display: block; }
-
-    /* Óculos */
-    .glasses {
-      position: absolute;
-      top: 18%;
-      left: 58%;
-      width: clamp(100px, 16vw, 220px);
-      z-index: 3;
-      transform: rotate(-20deg);
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.2));
-      pointer-events: none;
-    }
-
-    .glasses img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* Logo CONTRASTE */
-    .logo {
-      position: absolute;
-      bottom: clamp(18px, 3.5vw, 36px);
-      right: clamp(20px, 5vw, 70px);
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      z-index: 3;
-    }
-
-    .logo-icon {
-      width: clamp(28px, 3.5vw, 44px);
-      height: clamp(28px, 3.5vw, 44px);
-      border-radius: 50%;
-      border: 3px solid #e3ff00;
-      background: linear-gradient(
-        to right,
-        #e3ff00 0% 50%,
-        #00c853 50% 100%
-      );
-      flex-shrink: 0;
-    }
-
-    .logo-text {
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: 700;
-      font-size: clamp(13px, 1.7vw, 22px);
-      color: #e3ff00;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    /* Linha verde limão na base */
-    .banner-bottom-line {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 5px;
-      background: #c8ff00;
-      z-index: 4;
-    }
-
-    main {
-      max-width: 900px;
-      margin: 48px auto;
-      padding: 0 24px;
-      color: #333;
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    @media (max-width: 700px) {
-      .glasses {
-        left: auto;
-        right: 4%;
-        top: 12%;
-        width: 28vw;
-      }
-      .logo {
-        bottom: 14px;
-        right: 14px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
   <header class="banner" role="banner" aria-label="UFFS de Portas Abertas – Contraste">
@@ -190,8 +32,147 @@
   </header>
 
   <main>
-    <p>Conteúdo da página abaixo do header...</p>
+    <!-- ========== SEÇÃO ROLANDO AGORA ========== -->
+    <section class="now-section" aria-labelledby="now-title">
+      <div class="section-header">
+        <h2 id="now-title" class="section-title">
+          <span class="live-dot" aria-hidden="true"></span>
+          Rolando agora
+        </h2>
+        <p class="section-subtitle">Acompanhe as atividades que estão acontecendo neste momento</p>
+      </div>
+
+      <div class="carousel-wrapper">
+        <button class="carousel-btn prev" aria-label="Atividade anterior" type="button">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="carousel" role="region" aria-label="Carrossel de atividades ao vivo" tabindex="0">
+          <div class="carousel-track">
+
+            <!-- Card 1 -->
+            <article class="activity-card">
+              <div class="card-top">
+                <span class="status-badge live">AO VIVO</span>
+                <span class="card-time">14:00 – 15:30</span>
+              </div>
+              <h3 class="card-title">Visita guiada ao Campus</h3>
+              <p class="card-location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Ponto de encontro: Hall Principal
+              </p>
+              <p class="card-desc">Conheça os laboratórios, salas e espaços de convivência da UFFS com alunos e
+                professores.</p>
+              <div class="card-footer">
+                <span class="card-tag">Presencial</span>
+              </div>
+            </article>
+
+            <!-- Card 2 -->
+            <article class="activity-card">
+              <div class="card-top">
+                <span class="status-badge live">AO VIVO</span>
+                <span class="card-time">14:30 – 16:00</span>
+              </div>
+              <h3 class="card-title">Oficina de Fotografia Analógica</h3>
+              <p class="card-location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Sala 203 – Bloco B
+              </p>
+              <p class="card-desc">Aprenda a revelar fotos e explorar técnicas clássicas com o coletivo Contraste.</p>
+              <div class="card-footer">
+                <span class="card-tag">Workshop</span>
+              </div>
+            </article>
+
+            <!-- Card 3 -->
+            <article class="activity-card">
+              <div class="card-top">
+                <span class="status-badge live">AO VIVO</span>
+                <span class="card-time">15:00 – 16:30</span>
+              </div>
+              <h3 class="card-title">Mesa: Ciência & Sociedade</h3>
+              <p class="card-location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Auditório Central
+              </p>
+              <p class="card-desc">Pesquisadores debatem o impacto da universidade pública na transformação social da
+                região.</p>
+              <div class="card-footer">
+                <span class="card-tag">Palestra</span>
+              </div>
+            </article>
+
+            <!-- Card 4 -->
+            <article class="activity-card">
+              <div class="card-top">
+                <span class="status-badge soon">EM BREVE</span>
+                <span class="card-time">16:00 – 17:00</span>
+              </div>
+              <h3 class="card-title">Show de Talentos UFFS</h3>
+              <p class="card-location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Área de Convivência
+              </p>
+              <p class="card-desc">Apresentações musicais, teatro e performances dos estudantes do campus.</p>
+              <div class="card-footer">
+                <span class="card-tag">Cultural</span>
+              </div>
+            </article>
+
+            <!-- Card 5 -->
+            <article class="activity-card">
+              <div class="card-top">
+                <span class="status-badge live">AO VIVO</span>
+                <span class="card-time">14:00 – 17:00</span>
+              </div>
+              <h3 class="card-title">Feira de Projetos de Extensão</h3>
+              <p class="card-location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Pátio Externo
+              </p>
+              <p class="card-desc">Conheça os projetos que a universidade desenvolve junto à comunidade.</p>
+              <div class="card-footer">
+                <span class="card-tag">Exposição</span>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <button class="carousel-btn next" aria-label="Próxima atividade" type="button">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Indicadores (dots) -->
+      <div class="carousel-dots" role="tablist" aria-label="Navegação do carrossel"></div>
+    </section>
   </main>
 
+  <script src="carousel.js" defer></script>
+
 </body>
+
 </html>

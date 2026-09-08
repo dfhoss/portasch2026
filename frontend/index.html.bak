@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFFS de Portas Abertas – Contraste</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="banner" role="banner" aria-label="UFFS de Portas Abertas – Contraste">
+    <div class="content">
+      <div class="badge">UFFS DE</div>
+      <h1 class="title">
+        <span>PORTAS</span>
+        <span>ABERTAS</span>
+      </h1>
+    </div>
+
+    <div class="glasses">
+      <img src="assets/images/oculos.png" alt="">
+    </div>
+
+    <div class="logo">
+      <div class="logo-icon" aria-hidden="true"></div>
+      <span class="logo-text">CONTRASTE</span>
+    </div>
+
+    <div class="banner-bottom-line" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <p>Conteúdo da página abaixo do header...</p>
+  </main>
+
+</body>
+</html>
