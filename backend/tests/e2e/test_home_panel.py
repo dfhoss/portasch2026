@@ -329,7 +329,11 @@ def test_exhaustive_inclusion_uses_isolated_fixture_and_persists_all_fields(
     admin_page.get_by_role("button", name="Adicionar eixo").click()
     admin_page.get_by_label("Nome do eixo").fill(scenario["axis"])
     admin_page.get_by_role("button", name="Salvar").click()
-    expect(admin_page.get_by_text(scenario["axis"])).to_be_visible()
+    expect(
+        admin_page.locator(".axis-detail-panel > header").get_by_role(
+            "heading", name=scenario["axis"]
+        )
+    ).to_be_visible()
 
     admin_page.get_by_role("button", name="Programação").click()
     admin_page.get_by_role("button", name="Adicionar seção").click()
@@ -393,7 +397,11 @@ def test_created_axis_can_be_selected_and_persists_after_reload(admin_page: Page
     admin_page.get_by_role("button", name="Adicionar eixo").click()
     admin_page.get_by_label("Nome do eixo").fill("Eixo de persistência E2E")
     admin_page.get_by_role("button", name="Salvar").click()
-    expect(admin_page.get_by_text("Eixo de persistência E2E")).to_be_visible()
+    expect(
+        admin_page.locator(".axis-detail-panel > header").get_by_role(
+            "heading", name="Eixo de persistência E2E"
+        )
+    ).to_be_visible()
 
     admin_page.get_by_role("button", name="Programação").click()
     click_section_action(admin_page, "add-group")
@@ -483,29 +491,25 @@ def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page
     admin_page.get_by_role("button", name="Adicionar eixo").click()
     admin_page.get_by_label("Nome do eixo").fill("Eixo E2E")
     admin_page.get_by_role("button", name="Salvar").click()
-    expect(admin_page.get_by_text("Eixo E2E")).to_be_visible()
-    axis = admin_page.locator(".catalog-card").filter(has_text="Eixo E2E")
-    click_catalog_action(admin_page, axis, "Editar")
+    axis_header = admin_page.locator(".axis-detail-panel > header")
+    expect(axis_header.get_by_role("heading", name="Eixo E2E")).to_be_visible()
+    axis_header.get_by_role("button", name="Editar eixo").click()
     admin_page.get_by_label("Nome do eixo").fill("Eixo E2E renomeado")
     admin_page.get_by_role("button", name="Salvar").click()
-    expect(admin_page.get_by_text("Eixo E2E renomeado")).to_be_visible()
-    admin_page.once("dialog", accept_dialog)
-    axis = admin_page.locator(".catalog-card").filter(has_text="Eixo E2E renomeado")
-    click_catalog_action(admin_page, axis, "Excluir")
-    expect(admin_page.get_by_text("Eixo excluído com sucesso.")).to_be_visible()
+    axis_header = admin_page.locator(".axis-detail-panel > header")
+    expect(axis_header.get_by_role("heading", name="Eixo E2E renomeado")).to_be_visible()
 
 
-def test_axis_in_use_delete_is_safe_and_null_axis_is_visible(admin_page: Page) -> None:
+def test_axis_programs_are_read_only_and_null_axis_is_visible(admin_page: Page) -> None:
     login(admin_page)
     admin_page.get_by_role("button", name="Eixos").click()
-    expect(admin_page.get_by_text("Geral")).to_be_visible()
-    admin_page.once("dialog", accept_dialog)
-    axis = admin_page.locator(".catalog-card").filter(has_text="Administração, negócios e direito")
-    click_catalog_action(admin_page, axis, "Excluir")
-    expect(admin_page.get_by_text("Este registro ainda está em uso.")).to_be_visible()
     expect(
-        admin_page.get_by_text("Voz e Ação: conhecendo o curso de Administração")
+        admin_page.locator(".axis-detail-panel > header").get_by_role("heading", name="Geral")
     ).to_be_visible()
+    axis_header = admin_page.locator(".axis-detail-panel > header")
+    expect(axis_header.locator(".card-menu-trigger")).to_have_count(0)
+    expect(admin_page.get_by_text("Atividades gerais", exact=True)).to_be_visible()
+    expect(admin_page.locator(".axis-program-preview")).to_contain_text("Recepção nos Auditórios")
     expect(admin_page.locator("body")).not_to_contain_text("administracao-negocios-e-direito")
     admin_page.get_by_role("button", name="Programação").click()
     click_section_action(admin_page, "add-group")

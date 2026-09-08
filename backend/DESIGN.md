@@ -153,6 +153,18 @@ ele ao implementar ou alterar a interface.
 - Títulos de página usam `--font-size-xl` e `--font-weight-bold`. Títulos de seção usam
   `--font-size-lg` e `--font-weight-semibold`. O texto corrido usa `--font-size-sm` ou
   `--font-size-md` com `--line-height-normal`.
+- A hierarquia tipográfica deve ser semântica e previsível: contexto e metadados usam `--font-size-xs`
+  com `--font-weight-regular` e `--color-text-muted`; títulos de registros usam `--font-size-md`
+  com `--font-weight-semibold`; instruções e conteúdo de leitura usam `--font-size-sm`,
+  `--font-weight-regular` e `--line-height-normal`. Use tamanho, peso, cor e espaço em conjunto;
+  não use caixa alta, cor isolada ou negrito em textos longos para criar hierarquia.
+- Todo texto de componente deve herdar explicitamente `--font-family-sans`; elementos com aparência
+  nativa, como `summary` e `li`, precisam declarar essa herança quando receberem estilos próprios para
+  não dependerem do user agent. A interface usa somente a pilha sem serifa do sistema, nunca a fonte
+  serifada padrão do navegador.
+- Dentro de um componente, mantenha uma única escala tipográfica coerente. Separe níveis por papéis:
+  contexto menor e discreto, título principal mais forte, metadados subordinados e corpo legível.
+  O alinhamento padrão em português é à esquerda; não centralize ou justifique blocos de leitura.
 - Evite texto corrido em caixa alta. A caixa alta fica reservada para rótulos curtos e eyebrows.
 
 ### Espaçamento e layout
@@ -209,6 +221,18 @@ ele ao implementar ou alterar a interface.
 - O menu de ações de uma sala deve escapar da área rolável da grade e abrir abaixo, à direita do botão
   quando houver espaço. Seu posicionamento usa a viewport para evitar que o cartão ou a grade o recorte;
   se não houver espaço inferior ou lateral, ele se reposiciona dentro da viewport.
+- Eixos de conhecimento usam o mesmo canvas `.locations-workspace` dos locais: a navegação lateral
+  lista os nomes dos eixos e a área principal mostra apenas o eixo selecionado. Cada item da navegação
+  é um botão com nome, quantidade de grupos vinculados e estado `aria-current="true"`; a busca filtra
+  somente essa lista sem perder o foco do campo.
+- O eixo selecionado aparece em um único header do painel, como nos locais, com nome, contagens e a
+  ação secundária explícita “Editar eixo” à direita. A edição usa o mesmo `dialog` e `.editor-form` de
+  “Editar grupo de locais”. Os cards de programação são somente leitura e mostram seção, grupo,
+  quantidade de atividades e uma prévia da primeira atividade. A lista completa fica sob “Ver
+  programação vinculada”, inicialmente recolhida, em um disclosure com faixa clicável, chevron SVG,
+  estados de foco/abertura e rolagem própria para não alongar a página. As atividades são linhas sem
+  marcador nativo, separadas por bordas sutis e espaçamento regular. A aba Eixos não oferece ações
+  para editar a programação.
 - Uma sessão da agenda armazena `locations` como lista. Várias salas podem compartilhar um horário;
   salas com horários diferentes usam entradas de sessão separadas para a mesma atividade. A entrada
   legada `location` é aceita somente para migração ao formato de lista.
@@ -306,9 +330,10 @@ ele ao implementar ou alterar a interface.
   entidade, como `Adicionar local` ou `Adicionar eixo`. Na programação, `Adicionar seção` é o
   botão compacto com `+` ao final da lista; criação de grupo e atividade fica no menu contextual
   `Adicionar` da seção selecionada.
-- `Editar` é uma ação secundária contextual. Em seções, grupos, atividades, locais e eixos,
-  deve ficar no menu de três pontos do próprio registro, com ícone de lápis e rótulo explícito.
-  Não exiba editar como botão paralelo à ação de excluir em cards ou cabeçalhos.
+- `Editar` é uma ação secundária contextual. Em seções, grupos, atividades e locais, deve ficar no
+  menu de três pontos do próprio registro, com ícone de lápis e rótulo explícito. Em Eixos, o eixo
+  selecionado segue o padrão de grupos de locais: “Editar eixo” é um botão secundário no header do
+  painel. Não exiba outro menu de ações ou botão de excluir nessa tela.
 - `Excluir` é sempre a última opção do menu, com ícone de lixeira, separação visual das ações
   comuns e `--color-danger`. A cor nunca é o único sinal: o rótulo deve começar com `Excluir`
   e a confirmação deve identificar o registro e o conteúdo afetado.
@@ -364,10 +389,18 @@ estados de foco e o layout móvel.
 
 ## Referências
 
-- [Material Design — botões](https://m2.material.io/go/design-buttons/) — hierarquia com uma
+- [Material Design 3 — tipografia](https://m3.material.io/styles/typography/overview) — estilos
+  tipográficos e hierarquia semântica para organizar a leitura.
+- [Material Design 3 — botões](https://m3.material.io/components/buttons) — hierarquia com uma
   única ação de maior destaque e ações secundárias com menor ênfase.
-- [Material Design — diálogos](https://m2.material.io/develop/web/components/dialogs) — ações de
+- [Material Design 3 — diálogos](https://m3.material.io/components/dialogs) — ações de
   confirmação e cancelamento explícitas, com no máximo duas ações no diálogo.
+- [Material Design 3 — estados](https://m3.material.io/foundations/interaction/states/overview) —
+  estados visuais consistentes para hover, foco, pressionado e seleção.
+- [Material Design 3 — layouts canônicos](https://m3.material.io/foundations/layout/canonical-examples/overview)
+  — relação entre navegação lateral, lista e painel de detalhe.
+- [Fluent 2 — tipografia](https://fluent2.microsoft.design/typography) — rampa com papéis, pesos,
+  entrelinha, alinhamento à esquerda e uso da fonte nativa do sistema.
 - [Fluent 2 — botões](https://fluent2.microsoft.design/components/web/react/core/button/usage) —
   uma única ação primária por contexto, rótulos iniciados por verbos e ícones familiares.
 - [Fluent 2 — toolbar](https://fluent2.microsoft.design/components/web/react/core/toolbar/usage) —
@@ -377,6 +410,12 @@ estados de foco e o layout móvel.
   consequências e pedir confirmação.
 - [GOV.UK Design System — botões](https://design-system.service.gov.uk/components/button/) —
   ações destrutivas devem ser usadas com parcimônia, com texto explícito e confirmação adicional.
+- [GOV.UK Design System — títulos](https://design-system.service.gov.uk/styles/headings/) — níveis de
+  título consistentes, caixa de frase e estrutura semântica.
+- [GOV.UK Design System — listas](https://design-system.service.gov.uk/styles/lists/) — listas como
+  blocos de leitura, com espaçamento quando itens percorrem várias linhas.
+- [Carbon Design System — tipografia](https://v10.carbondesignsystem.com/guidelines/typography/overview/)
+  — textura tipográfica, escalas de tamanho e peso para hierarquia em produtos.
 - [Especificação de propriedades personalizadas CSS da W3C](https://www.w3.org/TR/css-variables-1/)
 - [Formato do Design Tokens Community Group](https://www.designtokens.org/tr/drafts/format/)
 - [MDN: Uso de propriedades personalizadas CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)

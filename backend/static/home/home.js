@@ -38,6 +38,7 @@ const catalogKeys = new WeakMap();
 let nextCatalogKey = 1;
 let activeEditorSection = "schedule";
 let selectedLocationGroupId = null;
+let selectedKnowledgeAxisId = null;
 let announceTimer = null;
 
 function readEditorViewState() {
@@ -499,43 +500,109 @@ function renderLocations(searchQuery = "") {
     </div>`;
 }
 
-function axisGroupCount(axisId) {
-  let count = 0;
+function knowledgeAxisPrograms(axisId) {
+  const programs = [];
   for (const section of state.schedule?.sections || []) {
     for (const group of section.groups || []) {
-      if (group.knowledgeAxis === axisId) count += 1;
+      if (group.knowledgeAxis === axisId) programs.push({section, group});
     }
   }
-  return count;
+  return programs;
 }
 
-function renderKnowledgeAxes() {
-  const cards = state.knowledgeAxes.length
-    ? state.knowledgeAxes
+function axisProgramCard(program) {
+  const activities = program.group.items || [];
+  const activityLabel = activities.length === 1 ? "atividade" : "atividades";
+  const activityPreview = activities.length
+    ? `<span class="axis-program-preview">${escapeHtml(activities[0].title || "Atividade sem título")}${activities.length > 1 ? ` · +${activities.length - 1}` : ""}</span>`
+    : "";
+  const activityItems = activities.length
+    ? `<ul class="axis-activity-list">${activities
+        .map((activity) => `<li>${escapeHtml(activity.title || "Atividade sem título")}</li>`)
+        .join("")}</ul>`
+    : '<p class="secondary-text">Nenhuma atividade cadastrada.</p>';
+  return `<article class="catalog-card axis-program-card">
+    <div class="axis-program-copy">
+      <span class="axis-program-section">${escapeHtml(program.section.title || "Seção sem título")}</span>
+      <strong class="axis-program-title">${escapeHtml(program.group.title || "Grupo sem título")}</strong>
+      <span class="axis-program-count">${activities.length} ${activityLabel}</span>
+      ${activityPreview}
+      <details class="axis-program-details">
+        <summary class="axis-program-details-summary">
+          <span>Ver programação vinculada</span>
+          <span class="axis-program-details-chevron">${actionIcon("chevron")}</span>
+        </summary>
+        <div class="axis-program-details-body">${activityItems}</div>
+      </details>
+    </div>
+  </article>`;
+}
+
+function knowledgeAxisEditAction(axis) {
+  if (!axis) return "";
+  const key = catalogKey(axis);
+  return `<button class="secondary-action location-group-edit" type="button" data-action="edit-axis" data-key="${key}">${actionIcon("edit")}<span>Editar eixo</span></button>`;
+}
+
+function renderKnowledgeAxes(searchQuery = "") {
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+  const visibleAxes = state.knowledgeAxes.filter((axis) =>
+    axis.name.toLocaleLowerCase().includes(normalizedQuery),
+  );
+  selectedKnowledgeAxisId = visibleAxes.some((axis) => axis.id === selectedKnowledgeAxisId)
+    ? selectedKnowledgeAxisId
+    : visibleAxes[0]?.id || null;
+  const selectedAxis = state.knowledgeAxes.find((axis) => axis.id === selectedKnowledgeAxisId);
+  const programs = selectedAxis ? knowledgeAxisPrograms(selectedAxis.id) : [];
+  const activityCount = programs.reduce(
+    (total, program) => total + (program.group.items || []).length,
+    0,
+  );
+  const axisItems = visibleAxes.length
+    ? visibleAxes
         .map((axis) => {
           const key = catalogKey(axis);
-          const count = axisGroupCount(axis.id);
-          return `<article class="catalog-card">
-            <div><strong>${escapeHtml(axis.name)}</strong><span class="secondary-text">${count} ${count === 1 ? "grupo" : "grupos"}</span></div>
-            <details class="menu card-menu">
-              <summary class="menu-trigger card-menu-trigger" aria-label="Ações do eixo ${escapeHtml(axis.name)}">${actionIcon("more")}</summary>
-              <div class="menu-panel card-menu-panel" role="menu">
-                <button class="menu-item" type="button" role="menuitem" data-action="edit-axis" data-key="${key}">${actionIcon("edit")}Editar</button>
-                <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-axis" data-key="${key}">${actionIcon("delete")}Excluir</button>
-              </div>
-            </details>
-          </article>`;
+          const count = knowledgeAxisPrograms(axis.id).length;
+          return `<div class="location-group-nav-item">
+            <button class="location-group-select" type="button" data-action="select-knowledge-axis" data-key="${key}" aria-current="${axis.id === selectedKnowledgeAxisId}">
+              <span>${escapeHtml(axis.name)}</span><small>${count}</small>
+            </button>
+          </div>`;
         })
         .join("")
-    : '<p class="empty-state">Nenhum eixo cadastrado.</p>';
+    : '<p class="empty-state">Nenhum eixo encontrado.</p>';
+  const cards = programs.length
+    ? programs.map(axisProgramCard).join("")
+    : '<p class="empty-state">Este eixo ainda não está vinculado à programação.</p>';
+  const axisCount = programs.length === 1 ? "grupo" : "grupos";
+  const activityCountLabel = activityCount === 1 ? "atividade" : "atividades";
   editorContent.innerHTML = `
-    <header class="content-header">
+    <header class="content-header axes-page-header">
       <div><p class="eyebrow">Catálogo da agenda</p><h2>Eixos de conhecimento</h2></div>
       <div class="toolbar-actions">
         <button type="button" class="primary-action" data-action="add-axis">Adicionar eixo</button>
       </div>
     </header>
-    <div class="catalog-list" id="knowledge-axes-list">${cards}</div>`;
+    <div class="locations-workspace knowledge-axes-workspace">
+      <div class="location-toolbar">
+        <input id="knowledge-axis-search" type="search" placeholder="Buscar eixo" value="${escapeHtml(searchQuery)}" aria-label="Buscar eixos">
+      </div>
+      <div class="locations-workspace-body">
+        <nav id="knowledge-axis-nav" class="location-group-nav axis-nav" aria-label="Eixos de conhecimento">
+          <div class="location-group-nav-heading"><h3>Eixos</h3><span>${visibleAxes.length}</span></div>
+          <div class="location-group-nav-list">${axisItems}</div>
+        </nav>
+        <section class="locations-room-panel axis-detail-panel" aria-label="Programação vinculada ao eixo ${escapeHtml(selectedAxis?.name || "selecionado")}">
+          <header>
+            <div>
+              <h3 id="selected-knowledge-axis">${escapeHtml(selectedAxis?.name || "Eixos de conhecimento")}</h3>
+              <p>${programs.length} ${axisCount} · ${activityCount} ${activityCountLabel}</p>
+            </div>${knowledgeAxisEditAction(selectedAxis)}
+          </header>
+          <div class="catalog-list axis-program-grid" id="knowledge-axis-program-list">${cards}</div>
+        </section>
+      </div>
+    </div>`;
 }
 
 function locationCard(location, extraClass = "") {
@@ -1038,6 +1105,7 @@ async function saveKnowledgeAxis(form = modalContent.querySelector("#knowledge-a
     } else {
       state.knowledgeAxes = [...state.knowledgeAxes, canonical];
     }
+    selectedKnowledgeAxisId = canonical.id;
     renderKnowledgeAxes();
     editorModal.close();
     announce(record ? "Eixo renomeado com sucesso." : "Eixo criado com sucesso.");
@@ -1345,6 +1413,11 @@ async function handleEditorClick(event) {
     selectedLocationGroupId = key;
     return renderLocations(document.querySelector("#location-search")?.value || "");
   }
+  if (action === "select-knowledge-axis") {
+    const axis = catalogRecord("axis", key);
+    if (axis) selectedKnowledgeAxisId = axis.id;
+    return renderKnowledgeAxes(document.querySelector("#knowledge-axis-search")?.value || "");
+  }
   if (action === "edit-location") return openLocationEditor(catalogRecord("location", key), button);
   if (action === "delete-location") return deleteLocation(catalogRecord("location", key));
   if (action === "add-axis") return openKnowledgeAxisEditor(null, button);
@@ -1484,12 +1557,15 @@ editorContent.addEventListener("change", (event) => {
   markScheduleChanged();
 });
 editorContent.addEventListener("input", (event) => {
-  if (event.target.id !== "location-search") return;
+  if (event.target.id !== "location-search" && event.target.id !== "knowledge-axis-search") return;
   const searchInput = event.target;
   const selectionStart = searchInput.selectionStart;
   const selectionEnd = searchInput.selectionEnd;
-  renderLocations(searchInput.value);
-  const nextSearchInput = document.querySelector("#location-search");
+  const renderSearch = searchInput.id === "location-search" ? renderLocations : renderKnowledgeAxes;
+  renderSearch(searchInput.value);
+  const nextSearchInput = searchInput.id === "location-search"
+    ? document.querySelector("#location-search")
+    : document.querySelector("#knowledge-axis-search");
   nextSearchInput?.focus();
   if (Number.isInteger(selectionStart) && Number.isInteger(selectionEnd)) {
     nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);

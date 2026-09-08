@@ -146,9 +146,9 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
         api.renderKnowledgeAxes();
         html = elementFor("#editor-content").innerHTML;
         assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar eixo/);
-        assert.match(html, /class="menu card-menu"[\s\S]*data-action="edit-axis"[\s\S]*data-action="delete-axis"/);
+        assert.match(html, /class="secondary-action location-group-edit"[\s\S]*data-action="edit-axis"/);
         assert.equal((html.match(/data-action="edit-axis"/g) || []).length, 1);
-        assert.equal((html.match(/data-action="delete-axis"/g) || []).length, 1);
+        assert.equal((html.match(/data-action="delete-axis"/g) || []).length, 0);
         """
     )
 
@@ -218,6 +218,29 @@ def test_locations_use_group_navigation_and_compact_room_grid():
         assert.equal((html.match(/class="catalog-card location-room-card"/g) || []).length, 2);
         """
     )
+
+
+def test_axes_use_shared_workspace_and_compact_program_cards():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    assert ".axis-program-card {" in css
+    assert ".axis-program-details {" in css
+    assert ".axis-program-details-summary {" in css
+    assert ".axis-program-details-body {" in css
+    assert ".axis-activity-list li {" in css
+    program_card_css = css.split(".axis-program-card {", 1)[1].split("}", 1)[0]
+    details_css = css.split(".axis-program-details {", 1)[1].split("}", 1)[0]
+    assert ".knowledge-axes-workspace" in css
+    assert ".axis-nav" in css
+    assert "grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));" in css
+    assert "min-width: 0;" in program_card_css
+    assert "grid-column: 1 / -1;" in details_css
+    summary_css = css.split(".axis-program-details-summary {", 1)[1].split("}", 1)[0]
+    activity_css = css.split(".axis-activity-list li {", 1)[1].split("}", 1)[0]
+    assert "font-family: inherit;" in summary_css
+    assert "list-style: none;" in summary_css
+    assert "list-style: none;" in activity_css
+    assert "border-bottom: var(--border-width) solid var(--color-border);" in activity_css
+    assert "overflow-y: auto;" in css.split(".axis-program-details-body {", 1)[1].split("}", 1)[0]
 
 
 def test_location_group_edit_action_lives_in_selected_panel_header():

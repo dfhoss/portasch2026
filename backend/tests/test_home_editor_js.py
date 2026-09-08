@@ -85,7 +85,7 @@ vm.createContext(context);
 
 const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
-  state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, openActivityEditor,
+  state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, renderKnowledgeAxes, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
   openGroupEditor, handleEditorClick, showApiError, logout
 };`, context, {filename: "admin.js"});
@@ -309,6 +309,41 @@ def test_locations_render_group_navigation_with_room_metadata():
         assert.match(elementFor("#editor-content").innerHTML, /Sala prática/);
         assert.match(elementFor("#editor-content").innerHTML, /111/);
         assert.match(elementFor("#editor-content").innerHTML, /<details/);
+        """
+    )
+
+
+def test_axes_use_location_workspace_with_program_cards_for_selected_axis():
+    run_node_case(
+        """
+        api.state.knowledgeAxes = [
+          {id: "axis-a", name: "Ciência e tecnologia"},
+          {id: "axis-b", name: "Artes e humanidades"},
+        ];
+        api.state.schedule = {sections: [{title: "Programação completa", groups: [
+          {title: "Bloco C", knowledgeAxis: "axis-a", items: [
+            {title: "Laboratório aberto"},
+            {title: "Demonstração"},
+          ]},
+          {title: "Grupo de outro eixo", knowledgeAxis: "axis-b", items: [{title: "Atividade"}]},
+        ]}]};
+        api.renderKnowledgeAxes();
+        const html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /class="locations-workspace knowledge-axes-workspace"/);
+        assert.match(html, /id="knowledge-axis-search"/);
+        assert.match(html, /id="knowledge-axis-nav"/);
+        assert.match(html, /data-action="select-knowledge-axis"/);
+        assert.match(html, /Ciência e tecnologia/);
+        assert.match(html, /class="catalog-list axis-program-grid"/);
+        assert.match(html, /Programação completa/);
+        assert.match(html, /Bloco C/);
+        assert.match(html, /Laboratório aberto/);
+        assert.match(html, /Demonstração/);
+        assert.match(html, /Ver programação vinculada/);
+        assert.match(html, /class="axis-program-details-summary"/);
+        assert.match(html, /class="axis-program-details-chevron"/);
+        assert.match(html, /class="axis-activity-list"/);
+        assert.equal(html.includes("Grupo de outro eixo"), false);
         """
     )
 

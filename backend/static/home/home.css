@@ -875,6 +875,136 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   overflow-y: auto;
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
 }
+.axis-nav .location-group-select span { overflow-wrap: anywhere; }
+.knowledge-axes-workspace .axis-detail-panel { min-width: 0; }
+.axis-program-copy { font-family: var(--font-family-sans); }
+.axis-program-section {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+.axis-program-title {
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+.axis-program-count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+.axis-program-preview {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.axis-program-grid {
+  flex: 1 1 auto;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+}
+.axis-program-card {
+  min-width: 0;
+  min-height: 0;
+  align-items: start;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.axis-program-copy {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+}
+.axis-program-details {
+  grid-column: 1 / -1;
+  width: 100%;
+  font-family: var(--font-family-sans);
+  margin-top: var(--space-2);
+}
+.axis-program-details-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+  color: var(--color-navigation);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-semibold);
+  list-style: none;
+}
+.axis-program-details-summary::-webkit-details-marker { display: none; }
+.axis-program-details-summary:hover,
+.axis-program-details[open] .axis-program-details-summary {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-selected);
+}
+.axis-program-details-summary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.axis-program-details-chevron {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  line-height: 0;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.axis-program-details-chevron .action-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.axis-program-details[open] .axis-program-details-chevron { transform: rotate(180deg); }
+.axis-program-details-body {
+  max-height: 10rem;
+  margin-top: var(--space-1);
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+.axis-activity-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+.axis-activity-list li {
+  padding: var(--space-2) var(--space-0);
+  border-bottom: var(--border-width) solid var(--color-border);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  overflow-wrap: anywhere;
+  list-style: none;
+}
+.axis-activity-list li:last-child { border-bottom: 0; }
 .location-room-card {
   min-width: 0;
   min-height: 5rem;
