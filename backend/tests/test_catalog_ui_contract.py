@@ -315,6 +315,27 @@ def test_locations_search_and_room_header_share_catalog_card_inset():
     assert ".locations-room-panel { padding: var(--panel-padding); }" in css
 
 
+def test_catalog_workspaces_use_viewport_height_and_keep_editor_inset():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    assert ".editor-view:has(#editor-content > .locations-workspace) {" in css
+    assert (
+        "height: 100dvh;"
+        in css.split(".editor-view:has(#editor-content > .locations-workspace) {", 1)[1].split(
+            "}", 1
+        )[0]
+    )
+    assert "#editor-content:has(> .locations-workspace) > .locations-workspace {" in css
+    workspace_rule = css.split(
+        "#editor-content:has(> .locations-workspace) > .locations-workspace {", 1
+    )[1].split("}", 1)[0]
+    assert "flex: 1 1 auto;" in workspace_rule
+    assert "height: auto;" in workspace_rule
+    assert "min-height: 0;" in workspace_rule
+    assert (
+        "padding: var(--content-padding);" in css.split("#editor-content {", 1)[1].split("}", 1)[0]
+    )
+
+
 def test_group_navigation_styles_do_not_override_three_dot_menu_alignment():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     assert ".location-group-nav button {" not in css

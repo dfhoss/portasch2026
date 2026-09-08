@@ -167,6 +167,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   grid-template-rows: auto 1fr;
   min-height: 100vh;
 }
+.editor-view:has(#editor-content > .locations-workspace) {
+  height: 100dvh;
+}
 .editor-sidebar {
   grid-column: 1;
   grid-row: 1 / -1;
@@ -296,6 +299,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   padding: var(--content-padding);
 }
 #editor-content { grid-area: content; }
+#editor-content:has(> .locations-workspace) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#editor-content:has(> .locations-workspace) > .locations-workspace {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
 #login-message:not(:empty) {
   padding: var(--space-3);
   border: var(--border-width) solid var(--green-200);
@@ -1101,11 +1114,17 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
 @media (max-width: 749px) {
   :root { --content-padding: var(--space-4); }
   .editor-view { display: block; }
+  .editor-view:has(#editor-content > .locations-workspace) {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
   .editor-sidebar {
     display: block;
     position: static;
     height: auto;
     padding: var(--space-0);
+    flex: 0 0 auto;
   }
   .editor-header {
     flex-direction: row;
@@ -1131,6 +1150,10 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
     color: var(--color-navigation);
   }
   #editor-content { width: 100%; padding: var(--content-padding); }
+  #editor-content:has(> .locations-workspace) {
+    flex: 1 1 auto;
+    height: auto;
+  }
   #editor-toast { top: var(--space-3); right: var(--space-3); }
   .schedule-metadata { grid-template-columns: 1fr; }
   .section-heading, .schedule-activity { display: grid; grid-template-columns: 1fr; }

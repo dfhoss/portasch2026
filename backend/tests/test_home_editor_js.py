@@ -333,6 +333,8 @@ def test_axes_use_location_workspace_with_program_cards_for_selected_axis():
         assert.match(html, /id="knowledge-axis-search"/);
         assert.match(html, /id="knowledge-axis-nav"/);
         assert.match(html, /data-action="select-knowledge-axis"/);
+        assert.match(html, /class="location-group-add-card"[\s\S]*>Novo eixo/);
+        assert.match(html, /data-action="add-axis"/);
         assert.match(html, /Ciência e tecnologia/);
         assert.match(html, /class="catalog-list axis-program-grid"/);
         assert.match(html, /Programação completa/);

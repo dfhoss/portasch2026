@@ -591,6 +591,7 @@ function renderKnowledgeAxes(searchQuery = "") {
         <nav id="knowledge-axis-nav" class="location-group-nav axis-nav" aria-label="Eixos de conhecimento">
           <div class="location-group-nav-heading"><h3>Eixos</h3><span>${visibleAxes.length}</span></div>
           <div class="location-group-nav-list">${axisItems}</div>
+          <button class="location-group-add-card" type="button" data-action="add-axis" aria-label="Adicionar novo eixo"><span aria-hidden="true">+</span><span>Novo eixo</span></button>
         </nav>
         <section class="locations-room-panel axis-detail-panel" aria-label="Programação vinculada ao eixo ${escapeHtml(selectedAxis?.name || "selecionado")}">
           <header>

@@ -216,6 +216,8 @@ ele ao implementar ou alterar a interface.
   O card `Novo grupo` fica no fim da navegação e é a ação contextual de criação de grupos; ele permanece
   reservado no rodapé da coluna enquanto a lista de grupos ocupa o espaço flexível restante. A lista
   só mostra rolagem quando o conteúdo excede a altura disponível, inclusive em zooms e viewports menores.
+  O workspace usa a altura disponível do viewport e o `--content-padding` do editor para manter o mesmo
+  espaçamento à esquerda, à direita e abaixo; a rolagem de muitas salas continua interna aos painéis.
   O cabeçalho
   da página mantém apenas `Adicionar sala` como ação primária, vinculando a nova sala ao grupo ativo.
 - O menu de ações de uma sala deve escapar da área rolável da grade e abrir abaixo, à direita do botão
