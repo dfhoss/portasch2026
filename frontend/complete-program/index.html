@@ -1,184 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="standard">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UFFS de Portas Abertas – Contraste</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="./complete-program/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Programação Completa - Portas Abertas UFFS</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    /* Demo preview toolbar */
+    .demo-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--color-surface);
+      border-bottom: 2px solid var(--color-border);
+      font-family: var(--font-supporting);
+      font-size: 0.9rem;
+    }
+    .demo-bar__brand {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .demo-bar__actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .demo-btn {
+      padding: 0.45rem 0.9rem;
+      font-family: var(--font-supporting);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--color-content-text);
+      background: var(--color-page);
+      border: 2px solid var(--color-border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .demo-btn:hover {
+      background: var(--color-primary);
+      color: var(--color-on-brand);
+    }
+  </style>
 </head>
-
 <body>
 
-  <header class="banner" role="banner" aria-label="UFFS de Portas Abertas – Contraste">
-    <div class="content">
-      <div class="badge">UFFS DE</div>
-      <h1 class="title">
-        <span>PORTAS</span>
-        <span>ABERTAS</span>
-      </h1>
+  <!-- Demo toolbar for quick testing of themes and controls -->
+  <aside class="demo-bar" aria-label="Barra de demonstração">
+    <div class="demo-bar__brand">
+      PORTAS ABERTAS UFFS • COMPONENTE EXTRAÍDO
     </div>
-
-    <div class="glasses">
-      <img src="assets/images/oculos.png" alt="">
+    <div class="demo-bar__actions">
+      <button type="button" class="demo-btn" id="btn-toggle-theme">
+        Alternar Contraste
+      </button>
+      <button type="button" class="demo-btn" id="btn-expand-all">
+        Expandir Tudo
+      </button>
     </div>
-
-    <div class="logo">
-      <div class="logo-icon" aria-hidden="true"></div>
-      <span class="logo-text">CONTRASTE</span>
-    </div>
-
-    <div class="banner-bottom-line" aria-hidden="true"></div>
-  </header>
+  </aside>
 
   <main>
-    <!-- ========== SEÇÃO ROLANDO AGORA ========== -->
-    <section class="now-section" aria-labelledby="now-title">
-      <div class="section-header">
-        <h2 id="now-title" class="section-title">
-          <span class="live-dot" aria-hidden="true"></span>
-          Rolando agora
-        </h2>
-        <p class="section-subtitle">Acompanhe as atividades que estão acontecendo neste momento</p>
-      </div>
-
-      <div class="carousel-wrapper">
-        <button class="carousel-btn prev" aria-label="Atividade anterior" type="button">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-
-        <div class="carousel" role="region" aria-label="Carrossel de atividades ao vivo" tabindex="0">
-          <div class="carousel-track">
-
-            <!-- Card 1 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">14:00 – 15:30</span>
-              </div>
-              <h3 class="card-title">Visita guiada ao Campus</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Ponto de encontro: Hall Principal
-              </p>
-              <p class="card-desc">Conheça os laboratórios, salas e espaços de convivência da UFFS com alunos e
-                professores.</p>
-              <div class="card-footer">
-                <span class="card-tag">Presencial</span>
-              </div>
-            </article>
-
-            <!-- Card 2 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">14:30 – 16:00</span>
-              </div>
-              <h3 class="card-title">Oficina de Fotografia Analógica</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Sala 203 – Bloco B
-              </p>
-              <p class="card-desc">Aprenda a revelar fotos e explorar técnicas clássicas com o coletivo Contraste.</p>
-              <div class="card-footer">
-                <span class="card-tag">Workshop</span>
-              </div>
-            </article>
-
-            <!-- Card 3 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">15:00 – 16:30</span>
-              </div>
-              <h3 class="card-title">Mesa: Ciência & Sociedade</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Auditório Central
-              </p>
-              <p class="card-desc">Pesquisadores debatem o impacto da universidade pública na transformação social da
-                região.</p>
-              <div class="card-footer">
-                <span class="card-tag">Palestra</span>
-              </div>
-            </article>
-
-            <!-- Card 4 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge soon">EM BREVE</span>
-                <span class="card-time">16:00 – 17:00</span>
-              </div>
-              <h3 class="card-title">Show de Talentos UFFS</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Área de Convivência
-              </p>
-              <p class="card-desc">Apresentações musicais, teatro e performances dos estudantes do campus.</p>
-              <div class="card-footer">
-                <span class="card-tag">Cultural</span>
-              </div>
-            </article>
-
-            <!-- Card 5 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">14:00 – 17:00</span>
-              </div>
-              <h3 class="card-title">Feira de Projetos de Extensão</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Pátio Externo
-              </p>
-              <p class="card-desc">Conheça os projetos que a universidade desenvolve junto à comunidade.</p>
-              <div class="card-footer">
-                <span class="card-tag">Exposição</span>
-              </div>
-            </article>
-
-          </div>
-        </div>
-
-        <button class="carousel-btn next" aria-label="Próxima atividade" type="button">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Indicadores (dots) -->
-      <div class="carousel-dots" role="tablist" aria-label="Navegação do carrossel"></div>
-    </section>
-
-    <!-- ========== SEÇÃO PROGRAMAÇÃO COMPLETA ========== -->
+    <!-- Componente extraído de <section id="complete-program"> -->
     <section id="complete-program" data-section="complete-program" data-animate="" class="is-visible">
       <div data-schedule-status="" role="status" aria-live="polite"></div>
       <div data-schedule-root="" data-schedule-mount="complete-program" aria-busy="false">
         <article class="schedule-section schedule-section--complete-program" data-schedule-section="complete-program" aria-labelledby="schedule-heading-1">
           <h2 class="schedule-section__title" id="schedule-heading-1">Programação completa</h2>
           <p class="schedule-section__description">Intervalos: manhã, das 12h às 13h; tarde, das 17h30 às 19h.</p>
-
+          
           <div class="schedule-view-selector" role="radiogroup" aria-label="Visualizar por">
             <span class="schedule-view-selector__label">Visualizar por</span>
             <button type="button" class="schedule-view-selector__option" role="radio" data-schedule-view="shift" aria-checked="true" tabindex="0">Turno</button>
@@ -374,19 +268,19 @@
                     <li id="schedule-item-shift-morning-165" class="schedule-item schedule-view-item" data-schedule-item="historia-oficina-sobre-fontes-historicas-detetives-do-passado-rastros-da-historia-do-oeste-catarinense" data-source-schedule-item="historia-oficina-sobre-fontes-historicas-detetives-do-passado-rastros-da-historia-do-oeste-catarinense" data-schedule-finalized="false">
                       <p class="schedule-item__course" data-schedule-item-course="">HISTÓRIA</p>
                       <h5 class="schedule-item__title">Oficina sobre fontes históricas: Detetives do Passado - Rastros da História do Oeste Catarinense.</h5>
-                      <p class="schedule-item__description">Apresentar a importância das fontes históricas para compreender a formação territorial da região onde vivem. Análise de diferentes tipos de documentos como: mapas antigos e contratos de terras, discutindo o que cada fonte revela e o que silencia o processo histórico.</p>
+                      <p class="schedule-item__description">Apresentar a importância das fontes históricas para compreender a formação territorial da região onde vivem.</p>
                       <p class="schedule-session"><time datetime="08:30">8h30</time><span> às </span><time datetime="21:00">21h</time><br><span class="schedule-session__location">Bloco A - Sala 208</span></p>
                     </li>
                     <li id="schedule-item-shift-morning-166" class="schedule-item schedule-view-item" data-schedule-item="historia-oficina-fronteiras-quando-a-historia-deixa-pegadas-na-natureza" data-source-schedule-item="historia-oficina-fronteiras-quando-a-historia-deixa-pegadas-na-natureza" data-schedule-finalized="false">
                       <p class="schedule-item__course" data-schedule-item-course="">HISTÓRIA</p>
-                      <h5 class="schedule-item__title">Oficina Fronteiras: quando a História deixa pegadas na natureza</h5>
-                      <p class="schedule-item__description">A atividade inicia com uma breve introdução sobre o que é a História Ambiental, destacando como ela estuda as relações entre sociedade e natureza ao longo do tempo. Em seguida, os alunos serão desafiados a analisar diferentes acontecimentos históricos e identificar de que maneira esses eventos impactaram o meio ambiente.</p>
+                      <h5 class="schedule-item__title">Oficina Fronteiras: quando a História deixa pegadas na naturezas</h5>
+                      <p class="schedule-item__description">A atividade inicia com uma breve introdução sobre o que é a História Ambiental, destacando como ela estuda as relações entre sociedade e natureza ao longo do tempo.</p>
                       <p class="schedule-session"><time datetime="09:30">9h30</time><span> às </span><time datetime="21:00">21h</time><br><span class="schedule-session__location">Bloco LAB 2 - Sala 103-3</span></p>
                     </li>
                     <li id="schedule-item-shift-morning-167" class="schedule-item schedule-view-item" data-schedule-item="historia-visita-laboratorio-universitario-de-patrimonio-e-arqueologia-lupa" data-source-schedule-item="historia-visita-laboratorio-universitario-de-patrimonio-e-arqueologia-lupa" data-schedule-finalized="false">
                       <p class="schedule-item__course" data-schedule-item-course="">HISTÓRIA</p>
                       <h5 class="schedule-item__title">VISITA Laboratório Universitário de Patrimônio e Arqueologia (LUPA)</h5>
-                      <p class="schedule-item__description">Equipamentos e materiais utilizados em pesquisas arqueológicas; O acervo de objetos e vestígios arqueológicos estudados pelo laboratório; As etapas de trabalho arqueológico, desde a coleta em campo até a análise e a conservação.</p>
+                      <p class="schedule-item__description">Equipamentos e materiais utilizados em pesquisas arqueológicas; O acervo de objetos e vestígios arqueológicos estudados pelo laboratório.</p>
                       <p class="schedule-session"><time datetime="08:30">8h30</time><span> às </span><time datetime="12:00">12h</time><br><span class="schedule-session__location">Sala 103 - LAB 1</span></p>
                     </li>
                   </ul>
@@ -433,7 +327,7 @@
                     <li id="schedule-item-shift-morning-174" class="schedule-item schedule-view-item" data-schedule-item="letras-oficina-de-elaboracao-de-prompts" data-source-schedule-item="letras-oficina-de-elaboracao-de-prompts" data-schedule-finalized="false">
                       <p class="schedule-item__course" data-schedule-item-course="">LETRAS</p>
                       <h5 class="schedule-item__title">Oficina de elaboração de prompts</h5>
-                      <p class="schedule-item__description">Elaboração de prompts e interpretação de respostas do chatbot Compreensão de como um prompt se estrutura; alucinações de IA; constribuições para o uso crítico da IA.</p>
+                      <p class="schedule-item__description">Elaboração de prompts e interpretação de respostas do chatbot.</p>
                       <p class="schedule-session"><time datetime="09:00">9h</time><span> às </span><time datetime="09:20">9h20</time><br><span class="schedule-session__location">Bloco B - Sala 110 CELUFFS</span></p>
                     </li>
                   </ul>
@@ -1110,9 +1004,29 @@
     </section>
   </main>
 
-  <script src="carousel.js" defer></script>
-  <script src="./complete-program/script.js" defer></script>
+  <!-- Interactive JavaScript logic -->
+  <script src="./script.js" defer></script>
 
+  <script>
+    // Demo helpers: Theme Toggle & Expand All
+    const root = document.documentElement;
+    const btnTheme = document.getElementById("btn-toggle-theme");
+    const btnExpand = document.getElementById("btn-expand-all");
+
+    btnTheme?.addEventListener("click", () => {
+      const current = root.getAttribute("data-theme");
+      const next = current === "high-contrast" ? "standard" : "high-contrast";
+      root.setAttribute("data-theme", next);
+      btnTheme.textContent = next === "high-contrast" ? "Tema Padrão" : "Alto Contraste";
+    });
+
+    let allExpanded = false;
+    btnExpand?.addEventListener("click", () => {
+      const detailsList = document.querySelectorAll("#complete-program details");
+      allExpanded = !allExpanded;
+      detailsList.forEach(d => d.open = allExpanded);
+      btnExpand.textContent = allExpanded ? "Recolher Tudo" : "Expandir Tudo";
+    });
+  </script>
 </body>
-
 </html>
