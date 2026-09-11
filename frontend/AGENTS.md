@@ -5,10 +5,9 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 
 ## Comandos de desenvolvimento
 
-- `py -m http.server 4173 --directory frontend` — serve a página localmente; abra
-  `http://localhost:4173/`.
-- `python -m http.server 4173 --directory frontend` — alternativa quando `py` não estiver
-  disponível.
+- `py -m http.server 4173 --directory ..` — serve o repositório para que o frontend consiga ler
+  `backend/db/schedule.json`; abra `http://localhost:4173/frontend/`.
+- `python -m http.server 4173 --directory ..` — alternativa quando `py` não estiver disponível.
 - Não há etapa de build nem gerenciador de dependências no frontend legado; teste os arquivos
   estáticos diretamente no navegador.
 
@@ -21,7 +20,8 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 - Mantenha os assets relativos à página. Não renomeie arquivos em `assets/` sem atualizar todos
   os caminhos que dependem dos nomes originais.
 - Os arquivos servidos pela página ficam em `static/`: CSS em `static/css/`, JavaScript em
-  `static/js/`, dados em `static/data/` e assets em `static/assets/`.
+  `static/js/` e assets em `static/assets/`. As fontes de dados são os JSONs do backend em
+  `backend/db/`: `schedule.json`, `knowledge_axes.json` e `locations.json`.
 
 ## Armadilhas e pontos de atenção
 
@@ -43,8 +43,8 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 
 - A versão-base documentada aqui contém conteúdo estático no HTML. Dados dinâmicos ou integração
   com a API exigem manter a página utilizável quando a rede falhar.
-- A agenda completa usa os dados compartilhados em `static/data/schedule-data.json` e os scripts em
-  `static/js/`; não misture seus tokens ou contratos com a home legada sem atualizar `DESIGN.md`.
+- A agenda completa lê diretamente `backend/db/schedule.json`; o formato e os IDs definidos pelo
+  backend ditam o funcionamento do frontend. Não crie uma cópia local da agenda em `frontend`.
 
 ## Validação
 

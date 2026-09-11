@@ -6,20 +6,22 @@ carrossel responsivo.
 
 ## Executar localmente
 
-Na raiz do repositório:
+Na pasta `frontend/`:
 
 ```powershell
-py -m http.server 4173 --directory frontend
+py -m http.server 4173 --directory ..
 ```
 
-Abra <http://localhost:4173/>. Se `py` não estiver disponível, use:
+Abra <http://localhost:4173/frontend/>. Se `py` não estiver disponível, use:
 
 ```powershell
-python -m http.server 4173 --directory frontend
+python -m http.server 4173 --directory ..
 ```
 
 Não há `package.json`, bundler ou dependências de frontend nessa versão; o navegador carrega
-`index.html`, `static/css/main.css`, `static/css/schedule.css`, `static/js/carousel.js`, `static/js/schedule.js` e os assets relativos diretamente.
+`index.html`, `static/css/main.css`, `static/css/schedule.css`, `static/js/carousel.js`, `static/js/schedule.js` e os assets relativos diretamente. A programação é lida de
+`backend/db/schedule.json`, `backend/db/knowledge_axes.json` e `backend/db/locations.json`, que são
+as fontes de verdade do backend.
 
 ## Organização
 
@@ -28,7 +30,6 @@ Não há `package.json`, bundler ou dependências de frontend nessa versão; o n
 | `index.html` | Estrutura semântica da home e conteúdo dos cartões |
 | `static/css/` | Folhas de estilo da página |
 | `static/js/` | Scripts e módulos JavaScript |
-| `static/data/` | Dados compartilhados em JSON |
 | `static/assets/images/` | Imagens usadas pela página |
 | `static/assets/documents/` | PDFs e materiais de referência |
 | `archive/legacy/` | Backups antigos, fora do carregamento da aplicação |
@@ -57,8 +58,10 @@ no código.
 
 ## Evolução da branch
 
-A programação completa é renderizada pela própria home e usa o script `static/js/schedule.js` e os
-dados compartilhados em `static/data/schedule-data.json`.
+A programação completa é renderizada pela própria home e usa o script `static/js/schedule.js` apenas
+para lógica de interação e transformação. Os dados são lidos diretamente de `backend/db/`: agenda,
+eixos de conhecimento e locais. O formato do backend dita o contrato de funcionamento do frontend;
+não replique dados de negócio dentro dos arquivos JavaScript.
 
 ## Referências técnicas
 
