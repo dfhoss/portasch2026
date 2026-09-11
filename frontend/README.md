@@ -57,3 +57,16 @@ no código.
 Commits posteriores podem adicionar áreas como `complete-program/`. Esses pacotes têm seus próprios
 documentos e contratos; preserve a separação até que a home e o componente sejam integrados
 intencionalmente.
+
+## Referências técnicas
+
+Para decisões de UI, consulte a seção [Referências para implementação](./DESIGN.md#referências-para-implementação)
+no `DESIGN.md`. Ela reúne as referências usadas pelo backend para tipografia, botões, estados,
+layout, overflow, tokens CSS e acessibilidade visual:
+
+- Material Design 3, Fluent 2, Carbon e GOV.UK para padrões de componentes e hierarquia;
+- W3C e Design Tokens Community Group para propriedades personalizadas e tokens;
+- MDN para `var()`, Flexbox e `overflow`.
+
+Antes de introduzir um novo padrão visual, verifique primeiro se ele pode ser expresso pelos
+tokens e regras já documentados no `DESIGN.md`.

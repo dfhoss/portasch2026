@@ -104,3 +104,31 @@ quanto o limite do índice.
 - Estados “AO VIVO” e “EM BREVE” devem aparecer como texto, nunca somente como cor.
 - Ao adicionar animações, inclua uma regra para `@media (prefers-reduced-motion: reduce)` que
   remova pulso e transições não essenciais.
+
+## Referências para implementação
+
+Use estas referências quando uma alteração exigir uma decisão de interação, layout ou token. Elas
+orientam a implementação; não substituem os contratos específicos deste documento.
+
+- [Material Design 3 — tipografia](https://m3.material.io/styles/typography/overview) — papéis,
+  escala e hierarquia de texto.
+- [Material Design 3 — botões](https://m3.material.io/components/buttons) — hierarquia e estados
+  de ações.
+- [Material Design 3 — estados](https://m3.material.io/foundations/interaction/states/overview) —
+  foco, hover, pressionado e desabilitado.
+- [Fluent 2 — tipografia](https://fluent2.microsoft.design/typography) — rampa tipográfica e
+  pesos para interfaces responsivas.
+- [Carbon — ações comuns](https://carbondesignsystem.com/patterns/common-actions/) — escolha e
+  agrupamento de ações em componentes.
+- [GOV.UK — botões](https://design-system.service.gov.uk/components/button/) — conteúdo,
+  tamanho e comportamento de botões acessíveis.
+- [GOV.UK — títulos](https://design-system.service.gov.uk/styles/headings/) — níveis semânticos e
+  ordem de títulos.
+- [W3C — propriedades personalizadas CSS](https://www.w3.org/TR/css-variables-1/) e
+  [Design Tokens Community Group](https://www.designtokens.org/tr/drafts/format/) — nomes,
+  escopo e interoperabilidade dos tokens.
+- [MDN — propriedades personalizadas CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties)
+  — declaração, fallback e uso de `var()`.
+- [MDN — Flexbox](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox)
+  e [`overflow`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/overflow)
+  — alinhamento e contenção do carrossel.
