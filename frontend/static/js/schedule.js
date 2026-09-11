@@ -423,9 +423,9 @@ function initCompleteProgram() {
   // Background fetch to refresh if server has updated schedule
   (async () => {
     try {
-      let dataUrl = "./complete-program/schedule-data.json";
+      let dataUrl = "./static/data/schedule-data.json";
       if (typeof document !== "undefined" && document.currentScript && document.currentScript.src) {
-        dataUrl = new URL("./schedule-data.json", document.currentScript.src).href;
+        dataUrl = new URL("../data/schedule-data.json", document.currentScript.src).href;
       }
       const res = await fetch(dataUrl);
       if (res.ok) {
