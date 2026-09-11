@@ -19,16 +19,20 @@ python -m http.server 4173 --directory frontend
 ```
 
 Não há `package.json`, bundler ou dependências de frontend nessa versão; o navegador carrega
-`index.html`, `styles.css`, `carousel.js` e os assets relativos diretamente.
+`index.html`, `static/css/main.css`, `static/js/carousel.js` e os assets relativos diretamente.
 
 ## Organização
 
 | Caminho | Responsabilidade |
 | --- | --- |
 | `index.html` | Estrutura semântica da home e conteúdo dos cartões |
-| `styles.css` | Identidade visual, layout, breakpoints e estados |
-| `carousel.js` | Navegação, autoplay, indicadores, teclado, swipe e resize |
-| `assets/` | Imagens e materiais visuais da página |
+| `static/css/` | Folhas de estilo da página |
+| `static/js/` | Scripts e módulos JavaScript |
+| `static/data/` | Dados compartilhados em JSON |
+| `static/assets/images/` | Imagens usadas pela página |
+| `static/assets/documents/` | PDFs e materiais de referência |
+| `static/complete-program/` | Componente completo e reutilizável |
+| `archive/legacy/` | Backups antigos, fora do carregamento da aplicação |
 | `DESIGN.md` | Tokens e regras visuais/acessíveis |
 | `AGENTS.md` | Regras operacionais para manutenção por agentes |
 
@@ -54,7 +58,7 @@ no código.
 
 ## Evolução da branch
 
-Commits posteriores podem adicionar áreas como `complete-program/`. Esses pacotes têm seus próprios
+Commits posteriores podem adicionar áreas como `static/complete-program/`. Esses pacotes têm seus próprios
 documentos e contratos; preserve a separação até que a home e o componente sejam integrados
 intencionalmente.
 

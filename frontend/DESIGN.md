@@ -6,7 +6,7 @@ Este documento descreve a identidade visual da home estática do UFFS de Portas 
 base `0e6d610`. A interface usa a linguagem visual do projeto Contraste: azul-violeta intenso,
 verde-limão, magenta, tipografia pesada e cartões claros para apresentar atividades em andamento.
 
-O documento é a referência para alterações em `index.html` e `styles.css`. A implementação deve
+O documento é a referência para alterações em `index.html` e `static/css/main.css`. A implementação deve
 preservar a hierarquia e os contratos de interação, mas pode substituir valores literais por
 tokens CSS ao evoluir a folha de estilos.
 

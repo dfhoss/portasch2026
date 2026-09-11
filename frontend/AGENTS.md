@@ -20,6 +20,9 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
   apenas de cor, hover ou movimento para comunicar estado.
 - Mantenha os assets relativos à página. Não renomeie arquivos em `assets/` sem atualizar todos
   os caminhos que dependem dos nomes originais.
+- Os arquivos servidos pela página ficam em `static/`: CSS em `static/css/`, JavaScript em
+  `static/js/`, dados em `static/data/`, assets em `static/assets/` e componentes em
+  `static/complete-program/`.
 
 ## Armadilhas e pontos de atenção
 
@@ -42,7 +45,7 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 - A versão-base documentada aqui contém conteúdo estático no HTML. Dados dinâmicos ou integração
   com a API exigem manter a página utilizável quando a rede falhar.
 - A agenda completa adicionada em commits posteriores possui documentação própria em
-  `complete-program/`; não misture seus tokens ou contratos com a home legada sem atualizar
+  `static/complete-program/`; não misture seus tokens ou contratos com a home legada sem atualizar
   `DESIGN.md`.
 
 ## Validação
