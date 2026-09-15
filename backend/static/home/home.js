@@ -1171,7 +1171,16 @@ function renderParticipants(searchQuery = "") {
   editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Participantes</h2><p>${state.participants.length} cadastrado(s)</p></div><button type="button" class="primary-action" data-action="add-participant">Adicionar participante</button></header><input id="participant-search" type="search" aria-label="Buscar participantes" placeholder="Buscar nome, e-mail ou instituição" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="participants-list">${visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`}</div>`;
 }
 
-function openAdminCatalogEditor(type, record, opener) {
+async function openAdminCatalogEditor(type, record, opener) {
+  if (type === "participant" && record && !/^\d{11}$/.test(String(record.cpf || ""))) {
+    let response;
+    try { response = await apiFetch(`/participants/${encodeURIComponent(record.id)}`); }
+    catch (error) { if (error.message !== "unauthorized") announce("Não foi possível carregar o cadastro."); return; }
+    if (!response.ok) { announce("Não foi possível carregar o cadastro."); return; }
+    try { record = await response.json(); }
+    catch (_error) { announce("Não foi possível carregar o cadastro."); return; }
+    if (!record || !/^\d{11}$/.test(String(record.cpf || ""))) { announce("Não foi possível carregar o cadastro."); return; }
+  }
   modalContext = {type, record};
   const form = type === "institution"
     ? `<label for="institution-name">Nome</label><input id="institution-name" name="name" required value="${escapeHtml(record?.name)}"><label for="institution-city">Cidade</label><input id="institution-city" name="city" required value="${escapeHtml(record?.city)}"><label for="institution-state">Estado</label><input id="institution-state" name="state" required value="${escapeHtml(record?.state)}"><label for="institution-description">Descrição</label><textarea id="institution-description" name="description">${escapeHtml(record?.description)}</textarea>`

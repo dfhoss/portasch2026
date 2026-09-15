@@ -33,6 +33,14 @@ class ParticipantResponse(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class ParticipantListResponse(ParticipantResponse):
+    cpf: str
+
+
+def _mask_cpf(cpf: str) -> str:
+    return f"***.***.***-{cpf[-2:]}"
+
+
 def get_participant_repository() -> ParticipantRepository:
     return ParticipantRepository(get_participants_path(), get_institutions_path())
 
@@ -58,9 +66,9 @@ def _error(code: int, message: str) -> HTTPException:
     return HTTPException(code, detail={"message": message, "references": []})
 
 
-@router.get("", response_model=list[ParticipantResponse])
+@router.get("", response_model=list[ParticipantListResponse])
 def list_participants(_: CurrentTokenData, repository: Repo):
-    return _run(repository.list)
+    return _run(lambda: [{**item, "cpf": _mask_cpf(item["cpf"])} for item in repository.list()])
 
 
 @router.get("/{participant_id}", response_model=ParticipantResponse)

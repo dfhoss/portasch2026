@@ -214,7 +214,8 @@ test("catalog views render counts and empty states", () => {
 - [x] `science-fair` existe e está com `groups: []`.
 - [x] As 11 escolas estão em `backend/db/institutions.json` como Chapecó/SC.
 - [x] CRUD autenticado funciona para instituições e participantes.
-- [x] CPF é válido, normalizado, único e mascarado no painel.
+- [x] CPF é válido, normalizado, único e mascarado no painel; a listagem da API também retorna
+  somente a máscara, enquanto o detalhe autenticado preserva o valor para edição.
 - [x] Instituição vinculada não pode ser excluída.
 - [x] A página administrativa é acessível e responsiva.
 - [x] A retenção até `31/07/2027` continua documentada em `TASKS.md`; este plano não apaga dados automaticamente.

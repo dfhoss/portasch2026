@@ -194,8 +194,9 @@ autenticação e do carregamento dos catálogos:
   ser embutido no HTML inicial.
 - Formulários usam diálogos acessíveis, labels explícitos, foco visível, mensagens de
   sucesso/erro e confirmação para exclusões.
-- O CPF é exibido mascarado na lista e enviado somente quando necessário para criar ou
-  editar o registro.
+- O CPF é exibido mascarado na lista e o contrato de `GET /participants` contém apenas essa
+  máscara; o detalhe autenticado (`GET /participants/{id}`) e as respostas de escrita podem
+  conter o CPF normalizado somente para preencher ou concluir a edição.
 - A página usa o token JWT já armazenado pela sessão administrativa e não embute catálogos
   nem dados pessoais no HTML inicial.
 - Instituições referenciadas por participantes exibem o conflito retornado pela API e não
