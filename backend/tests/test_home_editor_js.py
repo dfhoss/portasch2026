@@ -77,6 +77,7 @@ const context = {
   CSS: {escape: (value) => value},
   FormData: class FormData {
     constructor() {}
+    entries() { return []; }
     get() { return null; }
   },
 };
@@ -87,7 +88,7 @@ const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, renderKnowledgeAxes, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
-  openGroupEditor, handleEditorClick, showApiError, logout, participantRow
+  openGroupEditor, handleEditorClick, showApiError, logout, participantRow, renderInstitutions, renderParticipants, saveAdminCatalog, deleteAdminCatalog
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
@@ -149,6 +150,33 @@ def test_participant_list_masks_cpf():
         const html = api.participantRow({name: "Aluno", cpf: "52998224725", institutionId: "institution-001", email: "a@e.org"});
         assert.match(html, /\\*\\*\\*\\.\\*\\*\\*\\.\\*\\*\\*-25/);
         assert.equal(html.includes("52998224725"), false);
+        """
+    )
+
+
+def test_catalog_search_restores_focus_and_cursor_for_both_new_fields():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i", name: "Escola", city: "C", state: "SC"}];
+        api.state.participants = [];
+        for (const id of ["institution-search", "participant-search"]) {
+          api[id === "institution-search" ? "renderInstitutions" : "renderParticipants"]();
+          const input = elementFor(`#${id}`); input.value = "es"; input.selectionStart = 1; input.selectionEnd = 1;
+          elementFor("#editor-content").dispatchEvent({type: "input", target: input});
+          assert.equal(elementFor(`#${id}`).selectionStart, 1);
+        }
+        """
+    )
+
+
+def test_catalog_network_failure_preserves_state_and_announces_safe_message():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i", name: "Escola"}];
+        context.fetch = async () => { throw new Error("network secret"); };
+        await api.saveAdminCatalog("institution", elementFor("#form"));
+        assert.equal(api.state.institutions.length, 1);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
         """
     )
 

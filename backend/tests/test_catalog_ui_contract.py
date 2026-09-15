@@ -57,6 +57,12 @@ def test_admin_catalog_script_exposes_institution_and_participant_views(client):
     assert "Nenhum participante encontrado" in script
 
 
+def test_catalog_markup_escapes_participant_institution_id(client):
+    script = client.get("/home/static/home.js").text
+    assert 'option value="${escapeHtml(item.id)}"' in script
+    assert "renderCatalogLoading" in script
+
+
 def test_more_action_icon_is_solid_without_changing_other_icons():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")
@@ -284,7 +290,7 @@ def test_location_search_restores_focus_and_selection_after_filter_render():
     )[0]
     assert "const selectionStart = searchInput.selectionStart;" in input_handler
     assert "const selectionEnd = searchInput.selectionEnd;" in input_handler
-    assert 'document.querySelector("#location-search")' in input_handler
+    assert "document.querySelector(`#${searchInput.id}`)" in input_handler
     assert "nextSearchInput?.focus();" in input_handler
     assert "nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);" in input_handler
 
