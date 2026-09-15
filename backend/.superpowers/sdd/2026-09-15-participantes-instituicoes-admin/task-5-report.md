@@ -113,3 +113,35 @@ Saídas reais desta rodada:
 Arquivos desta rodada: `tests/test_home_editor_js.py` e este relatório. Foram preservados
 `db/locations.json`, `docs/...` e `../ideas.md`; não houve alteração de dados, credenciais ou
 implementação visual.
+
+## Rodada 5/5 — fechamento do parecer
+
+Fechei os três achados abertos sem alterar produção ou os arquivos protegidos. Os testes Node
+agora acionam efetivamente `handleEditorClick` com `data-action="retry-admin-data"`: instituições
+simulam falha inicial e depois resposta 2xx, e participantes repetem a mesma sequência, verificando
+estado e HTML de sucesso após o clique. Cada entidade também tem um caso de busca que filtra o
+resultado e comprova foco, `selectionStart` e `selectionEnd`; o harness passou a modelar
+`setSelectionRange` e IDs pós-render corretamente.
+
+Foi adicionado `test_institutions_and_participants_crud_and_reference_conflict` ao E2E. No
+navegador autenticado e com a fixture temporária, ele lista/conta, pesquisa, cria/edita/exclui
+instituição, cria/edita/exclui participante, verifica CPF mascarado sem o CPF completo e tenta
+excluir a instituição vinculada, confirmando a mensagem de conflito 409 e o registro preservado.
+
+Evidências reais da rodada:
+
+- RED: a primeira execução dos quatro casos novos de seleção revelou que o fake DOM não
+  preservava o elemento reconsultado nem implementava `setSelectionRange`; a correção ficou
+  restrita ao harness.
+- GREEN focado: 4 passed nos dois retries e nas duas buscas, com `--basetemp` local.
+- Suíte focada: `uv run pytest tests/test_home_page.py tests/test_home_editor_js.py
+  tests/test_catalog_ui_contract.py -v --basetemp .pytest-tmp-round5-focused` — **105 passed**.
+- E2E específico do fluxo novo — **1 passed**; E2E completo com `--basetemp` local — **19 passed**.
+- `uv run ruff check .` — **All checks passed**; `uv run ty check` — **All checks passed**;
+  `git diff --check` — exit 0.
+- `uv run ruff format --check .` continua falhando somente nos arquivos fora do escopo/preexistentes
+  (`clients/locations.py`, plano/documentação e testes que já tinham divergências); eles não foram
+  reformata­dos.
+
+Arquivos alterados nesta rodada: `tests/test_home_editor_js.py`, `tests/e2e/test_home_panel.py` e
+este relatório. `db/locations.json`, `docs/...` e `../ideas.md` permaneceram preservados.
