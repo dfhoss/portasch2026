@@ -51,3 +51,16 @@ A suíte E2E completa não teve encerramento limpo reproduzível devido à limpe
 concorrente/externa do diretório `--basetemp`; o teste E2E específico do fluxo passou.
 Os arquivos preexistentes `db/locations.json` e `../ideas.md` foram preservados e
 não fazem parte da correção.
+
+## Revisão adicional: máscara canônica
+
+Uma revisão do diff identificou que a máscara já produzida pela API (`***.***.***-25`)
+era passada novamente por `maskCpf`, que remove pontuação e acabava exibindo `CPF não
+informado`. Foi adicionado um teste RED específico para `participantRow` com a máscara
+canônica; ele falhou antes da alteração. `maskCpf` agora reconhece somente o formato
+canônico mascarado e o devolve sem alterações, mantendo a máscara de CPFs completos e
+o fallback seguro para valores inválidos.
+
+Validação adicional: `59 passed` nos testes focados de painel/API, `ruff check`, `ty check`
+e `git diff --check` passaram. `db/locations.json` e `../ideas.md` continuaram fora do
+commit.
