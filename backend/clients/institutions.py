@@ -7,6 +7,7 @@ from typing import Any
 from clients.json_store import (
     InvalidResourceNameError,
     PersistenceError,
+    ResourceInUseError,
     ResourceNotFoundError,
     atomic_write_json,
     clean_resource_name,
@@ -25,8 +26,9 @@ def get_institutions_path() -> Path:
 
 
 class InstitutionRepository:
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, participants_path: Path | None = None) -> None:
         self.path = path
+        self.participants_path = participants_path
 
     def list(self) -> builtins.list[dict[str, Any]]:
         return deepcopy(self._load_catalog()["institutions"])
@@ -70,6 +72,24 @@ class InstitutionRepository:
     def delete(self, institution_id: str) -> None:
         catalog = self._load_catalog()
         self._find(catalog["institutions"], institution_id)
+        if self.participants_path is not None:
+            try:
+                participants = read_json(self.participants_path)
+                if set(participants) != {"nextId", "participants"} or not isinstance(
+                    participants["participants"], list
+                ):
+                    raise ValueError
+            except (OSError, ValueError) as error:
+                raise PersistenceError(
+                    "Não foi possível ler o catálogo de participantes"
+                ) from error
+            references = [
+                item["id"]
+                for item in participants["participants"]
+                if item.get("institutionId") == institution_id
+            ]
+            if references:
+                raise ResourceInUseError("Instituição", institution_id, references)
         catalog["institutions"] = [
             item for item in catalog["institutions"] if item["id"] != institution_id
         ]

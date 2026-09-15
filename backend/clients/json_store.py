@@ -20,6 +20,10 @@ class DuplicateResourceNameError(ValueError):
         self.name = name
 
 
+class DuplicateParticipantCpfError(ValueError):
+    pass
+
+
 class InvalidResourceNameError(ValueError):
     def __init__(self, resource: str) -> None:
         super().__init__(f"O nome de {resource} não pode ficar vazio")
