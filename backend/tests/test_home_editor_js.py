@@ -155,6 +155,16 @@ def test_participant_list_masks_cpf():
     )
 
 
+def test_participant_list_preserves_canonical_masked_cpf():
+    run_node_case(
+        """
+        const html = api.participantRow({name: "Aluno", cpf: "***.***.***-25", institutionId: "institution-001", email: "a@e.org"});
+        assert.match(html, /\*\*\*\.\*\*\*\.\*\*\*-25/);
+        assert.equal(html.includes("CPF não informado"), false);
+        """
+    )
+
+
 def test_catalog_search_restores_focus_and_cursor_for_both_new_fields():
     run_node_case(
         """

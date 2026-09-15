@@ -1147,7 +1147,9 @@ function catalogReferenceValue(value) {
 }
 
 function maskCpf(cpf) {
-  const digits = String(cpf || "").replace(/\D/g, "");
+  const value = String(cpf || "");
+  if (/^\*{3}\.\*{3}\.\*{3}-\d{2}$/.test(value)) return value;
+  const digits = value.replace(/\D/g, "");
   return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : "CPF não informado";
 }
 
