@@ -2,8 +2,8 @@
 
 ## Objetivo
 
-Adicionar à API administrativa o cadastro de participantes do evento e o catálogo
-independente de instituições de ensino, sem introduzir banco de dados ou interface web.
+Adicionar à API e ao painel administrativo o cadastro de participantes do evento e o
+catálogo independente de instituições de ensino, sem introduzir banco de dados.
 Todos os endpoints exigem um JWT válido e seguem as fronteiras atuais de rotas,
 modelos Pydantic e clients de persistência JSON.
 
@@ -17,13 +17,13 @@ modelos Pydantic e clients de persistência JSON.
 - Referência de cada participante a uma instituição por `institutionId`.
 - Validação de nomes, campos obrigatórios, referências e conflitos de exclusão.
 - Testes de contrato HTTP, autenticação, persistência e integridade entre recursos.
+- Página administrativa protegida para o CRUD de instituições e participantes.
 
 ### Fora de escopo
 
 - Cadastro público sem autenticação.
 - Login, perfis ou permissões adicionais além do JWT existente.
 - Inscrição em atividades, presença, certificados ou dados de turma.
-- Interface no painel administrativo.
 - Cascata ou desvinculação automática ao excluir uma instituição.
 
 ## Recursos e contratos
@@ -41,6 +41,26 @@ Recurso persistido em `institutions.json`, com a forma:
   "institutions": []
 }
 ```
+
+O catálogo inicial deve ser criado a partir das escolas que estavam no grupo
+`participating-teams` da seção `science-fair` de `schedule.json`. Todas serão cadastradas
+com `state: "SC"` e `city: "Chapecó"`, preservando os nomes originais:
+
+- Eeb Candido Ramos
+- EEB Prof Lourdes A. S. Lago
+- EEB Olga Fin Travi
+- EEB Professora Zitta Flach
+- EEB Cordilheira Alta
+- Colégio Trilíngue Inovação
+- EEB BELERMINO VICTOR DALLA VECCHIA
+- E.E.B. Jorge Lacerda
+- Eeb Prof Manuel De Freitas Trancoso
+- Eeb Cedrense
+- EEB RuI Barbosa
+
+O grupo `participating-teams` será removido de `schedule.json`, mas a seção
+`science-fair` / “Programação Feira de Ciências” permanecerá como seção vazia para
+preservar a organização da programação.
 
 Cada instituição possui:
 
@@ -153,6 +173,24 @@ Rotas não acessam arquivos diretamente. O router valida o corpo e a autenticaç
 client aplica regras de domínio e persistência, e os modelos definem os contratos públicos
 de entrada e saída.
 
+## Página administrativa
+
+A página fica no painel autenticado servido em `/home`, seguindo os padrões visuais e de
+acessibilidade de `backend/DESIGN.md`. Ela adiciona as seções “Instituições” e
+“Participantes” à navegação existente.
+
+- “Instituições” lista nome, cidade e estado, com busca, criação, edição e exclusão.
+- “Participantes” lista nome, CPF mascarado, e-mail e instituição, com busca, criação,
+  edição e exclusão.
+- Formulários usam diálogos acessíveis, labels explícitos, foco visível, mensagens de
+  sucesso/erro e confirmação para exclusões.
+- O CPF é exibido mascarado na lista e enviado somente quando necessário para criar ou
+  editar o registro.
+- A página usa o token JWT já armazenado pela sessão administrativa e não embute catálogos
+  nem dados pessoais no HTML inicial.
+- Instituições referenciadas por participantes exibem o conflito retornado pela API e não
+  podem ser excluídas.
+
 ## Critérios de aceitação
 
 - Requisições sem ou com JWT inválido são rejeitadas antes de acessar os catálogos.
@@ -162,6 +200,10 @@ de entrada e saída.
 - Instituição vinculada não pode ser excluída.
 - Nomes equivalentes de instituições são rejeitados.
 - CPF ausente, inválido ou duplicado é rejeitado.
+- O grupo de equipes participantes não existe mais no `schedule.json`, e a seção da Feira
+  de Ciências continua presente sem esse grupo.
+- O painel autenticado permite gerenciar instituições e participantes sem expor CPF completo
+  na listagem.
 - Falhas de leitura, validação estrutural ou escrita não vazam detalhes de filesystem na
   resposta HTTP.
 - A suíte existente continua passando sem alterar os arquivos de dados reais.
