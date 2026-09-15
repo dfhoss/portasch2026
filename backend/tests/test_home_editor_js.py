@@ -213,6 +213,111 @@ def test_catalog_delete_conflict_unauthorized_and_network_keep_state():
     )
 
 
+def test_institution_catalog_has_independent_states_and_async_retry():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola", city: "C", state: "SC"}];
+        api.renderInstitutions();
+        assert.match(elementFor("#editor-content").innerHTML, /1 cadastrada/);
+        api.state.institutions = []; api.renderInstitutions();
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição cadastrada/);
+        api.renderInstitutions("inexistente");
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição encontrada/);
+
+        let release;
+        context.fetch = () => new Promise((resolve) => { release = resolve; });
+        api.renderCatalogLoading();
+        const loading = api.loadAdminData();
+        assert.match(elementFor("#editor-content").innerHTML, /Carregando catálogo/);
+        release({ok: false, status: 503, json: async () => ({})});
+        await loading;
+        assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+
+        const responses = [
+          {id: "i-2", name: "Nova", city: "C", state: "SC"},
+        ];
+        context.fetch = async (path) => path === "/institutions"
+          ? {ok: true, status: 200, json: async () => responses}
+          : {ok: true, status: 200, json: async () => []};
+        await api.loadAdminData();
+        assert.equal(api.state.institutions[0].name, "Nova");
+        """
+    )
+
+
+def test_participant_catalog_has_independent_states_and_async_retry():
+    run_node_case(
+        """
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: null}];
+        api.renderParticipants();
+        assert.match(elementFor("#editor-content").innerHTML, /1 cadastrado/);
+        api.state.participants = []; api.renderParticipants();
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhum participante cadastrado/);
+        api.renderParticipants("inexistente");
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhum participante encontrado/);
+
+        let release;
+        context.fetch = () => new Promise((resolve) => { release = resolve; });
+        api.renderCatalogLoading();
+        const loading = api.loadAdminData();
+        assert.match(elementFor("#editor-content").innerHTML, /Carregando catálogo/);
+        release({ok: false, status: 503, json: async () => ({})});
+        await loading;
+        assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+        """
+    )
+
+
+def test_participant_edit_updates_rendered_state_after_success_and_search_selection():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola", city: "C", state: "SC"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"}];
+        api.renderParticipants();
+        const search = elementFor("#participant-search"); search.value = "ana"; search.selectionStart = 1; search.selectionEnd = 3;
+        elementFor("#editor-content").dispatchEvent({type: "input", target: search});
+        assert.equal(elementFor("#participant-search").selectionStart, 1);
+        assert.equal(elementFor("#participant-search").selectionEnd, 3);
+        assert.match(elementFor("#editor-content").innerHTML, /Ana/);
+        api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
+        context.FormData = class { entries() { return [["name", "Bea"], ["cpf", "529.982.247-25"], ["email", "b@e.org"], ["institutionId", "i-1"]]; } };
+        context.fetch = async (_path, options) => {
+          assert.equal(JSON.parse(options.body).cpf, "52998224725");
+          return {ok: true, status: 200, json: async () => ({id: "p-1", name: "Bea", cpf: "52998224725", email: "b@e.org", institutionId: "i-1"})};
+        };
+        await api.saveAdminCatalog("participant", elementFor("#form"));
+        assert.equal(api.state.participants[0].name, "Bea");
+        assert.match(elementFor("#editor-content").innerHTML, /Bea/);
+        assert.equal(elementFor("#editor-content").innerHTML.includes("52998224725"), false);
+        """
+    )
+
+
+def test_catalog_save_and_delete_failures_preserve_both_entities_safely():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725"}];
+        context.FormData = class { entries() { return [["name", "Atual"], ["cpf", "52998224725"], ["email", "a@e.org"], ["institutionId", "i-1"]]; } };
+        for (const type of ["institution", "participant"]) {
+          const list = type === "institution" ? api.state.institutions : api.state.participants;
+          api.openAdminCatalogEditor(type, list[0], elementFor("#form"));
+          context.fetch = async () => ({ok: false, status: 401, json: async () => ({detail: "segredo"})});
+          await api.saveAdminCatalog(type, elementFor("#form"));
+          assert.equal(list.length, 1); assert.equal(list[0].name, type === "institution" ? "Escola" : "Ana");
+          context.fetch = async () => { throw new Error("rede-secreta"); };
+          await api.saveAdminCatalog(type, elementFor("#form"));
+          assert.equal(list.length, 1); assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+          context.fetch = async () => ({ok: false, status: 401, json: async () => ({})});
+          await api.deleteAdminCatalog(type, list[0]); assert.equal(list.length, 1);
+          context.fetch = async () => { throw new Error("rede-secreta"); };
+          await api.deleteAdminCatalog(type, list[0]); assert.equal(list.length, 1);
+          assert.match(elementFor("#editor-message").textContent, /Não foi possível excluir/);
+        }
+        """
+    )
+
+
 def test_schedule_creation_actions_are_grouped_by_context():
     run_node_case(
         """

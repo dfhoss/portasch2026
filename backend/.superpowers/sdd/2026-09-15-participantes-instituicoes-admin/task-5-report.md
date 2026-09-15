@@ -73,3 +73,43 @@ Resultados reais: testes focados **100 passed**; `tests/e2e` **18 passed**; `ruf
 `ty check` e `git diff --check` passaram. `ruff format --check .` permanece limitado por
 arquivos preexistentes fora do escopo (`clients/locations.py`, snippets de docs/plano e testes
 não alterados), que não foram reformatados.
+
+## Rodada de correção 4/5
+
+O parecer apontou cobertura operacional assimétrica. Mantive a implementação existente e
+acrescentei quatro testes Node executáveis, separados por entidade e por responsabilidade:
+
+- `test_institution_catalog_has_independent_states_and_async_retry`: instituições com
+  contagem/dados, vazio, sem resultados e transição controlada loading → erro/retry → nova
+  resposta 2xx, confirmando o novo estado carregado.
+- `test_participant_catalog_has_independent_states_and_async_retry`: a mesma sequência
+  exclusivamente para participantes.
+- `test_participant_edit_updates_rendered_state_after_success_and_search_selection`: filtro
+  efetivo de participantes, preservação de foco e de `selectionStart`/`selectionEnd`, edição
+  real após 2xx, atualização de state/HTML e CPF normalizado no payload mas ausente da linha.
+- `test_catalog_save_and_delete_failures_preserve_both_entities_safely`: para cada uma das
+  duas entidades, save e delete com 401 e falha de rede; o registro permanece e o feedback é
+  seguro. O teste anterior continua cobrindo 409 de instituição vinculada.
+
+RED/GREEN: a primeira execução dos testes novos encontrou apenas limitações do fake DOM e do
+fake FormData; após ajustar o harness para observar o container renderizado e fornecer campos
+válidos, os quatro casos passaram sem alteração de produção.
+
+Saídas reais desta rodada:
+
+- `uv run pytest tests/test_home_page.py tests/test_home_editor_js.py tests/test_catalog_ui_contract.py -v`
+  — **104 passed** nos casos; o processo exibiu ao final o `PermissionError [WinError 5]`
+  conhecido do cleanup automático de `pytest-current` no Windows.
+- `uv run pytest tests/e2e -v --basetemp .pytest-tmp-round4-e2e` — **18 passed**, exit 0,
+  em 31,46s, com 1 warning de depreciação do Starlette/httpx.
+- `uv run ruff check .` — **All checks passed!**
+- `uv run ruff format --check .` — falha somente nos arquivos preexistentes fora do escopo:
+  `clients/locations.py`, o plano/documentação e `tests/test_catalog_ui_contract.py`/o
+  harness preexistente; nenhum deles foi reformatado.
+- `uv run ty check` — **All checks passed!**
+- `git diff --check` — exit 0, sem erros; apenas avisos normais de conversão LF/CRLF nos
+  arquivos já modificados.
+
+Arquivos desta rodada: `tests/test_home_editor_js.py` e este relatório. Foram preservados
+`db/locations.json`, `docs/...` e `../ideas.md`; não houve alteração de dados, credenciais ou
+implementação visual.
