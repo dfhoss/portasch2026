@@ -3,11 +3,14 @@ import json
 import pytest
 from clients.institutions import InstitutionRepository, get_institutions_path
 from clients.json_store import (
+    DuplicateParticipantCpfError,
     DuplicateResourceNameError,
     InvalidResourceNameError,
     PersistenceError,
+    ResourceInUseError,
     ResourceNotFoundError,
 )
+from clients.participants import ParticipantRepository, get_participants_path, normalize_cpf
 
 
 def test_catalogos_iniciais_contem_instituicoes_e_feira_de_ciencias(
@@ -171,3 +174,89 @@ def test_institution_repository_converts_filesystem_errors(tmp_path):
     path.mkdir()
     with pytest.raises(PersistenceError):
         repository.create("Escola", "SC", "Chapecó", None)
+
+
+@pytest.mark.parametrize("value", ["529.982.247-25", "52998224725"])
+def test_normalize_cpf_accepts_valid_values(value):
+    assert normalize_cpf(value) == "52998224725"
+
+
+@pytest.mark.parametrize("value", ["111.111.111-11", "123", "529.982.247-26"])
+def test_normalize_cpf_rejects_invalid_values(value):
+    with pytest.raises(ValueError):
+        normalize_cpf(value)
+
+
+def test_get_participants_path_reads_environment_each_call(monkeypatch, tmp_path):
+    first = tmp_path / "first.json"
+    second = tmp_path / "second.json"
+    monkeypatch.setenv("PARTICIPANTS_PATH", str(first))
+    assert get_participants_path() == first
+    monkeypatch.setenv("PARTICIPANTS_PATH", str(second))
+    assert get_participants_path() == second
+
+
+def test_participant_repository_crud_normalizes_and_returns_defensive_copies(tmp_path):
+    participants = tmp_path / "participants.json"
+    institutions = tmp_path / "institutions.json"
+    participants.write_text('{"nextId": 1, "participants": []}', encoding="utf-8")
+    institutions.write_text(
+        '{"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola", "state": "SC", "city": "Chapecó", "description": null}]}',
+        encoding="utf-8",
+    )
+    repository = ParticipantRepository(participants, institutions)
+
+    created = repository.create(
+        "  Ana  ", "529.982.247-25", "  ana@example.org  ", "institution-001"
+    )
+    assert created == {
+        "id": "participant-001",
+        "name": "Ana",
+        "cpf": "52998224725",
+        "email": "ana@example.org",
+        "institutionId": "institution-001",
+    }
+    created["name"] = "Alterada"
+    assert repository.get("participant-001")["name"] == "Ana"
+    updated = repository.update(
+        "participant-001", "Bia", "529982247-25", "bia@example.org", "institution-001"
+    )
+    assert updated["id"] == "participant-001"
+    repository.delete("participant-001")
+    assert repository.list() == []
+
+
+def test_participant_repository_rejects_duplicate_cpf_and_missing_institution(tmp_path):
+    participants = tmp_path / "participants.json"
+    institutions = tmp_path / "institutions.json"
+    participants.write_text(
+        '{"nextId": 2, "participants": [{"id": "participant-001", "name": "Ana", "cpf": "52998224725", "email": "ana@example.org", "institutionId": "institution-001"}]}',
+        encoding="utf-8",
+    )
+    institutions.write_text(
+        '{"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola", "state": "SC", "city": "Chapecó", "description": null}]}',
+        encoding="utf-8",
+    )
+    repository = ParticipantRepository(participants, institutions)
+    with pytest.raises(DuplicateParticipantCpfError):
+        repository.create("Bia", "529.982.247-25", "bia@example.org", "institution-001")
+    with pytest.raises(ResourceNotFoundError):
+        repository.create("Bia", "935.411.347-80", "bia@example.org", "institution-999")
+
+
+def test_institution_delete_is_blocked_by_participant_references(tmp_path):
+    institutions = tmp_path / "institutions.json"
+    participants = tmp_path / "participants.json"
+    institutions.write_text(
+        '{"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola", "state": "SC", "city": "Chapecó", "description": null}]}',
+        encoding="utf-8",
+    )
+    participants.write_text(
+        '{"nextId": 2, "participants": [{"id": "participant-001", "name": "Ana", "cpf": "52998224725", "email": "ana@example.org", "institutionId": "institution-001"}]}',
+        encoding="utf-8",
+    )
+    before = institutions.read_text(encoding="utf-8")
+    with pytest.raises(ResourceInUseError) as error:
+        InstitutionRepository(institutions, participants).delete("institution-001")
+    assert error.value.references == ["participant-001"]
+    assert institutions.read_text(encoding="utf-8") == before
