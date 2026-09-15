@@ -60,3 +60,16 @@ foram reformata­dos fora do escopo.
 ## Rodada de correção 2
 
 Removidas as cinco funções legacy mortas e acrescentado contrato de ausência delas. Testes focados: 98 passed. E2E: 18 passed. Ruff check, ty check e git diff --check passaram. O format check global continua limitado aos arquivos preexistentes fora do escopo, conforme registrado anteriormente.
+
+## Rodada de correção 3 (final)
+
+O harness Node passou a exportar renderizadores, estados e ações. O teste operacional comprova
+para instituições e participantes contagem/dados, vazio, sem resultados, loading/erro/retry,
+criação/edição/exclusão após 2xx, payload de CPF normalizado, máscara sem CPF completo na linha,
+409 de instituição vinculada, 401/rede preservando estado e busca com foco/cursor. Todas as
+funções legacy mortas foram removidas.
+
+Resultados reais: testes focados **100 passed**; `tests/e2e` **18 passed**; `ruff check .`,
+`ty check` e `git diff --check` passaram. `ruff format --check .` permanece limitado por
+arquivos preexistentes fora do escopo (`clients/locations.py`, snippets de docs/plano e testes
+não alterados), que não foram reformatados.

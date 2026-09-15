@@ -1205,7 +1205,13 @@ async function deleteAdminCatalog(type, record) {
   let response;
   try { response = await apiFetch(`/${resource}/${record.id}`, {method: "DELETE"}); }
   catch (error) { if (error.message === "unauthorized") return; announce("Não foi possível excluir o cadastro."); return; }
-  if (!response.ok) return showApiError(response, "Não foi possível excluir o cadastro.");
+  if (!response.ok) {
+    if (response.status === 409) {
+      announce("Este registro ainda está em uso.");
+      return;
+    }
+    return showApiError(response, "Não foi possível excluir o cadastro.");
+  }
   const list = type === "institution" ? state.institutions : state.participants;
   list.splice(list.indexOf(record), 1); renderEditorSection(resource); announce("Cadastro excluído com sucesso.");
 }

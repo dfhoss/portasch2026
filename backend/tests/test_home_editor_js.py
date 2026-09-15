@@ -88,7 +88,7 @@ const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, renderKnowledgeAxes, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
-  openGroupEditor, handleEditorClick, showApiError, logout, participantRow, renderInstitutions, renderParticipants, saveAdminCatalog, deleteAdminCatalog
+  openGroupEditor, handleEditorClick, showApiError, logout, participantRow, renderInstitutions, renderParticipants, renderCatalogLoading, renderCatalogError, saveAdminCatalog, deleteAdminCatalog, openAdminCatalogEditor
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
@@ -177,6 +177,38 @@ def test_catalog_network_failure_preserves_state_and_announces_safe_message():
         await api.saveAdminCatalog("institution", elementFor("#form"));
         assert.equal(api.state.institutions.length, 1);
         assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
+
+
+def test_catalog_views_render_operational_states_and_crud_both_entities():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola", city: "C", state: "SC"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"}];
+        api.renderInstitutions(); assert.match(elementFor("#editor-content").innerHTML, /1 cadastrada/); assert.match(elementFor("#editor-content").innerHTML, /Escola/);
+        api.renderParticipants(); const participantHtml = elementFor("#editor-content").innerHTML; assert.match(participantHtml, /1 cadastrado/); assert.match(participantHtml, /\*\*\*\.\*\*\*\.\*\*\*-25/); assert.equal(participantHtml.includes("52998224725"), false);
+        api.state.institutions = []; api.renderInstitutions(); assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição cadastrada/); api.renderInstitutions("xyz"); assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição encontrada/);
+        api.renderCatalogLoading(); assert.match(elementFor("#editor-content").innerHTML, /Carregando catálogo/); api.renderCatalogError(); assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+        context.FormData = class { entries() { return [["name", "Nova"], ["city", "C"], ["state", "SC"]]; } };
+        context.fetch = async (_path, options) => ({ok: true, status: 201, json: async () => ({id: "i-2", name: "Nova", city: "C", state: "SC"})});
+        await api.saveAdminCatalog("institution", elementFor("#form")); assert.equal(api.state.institutions.length, 1); assert.match(elementFor("#editor-content").innerHTML, /Nova/);
+        api.openAdminCatalogEditor("institution", api.state.institutions[0], elementFor("#form")); context.fetch = async () => ({ok: true, status: 200, json: async () => ({id: "i-2", name: "Editada", city: "C", state: "SC"})}); await api.saveAdminCatalog("institution", elementFor("#form")); assert.equal(api.state.institutions[0].name, "Editada");
+        context.fetch = async () => ({ok: true, status: 204, json: async () => null}); await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 0);
+        api.state.institutions = [{id: "i-3", name: "Escola", city: "C", state: "SC"}]; context.FormData = class { entries() { return [["name", "Aluno"], ["cpf", "529.982.247-25"], ["email", "a@e.org"], ["institutionId", "i-3"]]; } }; context.fetch = async (_path, options) => { assert.equal(JSON.parse(options.body).cpf, "52998224725"); return {ok: true, status: 201, json: async () => ({id: "p-2", name: "Aluno", cpf: "52998224725", email: "a@e.org", institutionId: "i-3"})}; }; await api.saveAdminCatalog("participant", elementFor("#form")); assert.equal(api.state.participants.some((p) => p.id === "p-2"), true);
+        context.fetch = async () => ({ok: true, status: 204, json: async () => null}); await api.deleteAdminCatalog("participant", api.state.participants.find((p) => p.id === "p-2")); assert.equal(api.state.participants.some((p) => p.id === "p-2"), false);
+        """
+    )
+
+
+def test_catalog_delete_conflict_unauthorized_and_network_keep_state():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i", name: "Vinculada"}];
+        context.fetch = async () => ({ok: false, status: 409, json: async () => ({detail: {message: "em uso", references: ["p-1"]}})});
+        await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 1); assert.match(elementFor("#editor-message").textContent, /uso/);
+        context.fetch = async () => ({ok: false, status: 401, json: async () => ({})}); await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 1);
+        context.fetch = async () => { throw new Error("secret"); }; await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 1); assert.match(elementFor("#editor-message").textContent, /Não foi possível excluir/);
         """
     )
 
