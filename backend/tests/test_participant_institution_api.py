@@ -1,4 +1,5 @@
 import pytest
+from clients.json_store import PersistenceError
 from fastapi import status
 
 
@@ -113,3 +114,116 @@ def test_api_maps_not_found_duplicate_invalid_and_in_use(client, auth_headers):
         ).status_code
         == 422
     )
+
+
+@pytest.mark.parametrize("path", ["/institutions", "/participants"])
+def test_catalog_routes_reject_invalid_jwt(client, path):
+    response = client.get(path, headers={"Authorization": "Bearer invalid-token"})
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.parametrize("method", ["get", "delete"])
+def test_missing_participant_get_and_delete_return_404(client, auth_headers, method):
+    response = getattr(client, method)("/participants/participant-missing", headers=auth_headers)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_missing_participant_put_returns_404(client, auth_headers):
+    response = client.put(
+        "/participants/participant-missing",
+        headers=auth_headers,
+        json={
+            "name": "Aluno",
+            "cpf": "52998224725",
+            "email": "a@e.com",
+            "institutionId": "institution-001",
+        },
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.parametrize("method", ["post", "put"])
+def test_participant_missing_institution_returns_404(client, auth_headers, method):
+    payload = {
+        "name": "Aluno",
+        "cpf": "52998224725",
+        "email": "a@e.com",
+        "institutionId": "institution-missing",
+    }
+    if method == "put":
+        path = "/participants/participant-001"
+        client.post(
+            "/participants",
+            headers=auth_headers,
+            json={**payload, "institutionId": "institution-001"},
+        )
+    else:
+        path = "/participants"
+    response = getattr(client, method)(path, headers=auth_headers, json=payload)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_institution_delete_conflict_contains_participant_references(client, auth_headers):
+    institution_id = "institution-001"
+    created = client.post(
+        "/participants",
+        headers=auth_headers,
+        json={
+            "name": "Aluno",
+            "cpf": "52998224725",
+            "email": "a@e.com",
+            "institutionId": institution_id,
+        },
+    )
+    assert created.status_code == status.HTTP_201_CREATED
+    response = client.delete(f"/institutions/{institution_id}", headers=auth_headers)
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert created.json()["id"] in response.json()["detail"]["references"]
+
+
+@pytest.mark.parametrize(
+    ("path", "filename"),
+    [("/institutions", "institutions.json"), ("/participants", "participants.json")],
+)
+def test_catalog_read_failures_are_stable_500(
+    client, auth_headers, temporary_database, path, filename
+):
+    catalog_path = getattr(temporary_database, filename.removesuffix(".json"))
+    catalog_path.write_text("{invalid", encoding="utf-8")
+    response = client.get(path, headers=auth_headers)
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {
+        "detail": {"message": "Não foi possível salvar as alterações", "references": []}
+    }
+    assert str(catalog_path) not in response.text
+    assert "traceback" not in response.text.lower()
+    assert "invalid" not in response.text
+
+
+@pytest.mark.parametrize("resource", ["institutions", "participants"])
+def test_catalog_write_failures_are_stable_500(client, auth_headers, monkeypatch, resource):
+    module = __import__(f"clients.{resource}", fromlist=["atomic_write_json"])
+
+    def fail_write(*args, **kwargs):
+        raise PersistenceError("private path and traceback")
+
+    monkeypatch.setattr(module, "atomic_write_json", fail_write)
+    if resource == "institutions":
+        path, payload = "/institutions", {"name": "Nova", "state": "SC", "city": "Chapecó"}
+    else:
+        path, payload = (
+            "/participants",
+            {
+                "name": "Aluno",
+                "cpf": "52998224725",
+                "email": "a@e.com",
+                "institutionId": "institution-001",
+            },
+        )
+    response = client.post(path, headers=auth_headers, json=payload)
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {
+        "detail": {"message": "Não foi possível salvar as alterações", "references": []}
+    }
+    assert "private path" not in response.text
+    assert "traceback" not in response.text.lower()
