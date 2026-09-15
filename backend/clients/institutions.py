@@ -28,7 +28,7 @@ def get_institutions_path() -> Path:
 class InstitutionRepository:
     def __init__(self, path: Path, participants_path: Path | None = None) -> None:
         self.path = path
-        self.participants_path = participants_path or path.parent / "participants.json"
+        self.participants_path = participants_path
 
     def list(self) -> builtins.list[dict[str, Any]]:
         return deepcopy(self._load_catalog()["institutions"])
@@ -73,9 +73,10 @@ class InstitutionRepository:
         catalog = self._load_catalog()
         self._find(catalog["institutions"], institution_id)
         try:
-            from clients.participants import ParticipantRepository
+            from clients.participants import ParticipantRepository, get_participants_path
 
-            participants = ParticipantRepository(self.participants_path, self.path)._load()
+            resolved_participants_path = self.participants_path or get_participants_path()
+            participants = ParticipantRepository(resolved_participants_path, self.path)._load()
         except (OSError, ValueError, TypeError) as error:
             raise PersistenceError("Não foi possível ler o catálogo de participantes") from error
         except ResourceNotFoundError as error:
@@ -98,10 +99,13 @@ class InstitutionRepository:
             payload = read_json(self.path)
         except (OSError, ValueError) as error:
             raise PersistenceError("Não foi possível ler o catálogo de instituições") from error
-        return self._validate_catalog(payload)
+        try:
+            return self._validate_catalog(payload)
+        except (TypeError, ValueError) as error:
+            raise PersistenceError("Não foi possível ler o catálogo de instituições") from error
 
     def _validate_catalog(self, payload: dict[str, Any]) -> dict[str, Any]:
-        if set(payload) != {"nextId", "institutions"}:
+        if not isinstance(payload, dict) or set(payload) != {"nextId", "institutions"}:
             raise ValueError("Catálogo de instituições inválido")
         if type(payload["nextId"]) is not int or payload["nextId"] < 1:
             raise ValueError("Catálogo de instituições inválido")
