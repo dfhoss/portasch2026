@@ -13,7 +13,7 @@ const vm = require("node:vm");
 
 class FakeElement {
   constructor(id = "") {
-    this.id = id;
+    this.id = id.startsWith("#") ? id.slice(1) : id;
     this.hidden = false;
     this.innerHTML = "";
     this.textContent = "";
@@ -42,6 +42,7 @@ class FakeElement {
   querySelectorAll() { return []; }
   closest() { return null; }
   focus() { this.focused = true; }
+  setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; }
   showModal() { this.open = true; }
   close() { this.open = false; this.dispatchEvent({type: "close"}); }
 }
@@ -233,14 +234,19 @@ def test_institution_catalog_has_independent_states_and_async_retry():
         await loading;
         assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
 
+        let retry = elementFor("#retry"); retry.dataset = {action: "retry-admin-data"};
         const responses = [
           {id: "i-2", name: "Nova", city: "C", state: "SC"},
         ];
+        let retryCalls = 0;
         context.fetch = async (path) => path === "/institutions"
           ? {ok: true, status: 200, json: async () => responses}
           : {ok: true, status: 200, json: async () => []};
-        await api.loadAdminData();
+        const retryEvent = {target: {closest: () => retry}};
+        retryCalls += 1; await api.handleEditorClick(retryEvent);
+        assert.equal(retryCalls, 1);
         assert.equal(api.state.institutions[0].name, "Nova");
+        assert.match(elementFor("#editor-content").innerHTML, /Instituições/);
         """
     )
 
@@ -264,6 +270,14 @@ def test_participant_catalog_has_independent_states_and_async_retry():
         release({ok: false, status: 503, json: async () => ({})});
         await loading;
         assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+
+        const retry = elementFor("#retry-participants"); retry.dataset = {action: "retry-admin-data"};
+        context.fetch = async (path) => path === "/participants"
+          ? {ok: true, status: 200, json: async () => [{id: "p-2", name: "Bia", cpf: "12345678901", email: "b@e.org", institutionId: null}]}
+          : {ok: true, status: 200, json: async () => []};
+        await api.handleEditorClick({target: {closest: () => retry}});
+        assert.equal(api.state.participants[0].name, "Bia");
+        assert.match(elementFor("#editor-content").innerHTML, /Participantes/);
         """
     )
 
@@ -276,6 +290,7 @@ def test_participant_edit_updates_rendered_state_after_success_and_search_select
         api.renderParticipants();
         const search = elementFor("#participant-search"); search.value = "ana"; search.selectionStart = 1; search.selectionEnd = 3;
         elementFor("#editor-content").dispatchEvent({type: "input", target: search});
+        assert.equal(elementFor("#participant-search").focused, true);
         assert.equal(elementFor("#participant-search").selectionStart, 1);
         assert.equal(elementFor("#participant-search").selectionEnd, 3);
         assert.match(elementFor("#editor-content").innerHTML, /Ana/);
@@ -289,6 +304,22 @@ def test_participant_edit_updates_rendered_state_after_success_and_search_select
         assert.equal(api.state.participants[0].name, "Bea");
         assert.match(elementFor("#editor-content").innerHTML, /Bea/);
         assert.equal(elementFor("#editor-content").innerHTML.includes("52998224725"), false);
+        """
+    )
+
+
+def test_institution_search_filters_and_preserves_focus_and_selection():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola Azul", city: "Chapecó", state: "SC"}, {id: "i-2", name: "Outra", city: "Lages", state: "SC"}];
+        api.renderInstitutions();
+        const search = elementFor("#institution-search"); search.value = "azul"; search.selectionStart = 1; search.selectionEnd = 3;
+        elementFor("#editor-content").dispatchEvent({type: "input", target: search});
+        assert.equal(elementFor("#institution-search").focused, true);
+        assert.equal(elementFor("#institution-search").selectionStart, 1);
+        assert.equal(elementFor("#institution-search").selectionEnd, 3);
+        assert.match(elementFor("#editor-content").innerHTML, /Escola Azul/);
+        assert.equal(elementFor("#editor-content").innerHTML.includes("Outra"), false);
         """
     )
 
