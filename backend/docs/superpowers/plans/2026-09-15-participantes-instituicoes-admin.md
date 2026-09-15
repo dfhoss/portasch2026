@@ -10,6 +10,13 @@
 
 **Spec:** `backend/docs/superpowers/specs/2026-09-09-participantes-e-instituicoes-design.md`
 
+## Estado da execução
+
+Atualizado em 15/09/2026. As Tarefas 1 a 5 foram concluídas até `c3b5993 Valida fluxos
+visuais dos catálogos`. A Tarefa 6 auditou cobertura, segurança e documentação e não
+identificou lacuna de código diretamente exigida. O relatório final está em
+`.superpowers/sdd/2026-09-15-participantes-instituicoes-admin/task-6-report.md`.
+
 ## Restrições globais
 
 - Antes de iniciar, leia `.worktrees/eixos-workspace/backend/DESIGN.md`, `.worktrees/eixos-workspace/backend/ARCHITECTURE.md` e `.worktrees/eixos-workspace/backend/AGENTS.md`; use-os como referência somente leitura e não altere a worktree.
@@ -18,6 +25,9 @@
 - Use `atomic_write_json`; converta falhas de filesystem em `PersistenceError` sem expor caminhos na resposta HTTP.
 - Normalize nomes por Unicode, espaços e caixa; preserve IDs ao atualizar.
 - Normalize CPF para 11 dígitos, valide os dígitos verificadores, imponha unicidade e mascare-o nas listas do painel.
+- O dashboard autenticado deve ter visões funcionais de instituições e participantes,
+  renderizadas via API após o login, com contagem, busca, estados vazio/carregando/erro e
+  atualização após mutações; o HTML inicial continua sem catálogos e CPF completo.
 - Siga os tokens semânticos, acessibilidade e breakpoints de `backend/DESIGN.md`.
 - Não altere credenciais, `backend/db/users.json` ou arquivos não relacionados.
 
@@ -151,7 +161,12 @@ def test_create_participant_returns_normalized_cpf(client, auth_headers):
 
 **Arquivos:** `backend/static/home/index.html`, `home.js`, `home.css`; testes em `backend/tests/test_home_page.py`, `test_home_editor_js.py`, `test_catalog_ui_contract.py` e `tests/e2e/test_home_panel.py`.
 
-**Interfaces:** adicionar `institutions` e `participants` a `EDITOR_SECTIONS`; usar `apiFetch` com o token da sessão; mostrar instituições e participantes em listas pesquisáveis; usar diálogos para criar/editar e confirmação para excluir.
+**Interfaces:** adicionar `institutions` e `participants` a `EDITOR_SECTIONS`; usar `apiFetch` com o token da sessão; mostrar instituições e participantes em visões responsivas pesquisáveis; usar diálogos para criar/editar e confirmação para excluir.
+
+**Visualizações obrigatórias:** a visão de instituições deve mostrar nome, cidade, estado e
+quantidade total; a visão de participantes deve mostrar nome, CPF mascarado, e-mail,
+instituição e quantidade total. Ambas devem distinguir carregamento, vazio, erro e nenhum
+resultado de busca, e atualizar a lista após cada mutação bem-sucedida.
 
 - [ ] **Passo 1: escrever testes de contrato**
 
@@ -170,21 +185,29 @@ test("participant list masks CPF", () => {
 });
 ```
 
+```javascript
+test("catalog views render counts and empty states", () => {
+  expect(renderInstitutionView([])).toContain("Nenhuma instituição cadastrada");
+  expect(renderParticipantView([])).toContain("Nenhum participante cadastrado");
+  expect(renderInstitutionView([{name: "Escola", city: "Chapecó", state: "SC"}])).toContain("1 instituição");
+});
+```
+
 - [ ] **Passo 2: executar** os testes de UI focados; esperar falhas pelos novos contratos.
-- [ ] **Passo 3: implementar** navegação, estados vazios, tabelas/cards, busca, carregamento da relação de instituições e formulários com labels para nome, CPF, e-mail, estado, cidade e descrição.
+- [ ] **Passo 3: implementar** navegação e as duas visões do dashboard, com contagem, estados de carregamento/vazio/erro/sem resultado, tabelas/cards, busca, carregamento da relação de instituições e formulários com labels para nome, CPF, e-mail, estado, cidade e descrição.
 - [ ] **Passo 4: implementar** máscara visual de CPF, envio normalizado, toasts, erros estruturados, foco no diálogo, confirmação de exclusão e bloqueio visual para instituição em uso.
-- [ ] **Passo 5: validar responsividade e acessibilidade** conforme `DESIGN.md`; não inserir catálogos ou CPF no HTML inicial; atualizar `DESIGN.md` somente se novos tokens forem necessários.
+- [ ] **Passo 5: validar responsividade e acessibilidade** conforme `DESIGN.md`; confirmar que as duas visões mostram dados reais após o login, não inserir catálogos ou CPF no HTML inicial e atualizar `DESIGN.md` somente se novos tokens forem necessários.
 - [ ] **Passo 6: executar** `uv run pytest backend/tests/test_home_page.py backend/tests/test_home_editor_js.py backend/tests/test_catalog_ui_contract.py -v` e `uv run pytest backend/tests/e2e -v` quando Chromium estiver instalado; commitar com `git add backend/static/home backend/tests; git commit -m "Adiciona CRUD ao painel administrativo"`.
 
 ### Tarefa 6: Validar documentação, segurança e entrega
 
 **Arquivos:** `backend/docs/superpowers/specs/2026-09-09-participantes-e-instituicoes-design.md`, `TASKS.md`, `backend/ARCHITECTURE.md` e toda a suíte.
 
-- [ ] **Passo 1: conferir cobertura da spec:** API, persistência, seed de 11 escolas, seção vazia da Feira, CPF, painel, autenticação, conflitos e retenção até `31/07/2027` devem estar representados nos testes ou na documentação.
-- [ ] **Passo 2: revisar segurança:** CPF completo não aparece em listas, HTML inicial, logs ou fixtures; tokens e `users.json` não foram alterados.
-- [ ] **Passo 3: executar dentro de `backend`** `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check` e `uv run pytest`; corrigir falhas antes do commit final.
-- [ ] **Passo 4: revisar o diff** com `git diff --check` e `git status --short`; não incluir `ideas.md`, imagens não relacionadas ou alterações acidentais de dados.
-- [ ] **Passo 5: atualizar `backend/ARCHITECTURE.md`** somente se a implementação alterar fronteiras descritas; registrar no commit final em português e imperativo.
+- [x] **Passo 1: conferir cobertura da spec:** API, persistência, seed de 11 escolas, seção vazia da Feira, CPF, painel, autenticação, conflitos e retenção até `31/07/2027` devem estar representados nos testes ou na documentação.
+- [x] **Passo 2: revisar segurança:** CPF completo não aparece em listas, HTML inicial, logs ou fixtures; tokens e `users.json` não foram alterados.
+- [x] **Passo 3: executar dentro de `backend`** `uv run ruff check .`, `uv run ruff format --check .`, `uv run ty check` e `uv run pytest`; corrigir falhas antes do commit final.
+- [x] **Passo 4: revisar o diff** com `git diff --check` e `git status --short`; não incluir `ideas.md`, imagens não relacionadas ou alterações acidentais de dados.
+- [x] **Passo 5: atualizar `backend/ARCHITECTURE.md`** somente se a implementação alterar fronteiras descritas; registrar no commit final em português e imperativo.
 
 ## Checklist de conclusão
 

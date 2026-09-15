@@ -179,9 +179,19 @@ A página fica no painel autenticado servido em `/home`, seguindo os padrões vi
 acessibilidade de `backend/DESIGN.md`. Ela adiciona as seções “Instituições” e
 “Participantes” à navegação existente.
 
-- “Instituições” lista nome, cidade e estado, com busca, criação, edição e exclusão.
-- “Participantes” lista nome, CPF mascarado, e-mail e instituição, com busca, criação,
-  edição e exclusão.
+O dashboard deve apresentar duas visões administrativas reais, renderizadas depois da
+autenticação e do carregamento dos catálogos:
+
+- A visão “Instituições” exibe uma lista responsiva de cards ou linhas com nome, cidade e
+  estado, além da quantidade total cadastrada, busca, criação, edição e exclusão.
+- A visão “Participantes” exibe uma tabela ou lista responsiva com nome, CPF mascarado,
+  e-mail e instituição, além da quantidade total cadastrada, busca, criação, edição e
+  exclusão.
+- Cada visão deve ter estados explícitos de carregamento, lista vazia, erro e resultado da
+  busca; a ausência de registros não pode deixar o conteúdo indistinguível do carregamento.
+- A navegação deve selecionar uma visão por vez sem perder a sessão, e os dados devem ser
+  obtidos por `apiFetch` usando o JWT da sessão. Nenhum catálogo ou registro pessoal pode
+  ser embutido no HTML inicial.
 - Formulários usam diálogos acessíveis, labels explícitos, foco visível, mensagens de
   sucesso/erro e confirmação para exclusões.
 - O CPF é exibido mascarado na lista e enviado somente quando necessário para criar ou
@@ -204,6 +214,8 @@ acessibilidade de `backend/DESIGN.md`. Ela adiciona as seções “Instituiçõe
   de Ciências continua presente sem esse grupo.
 - O painel autenticado permite gerenciar instituições e participantes sem expor CPF completo
   na listagem.
+- As visões de instituições e participantes exibem dados reais dos respectivos endpoints,
+  com contagem, busca, estado vazio e atualização após criar, editar ou excluir.
 - Falhas de leitura, validação estrutural ou escrita não vazam detalhes de filesystem na
   resposta HTTP.
 - A suíte existente continua passando sem alterar os arquivos de dados reais.
