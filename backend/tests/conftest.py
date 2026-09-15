@@ -68,6 +68,8 @@ def configured_environment(
     monkeypatch.setenv("LOCATIONS_PATH", str(temporary_database.locations))
     monkeypatch.setenv("KNOWLEDGE_AXES_PATH", str(temporary_database.knowledge_axes))
     monkeypatch.setenv("DATABASE_PATH", str(temporary_database.users))
+    monkeypatch.setenv("INSTITUTIONS_PATH", str(temporary_database.institutions))
+    monkeypatch.setenv("PARTICIPANTS_PATH", str(temporary_database.participants))
     return temporary_database
 
 
