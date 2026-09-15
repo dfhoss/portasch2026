@@ -98,7 +98,7 @@ class ParticipantRepository:
             payload = read_json(self.path)
         except (OSError, ValueError) as error:
             raise PersistenceError("Não foi possível ler o catálogo de participantes") from error
-        if (
+        if not isinstance(payload, dict) or (
             set(payload) != {"nextId", "participants"}
             or type(payload["nextId"]) is not int
             or payload["nextId"] < 1

@@ -102,7 +102,7 @@ def test_institution_repository_rejects_duplicate_names_and_invalid_fields(tmp_p
 def test_institution_repository_validates_catalog_structure(tmp_path):
     path = tmp_path / "institutions.json"
     path.write_text('{"nextId": 0, "institutions": []}', encoding="utf-8")
-    with pytest.raises(ValueError):
+    with pytest.raises(PersistenceError):
         InstitutionRepository(path).list()
 
 
@@ -129,7 +129,7 @@ def test_institution_repository_rejects_extra_catalog_keys(tmp_path, payload):
     path = tmp_path / "institutions.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
 
-    with pytest.raises(ValueError, match="Catálogo de instituições inválido"):
+    with pytest.raises(PersistenceError):
         InstitutionRepository(path).list()
 
 
@@ -343,5 +343,33 @@ def test_public_institution_repository_protects_references(tmp_path):
         '{"nextId": 2, "participants": [{"id": "participant-001", "name": "Ana", "cpf": "52998224725", "email": "a@e.com", "institutionId": "institution-001"}]}',
         encoding="utf-8",
     )
+    with pytest.raises(ResourceInUseError):
+        InstitutionRepository(institutions, participants).delete("institution-001")
+
+
+@pytest.mark.parametrize("payload", [[], "texto", 42, None])
+def test_catalog_root_must_be_object(tmp_path, payload):
+    participants = tmp_path / "participants.json"
+    institutions = tmp_path / "institutions.json"
+    participants.write_text(json.dumps(payload), encoding="utf-8")
+    institutions.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(PersistenceError):
+        ParticipantRepository(participants, institutions).list()
+    with pytest.raises(PersistenceError):
+        InstitutionRepository(institutions, participants).list()
+
+
+def test_public_institution_repository_uses_configured_participants_path(monkeypatch, tmp_path):
+    institutions = tmp_path / "institutions.json"
+    configured_participants = tmp_path / "configured-participants.json"
+    institutions.write_text(
+        '{"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola", "state": "SC", "city": "Chapecó", "description": null}]}',
+        encoding="utf-8",
+    )
+    configured_participants.write_text(
+        '{"nextId": 2, "participants": [{"id": "participant-001", "name": "Ana", "cpf": "52998224725", "email": "a@e.com", "institutionId": "institution-001"}]}',
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("PARTICIPANTS_PATH", str(configured_participants))
     with pytest.raises(ResourceInUseError):
         InstitutionRepository(institutions).delete("institution-001")
