@@ -33,6 +33,9 @@ def test_catalogos_iniciais_contem_instituicoes_e_feira_de_ciencias(
 
 def test_institution_repository_normalizes_values_and_generates_id(tmp_path):
     path = tmp_path / "institutions.json"
+    (tmp_path / "participants.json").write_text(
+        '{"nextId": 1, "participants": []}', encoding="utf-8"
+    )
     path.write_text('{"nextId": 1, "institutions": []}', encoding="utf-8")
 
     created = InstitutionRepository(path).create(
@@ -50,6 +53,9 @@ def test_institution_repository_normalizes_values_and_generates_id(tmp_path):
 
 def test_institution_repository_supports_crud_and_defensive_copies(tmp_path):
     path = tmp_path / "institutions.json"
+    (tmp_path / "participants.json").write_text(
+        '{"nextId": 1, "participants": []}', encoding="utf-8"
+    )
     path.write_text('{"nextId": 1, "institutions": []}', encoding="utf-8")
     repository = InstitutionRepository(path)
 
@@ -219,7 +225,7 @@ def test_participant_repository_crud_normalizes_and_returns_defensive_copies(tmp
     created["name"] = "Alterada"
     assert repository.get("participant-001")["name"] == "Ana"
     updated = repository.update(
-        "participant-001", "Bia", "529982247-25", "bia@example.org", "institution-001"
+        "participant-001", "Bia", "529.982.247-25", "bia@example.org", "institution-001"
     )
     assert updated["id"] == "participant-001"
     repository.delete("participant-001")
@@ -260,3 +266,82 @@ def test_institution_delete_is_blocked_by_participant_references(tmp_path):
         InstitutionRepository(institutions, participants).delete("institution-001")
     assert error.value.references == ["participant-001"]
     assert institutions.read_text(encoding="utf-8") == before
+
+
+@pytest.mark.parametrize(
+    "value", ["abc529.982.247-25", "529.982.247-25x", "５２９９８２２４７２５"]
+)
+def test_normalize_cpf_rejects_non_contract_formats(value):
+    with pytest.raises(ValueError):
+        normalize_cpf(value)
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        [{"id": "institution-001"}],
+        [
+            {
+                "id": "institution-001",
+                "name": "Escola",
+                "state": "SC",
+                "city": "Chapecó",
+                "description": None,
+                "extra": 1,
+            }
+        ],
+        ["not-an-institution"],
+    ],
+)
+def test_participant_repository_rejects_invalid_institution_catalog(tmp_path, bad):
+    participants = tmp_path / "participants.json"
+    institutions = tmp_path / "institutions.json"
+    participants.write_text('{"nextId": 1, "participants": []}', encoding="utf-8")
+    institutions.write_text(json.dumps({"nextId": 2, "institutions": bad}), encoding="utf-8")
+    with pytest.raises(PersistenceError, match="catálogo de instituições"):
+        ParticipantRepository(participants, institutions).create(
+            "Ana", "52998224725", "a@e.com", "institution-001"
+        )
+
+
+def test_participant_repository_rejects_invalid_persisted_invariants(tmp_path):
+    participants = tmp_path / "participants.json"
+    institutions = tmp_path / "institutions.json"
+    institutions.write_text(
+        '{"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola", "state": "SC", "city": "Chapecó", "description": null}]}',
+        encoding="utf-8",
+    )
+    participants.write_text(
+        json.dumps(
+            {
+                "nextId": 3,
+                "participants": [
+                    {
+                        "id": "participant-001",
+                        "name": "Ana",
+                        "cpf": "52998224726",
+                        "email": "a@e.com",
+                        "institutionId": "institution-001",
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(PersistenceError):
+        ParticipantRepository(participants, institutions).list()
+
+
+def test_public_institution_repository_protects_references(tmp_path):
+    institutions = tmp_path / "institutions.json"
+    participants = tmp_path / "participants.json"
+    institutions.write_text(
+        '{"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola", "state": "SC", "city": "Chapecó", "description": null}]}',
+        encoding="utf-8",
+    )
+    participants.write_text(
+        '{"nextId": 2, "participants": [{"id": "participant-001", "name": "Ana", "cpf": "52998224725", "email": "a@e.com", "institutionId": "institution-001"}]}',
+        encoding="utf-8",
+    )
+    with pytest.raises(ResourceInUseError):
+        InstitutionRepository(institutions).delete("institution-001")

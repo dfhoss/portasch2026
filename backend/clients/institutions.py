@@ -28,7 +28,7 @@ def get_institutions_path() -> Path:
 class InstitutionRepository:
     def __init__(self, path: Path, participants_path: Path | None = None) -> None:
         self.path = path
-        self.participants_path = participants_path
+        self.participants_path = participants_path or path.parent / "participants.json"
 
     def list(self) -> builtins.list[dict[str, Any]]:
         return deepcopy(self._load_catalog()["institutions"])
@@ -72,21 +72,19 @@ class InstitutionRepository:
     def delete(self, institution_id: str) -> None:
         catalog = self._load_catalog()
         self._find(catalog["institutions"], institution_id)
-        if self.participants_path is not None:
-            try:
-                participants = read_json(self.participants_path)
-                if set(participants) != {"nextId", "participants"} or not isinstance(
-                    participants["participants"], list
-                ):
-                    raise ValueError
-            except (OSError, ValueError) as error:
-                raise PersistenceError(
-                    "Não foi possível ler o catálogo de participantes"
-                ) from error
+        try:
+            from clients.participants import ParticipantRepository
+
+            participants = ParticipantRepository(self.participants_path, self.path)._load()
+        except (OSError, ValueError, TypeError) as error:
+            raise PersistenceError("Não foi possível ler o catálogo de participantes") from error
+        except ResourceNotFoundError as error:
+            raise PersistenceError("Catálogo de participantes inválido") from error
+        if participants:
             references = [
                 item["id"]
                 for item in participants["participants"]
-                if item.get("institutionId") == institution_id
+                if item["institutionId"] == institution_id
             ]
             if references:
                 raise ResourceInUseError("Instituição", institution_id, references)
