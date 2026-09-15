@@ -58,6 +58,10 @@ def test_participant_crud_normalizes_cpf_and_alias(client, auth_headers):
     participant = response.json()
     assert participant["cpf"] == "52998224725"
     assert participant["institutionId"] == institution["id"]
+    listed = client.get("/participants", headers=auth_headers)
+    assert listed.status_code == status.HTTP_200_OK
+    assert listed.json()[0]["cpf"] == "***.***.***-25"
+    assert "52998224725" not in listed.text
     assert (
         client.get(f"/participants/{participant['id']}", headers=auth_headers).json() == participant
     )

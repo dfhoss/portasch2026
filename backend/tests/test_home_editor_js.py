@@ -308,6 +308,32 @@ def test_participant_edit_updates_rendered_state_after_success_and_search_select
     )
 
 
+def test_participant_edit_loads_authenticated_detail_when_list_cpf_is_masked():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "***.***.***-25", email: "a@e.org", institutionId: "i-1"}];
+        const calls = [];
+        context.fetch = async (path) => { calls.push(path); return {ok: true, status: 200, json: async () => ({id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"})}; };
+        await api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
+        assert.deepEqual(calls, ["/participants/p-1"]);
+        assert.match(elementFor("#modal-content").innerHTML, /52998224725/);
+        """
+    )
+
+
+def test_participant_edit_detail_failure_keeps_modal_closed_and_announces_safe_error():
+    run_node_case(
+        """
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "***.***.***-25"}];
+        context.fetch = async () => ({ok: false, status: 401, json: async () => ({detail: "segredo interno"})});
+        await api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
+        assert.equal(elementFor("#modal-content").innerHTML, "");
+        assert.equal(elementFor("#editor-message").textContent, "");
+        """
+    )
+
+
 def test_institution_search_filters_and_preserves_focus_and_selection():
     run_node_case(
         """
