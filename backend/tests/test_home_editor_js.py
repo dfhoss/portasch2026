@@ -87,7 +87,7 @@ const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, renderKnowledgeAxes, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
-  openGroupEditor, handleEditorClick, showApiError, logout
+  openGroupEditor, handleEditorClick, showApiError, logout, participantRow
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
@@ -141,6 +141,16 @@ def test_editor_contains_every_required_control(client):
     required = ["add-section", "add-session", "save-schedule"]
     for control_id in required:
         assert f'id="{control_id}"' in html
+
+
+def test_participant_list_masks_cpf():
+    run_node_case(
+        """
+        const html = api.participantRow({name: "Aluno", cpf: "52998224725", institutionId: "institution-001", email: "a@e.org"});
+        assert.match(html, /\\*\\*\\*\\.\\*\\*\\*\\.\\*\\*\\*-25/);
+        assert.equal(html.includes("52998224725"), false);
+        """
+    )
 
 
 def test_schedule_creation_actions_are_grouped_by_context():
@@ -392,7 +402,9 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         const locations = [{id: "loc-1", name: "Auditório"}];
         const groups = [{id: "group-1", name: "Bloco C", category: "blocos"}];
         const axes = [{id: "geral", name: "Geral"}];
-        const responses = [schedule, locations, groups, axes].map((payload) => ({
+        const institutions = [{id: "institution-1", name: "Escola", city: "Chapecó", state: "SC"}];
+        const participants = [{id: "participant-1", name: "Aluno", cpf: "52998224725", email: "a@e.org", institutionId: "institution-1"}];
+        const responses = [schedule, locations, groups, axes, institutions, participants].map((payload) => ({
           ok: true,
           status: 200,
           json: async () => payload,
@@ -404,7 +416,9 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), schedule);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), locations);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locationGroups)), groups);
-        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
+            assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
+            assert.deepEqual(JSON.parse(JSON.stringify(api.state.institutions)), institutions);
+            assert.deepEqual(JSON.parse(JSON.stringify(api.state.participants)), participants);
         assert.equal(api.state.selectedSectionId, "secao");
         assert.match(elementFor("#editor-content").innerHTML, /Seção/);
         assert.equal(elementFor("#editor-message").textContent, "");

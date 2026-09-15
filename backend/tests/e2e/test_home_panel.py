@@ -134,8 +134,13 @@ def test_reload_restores_admin_view_schedule_context_and_scroll(admin_page: Page
 
     admin_page.get_by_role("button", name="Programação").click()
     sections = admin_page.locator("#section-list button")
-    sections.nth(2).click()
-    selected_title = sections.nth(2).text_content()
+    selected_index = next(
+        index
+        for index in range(sections.count())
+        if admin_page.locator(".schedule-section").nth(index).locator(".group-toggle").count()
+    )
+    sections.nth(selected_index).click()
+    selected_title = sections.nth(selected_index).text_content()
     assert selected_title is not None
     group_toggle = admin_page.locator(".group-toggle").first
     group_toggle.click()
