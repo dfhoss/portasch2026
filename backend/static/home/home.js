@@ -167,28 +167,29 @@ function catalogRecord(kind, key) {
   return records.find((record) => catalogKey(record) === key) || null;
 }
 
-function maskCpf(cpf) {
+/* catalog views live below the schedule helpers */
+function legacyMaskCpf(cpf) {
   const digits = String(cpf || "").replace(/\D/g, "");
   return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : "CPF não informado";
 }
 
-function participantRow(participant) {
+function legacyParticipantRow(participant) {
   const institution = state.institutions.find((item) => item.id === participant.institutionId);
   return `<article class="catalog-card participant-row"><div><strong>${escapeHtml(participant.name)}</strong><span class="secondary-text">CPF: ${maskCpf(participant.cpf)}</span><span class="secondary-text">${escapeHtml(participant.email)}</span><span class="secondary-text">Instituição: ${escapeHtml(institution?.name || "Não encontrada")}</span></div><div class="card-actions"><button type="button" data-action="edit-participant" data-id="${escapeHtml(participant.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-participant" data-id="${escapeHtml(participant.id)}">Excluir</button></div></article>`;
 }
 
-function institutionRow(institution) {
+function legacyInstitutionRow(institution) {
   return `<article class="catalog-card"><div><strong>${escapeHtml(institution.name)}</strong><span class="secondary-text">${escapeHtml(institution.city)} · ${escapeHtml(institution.state)}</span></div><div class="card-actions"><button type="button" data-action="edit-institution" data-id="${escapeHtml(institution.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-institution" data-id="${escapeHtml(institution.id)}">Excluir</button></div></article>`;
 }
 
-function renderInstitutions(searchQuery = "") {
+function legacyRenderInstitutions(searchQuery = "") {
   const query = searchQuery.trim().toLocaleLowerCase();
   const visible = state.institutions.filter((item) => `${item.name} ${item.city} ${item.state}`.toLocaleLowerCase().includes(query));
   const content = visible.length ? visible.map(institutionRow).join("") : `<p class="empty-state">${query ? "Nenhuma instituição encontrada" : "Nenhuma instituição cadastrada."}</p>`;
   editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Instituições</h2><p>${state.institutions.length} cadastrada(s)</p></div><button type="button" class="primary-action" data-action="add-institution">Adicionar instituição</button></header><input id="institution-search" type="search" aria-label="Buscar instituições" placeholder="Buscar instituição, cidade ou estado" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="institutions-list">${content}</div>`;
 }
 
-function renderParticipants(searchQuery = "") {
+function legacyRenderParticipants(searchQuery = "") {
   const query = searchQuery.trim().toLocaleLowerCase();
   const visible = state.participants.filter((item) => `${item.name} ${item.email} ${maskCpf(item.cpf)} ${state.institutions.find((i) => i.id === item.institutionId)?.name || ""}`.toLocaleLowerCase().includes(query));
   const content = visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`;
@@ -197,6 +198,10 @@ function renderParticipants(searchQuery = "") {
 
 function renderCatalogError() {
   editorContent.innerHTML = `<section class="empty-state" role="alert"><h2>Não foi possível carregar os catálogos.</h2><p>Verifique sua conexão e tente novamente.</p><button type="button" class="primary-action" data-action="retry-admin-data">Tentar novamente</button></section>`;
+}
+
+function renderCatalogLoading() {
+  editorContent.innerHTML = '<section class="empty-state catalog-loading" role="status" aria-live="polite">Carregando catálogo…</section>';
 }
 
 function showErrors(errors) {
@@ -1199,7 +1204,7 @@ function openAdminCatalogEditor(type, record, opener) {
   modalContext = {type, record};
   const form = type === "institution"
     ? `<label for="institution-name">Nome</label><input id="institution-name" name="name" required value="${escapeHtml(record?.name)}"><label for="institution-city">Cidade</label><input id="institution-city" name="city" required value="${escapeHtml(record?.city)}"><label for="institution-state">Estado</label><input id="institution-state" name="state" required value="${escapeHtml(record?.state)}"><label for="institution-description">Descrição</label><textarea id="institution-description" name="description">${escapeHtml(record?.description)}</textarea>`
-    : `<label for="participant-name">Nome</label><input id="participant-name" name="name" required value="${escapeHtml(record?.name)}"><label for="participant-cpf">CPF</label><input id="participant-cpf" name="cpf" required inputmode="numeric" value="${escapeHtml(record?.cpf)}"><label for="participant-email">E-mail</label><input id="participant-email" name="email" required type="email" value="${escapeHtml(record?.email)}"><label for="participant-institution">Instituição</label><select id="participant-institution" name="institutionId" required>${state.institutions.map((item) => `<option value="${item.id}"${item.id === record?.institutionId ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}</select>`;
+    : `<label for="participant-name">Nome</label><input id="participant-name" name="name" required value="${escapeHtml(record?.name)}"><label for="participant-cpf">CPF</label><input id="participant-cpf" name="cpf" required inputmode="numeric" value="${escapeHtml(record?.cpf)}"><label for="participant-email">E-mail</label><input id="participant-email" name="email" required type="email" value="${escapeHtml(record?.email)}"><label for="participant-institution">Instituição</label><select id="participant-institution" name="institutionId" required>${state.institutions.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === record?.institutionId ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}</select>`;
   showModal(record ? "Editar cadastro" : "Adicionar cadastro", `<form id="catalog-editor-form" class="editor-form">${form}</form>`, opener);
 }
 
@@ -1209,8 +1214,10 @@ async function saveAdminCatalog(type, form) {
   const data = Object.fromEntries(new FormData(form).entries());
   if (type === "participant") data.cpf = data.cpf.replace(/\D/g, "");
   const resource = type === "institution" ? "institutions" : "participants";
-  const record = modalContext.record;
-  const response = await apiFetch(record ? `/${resource}/${record.id}` : `/${resource}`, {method: record ? "PUT" : "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data)});
+  const record = modalContext?.record || null;
+  let response;
+  try { response = await apiFetch(record ? `/${resource}/${record.id}` : `/${resource}`, {method: record ? "PUT" : "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data)}); }
+  catch (error) { if (error.message === "unauthorized") return; announce("Não foi possível salvar o cadastro."); return; }
   if (!response.ok) return showApiError(response, "Não foi possível salvar o cadastro.");
   const canonical = await response.json();
   const list = type === "institution" ? state.institutions : state.participants;
@@ -1224,7 +1231,9 @@ async function deleteParticipant(record) { return deleteAdminCatalog("participan
 async function deleteAdminCatalog(type, record) {
   if (!record || !confirmDeletion(`Excluir o cadastro de “${record.name}”?`)) return;
   const resource = type === "institution" ? "institutions" : "participants";
-  const response = await apiFetch(`/${resource}/${record.id}`, {method: "DELETE"});
+  let response;
+  try { response = await apiFetch(`/${resource}/${record.id}`, {method: "DELETE"}); }
+  catch (error) { if (error.message === "unauthorized") return; announce("Não foi possível excluir o cadastro."); return; }
   if (!response.ok) return showApiError(response, "Não foi possível excluir o cadastro.");
   const list = type === "institution" ? state.institutions : state.participants;
   list.splice(list.indexOf(record), 1); renderEditorSection(resource); announce("Cadastro excluído com sucesso.");
@@ -1425,6 +1434,7 @@ async function saveSchedule() {
 }
 
 async function loadAdminData() {
+  if (["institutions", "participants"].includes(activeEditorSection)) renderCatalogLoading();
   const viewState = readEditorViewState();
   const [scheduleResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse, institutionsResponse, participantsResponse] =
     await Promise.all([
@@ -1683,9 +1693,7 @@ editorContent.addEventListener("input", (event) => {
   const selectionEnd = searchInput.selectionEnd;
   const renderSearch = {"location-search": renderLocations, "knowledge-axis-search": renderKnowledgeAxes, "institution-search": renderInstitutions, "participant-search": renderParticipants}[searchInput.id];
   renderSearch(searchInput.value);
-  const nextSearchInput = searchInput.id === "location-search"
-    ? document.querySelector("#location-search")
-    : document.querySelector("#knowledge-axis-search");
+  const nextSearchInput = document.querySelector(`#${searchInput.id}`);
   nextSearchInput?.focus();
   if (Number.isInteger(selectionStart) && Number.isInteger(selectionEnd)) {
     nextSearchInput?.setSelectionRange(selectionStart, selectionEnd);

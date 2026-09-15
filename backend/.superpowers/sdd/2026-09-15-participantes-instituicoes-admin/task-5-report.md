@@ -46,3 +46,13 @@ Alterados no commit: `static/home/index.html`, `static/home/home.js`, `static/ho
 `tests/e2e/conftest.py` e `tests/e2e/test_home_panel.py`.
 
 Preservados fora do commit: `db/locations.json`, `docs/...` já modificados e `../ideas.md`.
+
+## Rodada de correção 1
+
+Consolidei as funções duplicadas, corrigi restauração de foco/cursor nos quatro campos de
+busca, tratei falhas de rede em salvar/excluir sem mutar estado, adicionei indicador explícito
+de carregamento e retry, escapei IDs de opções e ampliei contratos Node para foco, erro de rede
+e markup seguro. As verificações finais registraram 98 testes focados e 18 E2E aprovados.
+`ruff check`, `ty check` e `git diff --check` passaram. `ruff format --check .` continua apontando
+somente `clients/locations.py`, snippets da documentação/plano e os testes preexistentes que não
+foram reformata­dos fora do escopo.
