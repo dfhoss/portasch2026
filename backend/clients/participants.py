@@ -25,7 +25,18 @@ def get_participants_path() -> Path:
 def normalize_cpf(value: str) -> str:
     if not isinstance(value, str):
         raise ValueError("CPF inválido")
-    digits = "".join(character for character in value if character.isdigit())
+    value = value.strip()
+    if len(value) == 11 and all("0" <= character <= "9" for character in value):
+        digits = value
+    elif len(value) == 14 and all(
+        (index in (3, 7) and character == ".")
+        or (index == 11 and character == "-")
+        or (index not in (3, 7, 11) and "0" <= character <= "9")
+        for index, character in enumerate(value)
+    ):
+        digits = value.replace(".", "").replace("-", "")
+    else:
+        raise ValueError("CPF inválido")
     if len(digits) != 11 or len(set(digits)) == 1:
         raise ValueError("CPF inválido")
     numbers = [int(digit) for digit in digits]
@@ -93,7 +104,9 @@ class ParticipantRepository:
             or payload["nextId"] < 1
             or not isinstance(payload["participants"], list)
         ):
-            raise ValueError("Catálogo de participantes inválido")
+            raise PersistenceError("Catálogo de participantes inválido")
+        seen_ids: set[str] = set()
+        seen_cpfs: set[str] = set()
         for item in payload["participants"]:
             if not isinstance(item, dict) or set(item) != {
                 "id",
@@ -102,21 +115,43 @@ class ParticipantRepository:
                 "email",
                 "institutionId",
             }:
-                raise ValueError("Catálogo de participantes inválido")
-            Participant.model_validate(item)
+                raise PersistenceError("Catálogo de participantes inválido")
+            try:
+                if item["id"] in seen_ids:
+                    raise ValueError
+                cpf = normalize_cpf(item["cpf"])
+                if cpf != item["cpf"] or cpf in seen_cpfs:
+                    raise ValueError
+                Participant.model_validate(item)
+            except TypeError, ValueError:
+                raise PersistenceError("Catálogo de participantes inválido") from None
+            seen_ids.add(item["id"])
+            seen_cpfs.add(cpf)
+        self._validate_institution_catalog()
+        institution_ids = {item["id"] for item in self._load_institutions()["institutions"]}
+        if any(item["institutionId"] not in institution_ids for item in payload["participants"]):
+            raise PersistenceError("Catálogo de participantes inválido")
         return payload
 
     def _ensure_institution(self, institution_id: str) -> None:
         try:
-            catalog = read_json(self.institutions_path)
-            if set(catalog) != {"nextId", "institutions"} or not isinstance(
-                catalog["institutions"], list
-            ):
-                raise ValueError
+            catalog = self._load_institutions()
         except (OSError, ValueError) as error:
             raise PersistenceError("Não foi possível ler o catálogo de instituições") from error
-        if not any(item.get("id") == institution_id for item in catalog["institutions"]):
+        if not any(item["id"] == institution_id for item in catalog["institutions"]):
             raise ResourceNotFoundError("Instituição", institution_id)
+
+    def _load_institutions(self) -> dict[str, Any]:
+        from clients.institutions import InstitutionRepository
+
+        try:
+            payload = read_json(self.institutions_path)
+            return InstitutionRepository(self.institutions_path)._validate_catalog(payload)
+        except (OSError, ValueError, TypeError) as error:
+            raise PersistenceError("Não foi possível ler o catálogo de instituições") from error
+
+    def _validate_institution_catalog(self) -> None:
+        self._load_institutions()
 
     @staticmethod
     def _record(
