@@ -63,12 +63,12 @@ Campos de entrada:
 
 Endpoints:
 
-| Método | Caminho | Resultado |
-| --- | --- | --- |
-| `GET` | `/institutions` | Lista todas as instituições. |
-| `GET` | `/institutions/{institution_id}` | Retorna uma instituição. |
-| `POST` | `/institutions` | Cria e retorna `201 Created`. |
-| `PUT` | `/institutions/{institution_id}` | Substitui e retorna a instituição. |
+| Método   | Caminho                          | Resultado                          |
+| -------- | -------------------------------- | ---------------------------------- |
+| `GET`    | `/institutions`                  | Lista todas as instituições.       |
+| `GET`    | `/institutions/{institution_id}` | Retorna uma instituição.           |
+| `POST`   | `/institutions`                  | Cria e retorna `201 Created`.      |
+| `PUT`    | `/institutions/{institution_id}` | Substitui e retorna a instituição. |
 | `DELETE` | `/institutions/{institution_id}` | Remove e retorna `204 No Content`. |
 
 O nome da instituição é único após normalização Unicode, espaços e caixa. O ID é
@@ -91,6 +91,7 @@ Cada participante possui:
 {
   "id": "participant-001",
   "name": "Nome do aluno",
+  "cpf": "12345678909",
   "email": "aluno@example.org",
   "institutionId": "institution-001"
 }
@@ -99,6 +100,8 @@ Cada participante possui:
 Campos de entrada:
 
 - `name`: obrigatório, texto não vazio, até 200 caracteres.
+- `cpf`: obrigatório, válido conforme os dígitos verificadores do CPF, normalizado
+  para os 11 dígitos sem pontuação e único entre os participantes.
 - `email`: obrigatório, texto não vazio, até 254 caracteres, normalizado com `strip`.
 - `institutionId`: obrigatório e deve apontar para uma instituição existente.
 
@@ -107,16 +110,16 @@ regra do evento, não um campo repetido em cada registro.
 
 Endpoints:
 
-| Método | Caminho | Resultado |
-| --- | --- | --- |
-| `GET` | `/participants` | Lista todos os participantes. |
-| `GET` | `/participants/{participant_id}` | Retorna um participante. |
-| `POST` | `/participants` | Cria e retorna `201 Created`. |
-| `PUT` | `/participants/{participant_id}` | Substitui e retorna o participante. |
-| `DELETE` | `/participants/{participant_id}` | Remove e retorna `204 No Content`. |
+| Método   | Caminho                          | Resultado                           |
+| -------- | -------------------------------- | ----------------------------------- |
+| `GET`    | `/participants`                  | Lista todos os participantes.       |
+| `GET`    | `/participants/{participant_id}` | Retorna um participante.            |
+| `POST`   | `/participants`                  | Cria e retorna `201 Created`.       |
+| `PUT`    | `/participants/{participant_id}` | Substitui e retorna o participante. |
+| `DELETE` | `/participants/{participant_id}` | Remove e retorna `204 No Content`.  |
 
-O ID do participante é gerado pelo client e preservado em atualizações. O contrato não
-exige unicidade de e-mail, pois o spec não define e-mail como identificador da pessoa.
+O ID do participante é gerado pelo client e preservado em atualizações. O CPF identifica
+unicamente a pessoa no cadastro; o contrato não exige unicidade de e-mail.
 
 ## Persistência e integridade
 
@@ -140,7 +143,7 @@ exige unicidade de e-mail, pois o spec não define e-mail como identificador da 
 cliente autenticado
   -> POST /institutions
   -> resposta com institutionId
-  -> POST /participants { name, email, institutionId }
+  -> POST /participants { name, cpf, email, institutionId }
   -> client valida a instituição
   -> participants.json gravado atomicamente
   -> resposta do participante
@@ -158,6 +161,7 @@ de entrada e saída.
 - Instituição inexistente não pode ser referenciada por participante.
 - Instituição vinculada não pode ser excluída.
 - Nomes equivalentes de instituições são rejeitados.
+- CPF ausente, inválido ou duplicado é rejeitado.
 - Falhas de leitura, validação estrutural ou escrita não vazam detalhes de filesystem na
   resposta HTTP.
 - A suíte existente continua passando sem alterar os arquivos de dados reais.
