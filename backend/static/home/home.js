@@ -167,35 +167,6 @@ function catalogRecord(kind, key) {
   return records.find((record) => catalogKey(record) === key) || null;
 }
 
-/* catalog views live below the schedule helpers */
-function legacyMaskCpf(cpf) {
-  const digits = String(cpf || "").replace(/\D/g, "");
-  return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : "CPF não informado";
-}
-
-function legacyParticipantRow(participant) {
-  const institution = state.institutions.find((item) => item.id === participant.institutionId);
-  return `<article class="catalog-card participant-row"><div><strong>${escapeHtml(participant.name)}</strong><span class="secondary-text">CPF: ${maskCpf(participant.cpf)}</span><span class="secondary-text">${escapeHtml(participant.email)}</span><span class="secondary-text">Instituição: ${escapeHtml(institution?.name || "Não encontrada")}</span></div><div class="card-actions"><button type="button" data-action="edit-participant" data-id="${escapeHtml(participant.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-participant" data-id="${escapeHtml(participant.id)}">Excluir</button></div></article>`;
-}
-
-function legacyInstitutionRow(institution) {
-  return `<article class="catalog-card"><div><strong>${escapeHtml(institution.name)}</strong><span class="secondary-text">${escapeHtml(institution.city)} · ${escapeHtml(institution.state)}</span></div><div class="card-actions"><button type="button" data-action="edit-institution" data-id="${escapeHtml(institution.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-institution" data-id="${escapeHtml(institution.id)}">Excluir</button></div></article>`;
-}
-
-function legacyRenderInstitutions(searchQuery = "") {
-  const query = searchQuery.trim().toLocaleLowerCase();
-  const visible = state.institutions.filter((item) => `${item.name} ${item.city} ${item.state}`.toLocaleLowerCase().includes(query));
-  const content = visible.length ? visible.map(institutionRow).join("") : `<p class="empty-state">${query ? "Nenhuma instituição encontrada" : "Nenhuma instituição cadastrada."}</p>`;
-  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Instituições</h2><p>${state.institutions.length} cadastrada(s)</p></div><button type="button" class="primary-action" data-action="add-institution">Adicionar instituição</button></header><input id="institution-search" type="search" aria-label="Buscar instituições" placeholder="Buscar instituição, cidade ou estado" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="institutions-list">${content}</div>`;
-}
-
-function legacyRenderParticipants(searchQuery = "") {
-  const query = searchQuery.trim().toLocaleLowerCase();
-  const visible = state.participants.filter((item) => `${item.name} ${item.email} ${maskCpf(item.cpf)} ${state.institutions.find((i) => i.id === item.institutionId)?.name || ""}`.toLocaleLowerCase().includes(query));
-  const content = visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`;
-  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Participantes</h2><p>${state.participants.length} cadastrado(s)</p></div><button type="button" class="primary-action" data-action="add-participant">Adicionar participante</button></header><input id="participant-search" type="search" aria-label="Buscar participantes" placeholder="Buscar nome, e-mail ou instituição" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="participants-list">${content}</div>`;
-}
-
 function renderCatalogError() {
   editorContent.innerHTML = `<section class="empty-state" role="alert"><h2>Não foi possível carregar os catálogos.</h2><p>Verifique sua conexão e tente novamente.</p><button type="button" class="primary-action" data-action="retry-admin-data">Tentar novamente</button></section>`;
 }
