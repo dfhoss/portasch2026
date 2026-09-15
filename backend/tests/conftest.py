@@ -33,6 +33,8 @@ class TemporaryDatabase:
     locations: Path
     knowledge_axes: Path
     users: Path
+    institutions: Path
+    participants: Path
 
 
 @pytest.fixture
@@ -42,12 +44,16 @@ def temporary_database(tmp_path: Path) -> TemporaryDatabase:
         locations=tmp_path / "locations.json",
         knowledge_axes=tmp_path / "knowledge_axes.json",
         users=tmp_path / "users.json",
+        institutions=tmp_path / "institutions.json",
+        participants=tmp_path / "participants.json",
     )
     for source_name, destination in (
         ("schedule.json", paths.schedule),
         ("locations.json", paths.locations),
         ("knowledge_axes.json", paths.knowledge_axes),
         ("users.json", paths.users),
+        ("institutions.json", paths.institutions),
+        ("participants.json", paths.participants),
     ):
         shutil.copyfile(PROJECT_ROOT / "db" / source_name, destination)
     return paths
