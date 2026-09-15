@@ -701,6 +701,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   text-align: center;
 }
 .catalog-list { display: grid; gap: var(--space-3); }
+.catalog-list .participant-row { align-items: start; }
+#institution-search, #participant-search { width: 100%; margin: var(--space-4) 0; }
+.catalog-card .secondary-text { display: block; }
 .catalog-card {
   display: flex;
   justify-content: space-between;
@@ -1160,6 +1163,8 @@ dialog h2 { margin-top: var(--space-0); color: var(--color-navigation); }
   .section-heading .card-actions { align-items: start; flex-wrap: wrap; }
   .save-status-group { align-items: stretch; flex-direction: column; }
   .catalog-card { align-items: start; flex-direction: column; }
+  .catalog-card .card-actions { width: 100%; justify-content: flex-start; }
+  .content-header { align-items: flex-start; gap: var(--space-3); }
   .locations-workspace { height: calc(100vh - 17rem); }
   .locations-workspace-body { grid-template-columns: 9rem minmax(0, 1fr); }
   .locations-room-panel { padding: var(--panel-padding); }

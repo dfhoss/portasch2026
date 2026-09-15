@@ -13,6 +13,12 @@ def test_admin_page_is_served_without_embedding_schedule(client):
     assert "Programação completa" not in response.text
 
 
+def test_admin_page_contains_new_catalog_sections(client):
+    html = client.get("/home").text
+    assert 'data-editor-section="institutions"' in html
+    assert 'data-editor-section="participants"' in html
+
+
 def test_admin_javascript_is_served(client):
     """Removing the browser authentication asset must make this fail."""
     response = client.get("/home/static/home.js")

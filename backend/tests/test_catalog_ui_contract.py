@@ -40,6 +40,23 @@ def test_catalog_script_exposes_crud_and_safe_in_use_feedback(client):
     assert "escapeHtml" in script
 
 
+def test_admin_catalog_script_exposes_institution_and_participant_views(client):
+    script = client.get("/home/static/home.js").text
+    for function_name in (
+        "renderInstitutions",
+        "renderParticipants",
+        "saveInstitution",
+        "saveParticipant",
+        "deleteInstitution",
+        "deleteParticipant",
+        "maskCpf",
+    ):
+        assert re.search(rf"function {function_name}\b", script)
+    assert 'apiFetch("/institutions")' in script
+    assert 'apiFetch("/participants")' in script
+    assert "Nenhum participante encontrado" in script
+
+
 def test_more_action_icon_is_solid_without_changing_other_icons():
     css = ADMIN_STYLES.read_text(encoding="utf-8")
     script = ADMIN_SCRIPT.read_text(encoding="utf-8")

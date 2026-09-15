@@ -14,13 +14,15 @@ const modalContent = document.querySelector("#modal-content");
 const addSessionButton = document.querySelector("#add-session");
 const modalApplyButton = document.querySelector("#modal-apply");
 const ADMIN_VIEW_STATE_KEY = "adminViewState";
-const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes", "account"]);
+const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes", "institutions", "participants", "account"]);
 
 const state = {
   schedule: null,
   locations: [],
   locationGroups: [],
   knowledgeAxes: [],
+  institutions: [],
+  participants: [],
   selectedSectionId: null,
 };
 
@@ -163,6 +165,38 @@ function catalogKey(record) {
 function catalogRecord(kind, key) {
   const records = kind === "location" ? state.locations : state.knowledgeAxes;
   return records.find((record) => catalogKey(record) === key) || null;
+}
+
+function maskCpf(cpf) {
+  const digits = String(cpf || "").replace(/\D/g, "");
+  return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : "CPF não informado";
+}
+
+function participantRow(participant) {
+  const institution = state.institutions.find((item) => item.id === participant.institutionId);
+  return `<article class="catalog-card participant-row"><div><strong>${escapeHtml(participant.name)}</strong><span class="secondary-text">CPF: ${maskCpf(participant.cpf)}</span><span class="secondary-text">${escapeHtml(participant.email)}</span><span class="secondary-text">Instituição: ${escapeHtml(institution?.name || "Não encontrada")}</span></div><div class="card-actions"><button type="button" data-action="edit-participant" data-id="${escapeHtml(participant.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-participant" data-id="${escapeHtml(participant.id)}">Excluir</button></div></article>`;
+}
+
+function institutionRow(institution) {
+  return `<article class="catalog-card"><div><strong>${escapeHtml(institution.name)}</strong><span class="secondary-text">${escapeHtml(institution.city)} · ${escapeHtml(institution.state)}</span></div><div class="card-actions"><button type="button" data-action="edit-institution" data-id="${escapeHtml(institution.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-institution" data-id="${escapeHtml(institution.id)}">Excluir</button></div></article>`;
+}
+
+function renderInstitutions(searchQuery = "") {
+  const query = searchQuery.trim().toLocaleLowerCase();
+  const visible = state.institutions.filter((item) => `${item.name} ${item.city} ${item.state}`.toLocaleLowerCase().includes(query));
+  const content = visible.length ? visible.map(institutionRow).join("") : `<p class="empty-state">${query ? "Nenhuma instituição encontrada" : "Nenhuma instituição cadastrada."}</p>`;
+  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Instituições</h2><p>${state.institutions.length} cadastrada(s)</p></div><button type="button" class="primary-action" data-action="add-institution">Adicionar instituição</button></header><input id="institution-search" type="search" aria-label="Buscar instituições" placeholder="Buscar instituição, cidade ou estado" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="institutions-list">${content}</div>`;
+}
+
+function renderParticipants(searchQuery = "") {
+  const query = searchQuery.trim().toLocaleLowerCase();
+  const visible = state.participants.filter((item) => `${item.name} ${item.email} ${maskCpf(item.cpf)} ${state.institutions.find((i) => i.id === item.institutionId)?.name || ""}`.toLocaleLowerCase().includes(query));
+  const content = visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`;
+  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Participantes</h2><p>${state.participants.length} cadastrado(s)</p></div><button type="button" class="primary-action" data-action="add-participant">Adicionar participante</button></header><input id="participant-search" type="search" aria-label="Buscar participantes" placeholder="Buscar nome, e-mail ou instituição" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="participants-list">${content}</div>`;
+}
+
+function renderCatalogError() {
+  editorContent.innerHTML = `<section class="empty-state" role="alert"><h2>Não foi possível carregar os catálogos.</h2><p>Verifique sua conexão e tente novamente.</p><button type="button" class="primary-action" data-action="retry-admin-data">Tentar novamente</button></section>`;
 }
 
 function showErrors(errors) {
@@ -657,6 +691,10 @@ function renderEditorSection(section) {
     renderLocations();
   } else if (activeEditorSection === "axes") {
     renderKnowledgeAxes();
+  } else if (activeEditorSection === "institutions") {
+    renderInstitutions();
+  } else if (activeEditorSection === "participants") {
+    renderParticipants();
   } else if (activeEditorSection === "account") {
     renderSettings();
   } else {
@@ -1132,11 +1170,73 @@ function catalogReferenceValue(value) {
   return modalReferenceValues.get(value) ?? value;
 }
 
+function maskCpf(cpf) {
+  const digits = String(cpf || "").replace(/\D/g, "");
+  return digits.length === 11 ? `***.***.***-${digits.slice(-2)}` : "CPF não informado";
+}
+
+function participantRow(item) {
+  const institution = state.institutions.find((record) => record.id === item.institutionId);
+  return `<article class="catalog-card participant-row"><div><strong>${escapeHtml(item.name)}</strong><span class="secondary-text">CPF: ${maskCpf(item.cpf)}</span><span class="secondary-text">${escapeHtml(item.email)}</span><span class="secondary-text">Instituição: ${escapeHtml(institution?.name || "Não encontrada")}</span></div><div class="card-actions"><button type="button" data-action="edit-participant" data-id="${escapeHtml(item.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-participant" data-id="${escapeHtml(item.id)}">Excluir</button></div></article>`;
+}
+function institutionRow(item) {
+  return `<article class="catalog-card"><div><strong>${escapeHtml(item.name)}</strong><span class="secondary-text">${escapeHtml(item.city)} · ${escapeHtml(item.state)}</span></div><div class="card-actions"><button type="button" data-action="edit-institution" data-id="${escapeHtml(item.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-institution" data-id="${escapeHtml(item.id)}">Excluir</button></div></article>`;
+}
+
+function renderInstitutions(searchQuery = "") {
+  const query = searchQuery.trim().toLocaleLowerCase();
+  const visible = state.institutions.filter((item) => `${item.name} ${item.city} ${item.state}`.toLocaleLowerCase().includes(query));
+  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Instituições</h2><p>${state.institutions.length} cadastrada(s)</p></div><button type="button" class="primary-action" data-action="add-institution">Adicionar instituição</button></header><input id="institution-search" type="search" aria-label="Buscar instituições" placeholder="Buscar instituição, cidade ou estado" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="institutions-list">${visible.length ? visible.map(institutionRow).join("") : `<p class="empty-state">${query ? "Nenhuma instituição encontrada" : "Nenhuma instituição cadastrada."}</p>`}</div>`;
+}
+
+function renderParticipants(searchQuery = "") {
+  const query = searchQuery.trim().toLocaleLowerCase();
+  const visible = state.participants.filter((item) => `${item.name} ${item.email} ${state.institutions.find((i) => i.id === item.institutionId)?.name || ""}`.toLocaleLowerCase().includes(query));
+  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Participantes</h2><p>${state.participants.length} cadastrado(s)</p></div><button type="button" class="primary-action" data-action="add-participant">Adicionar participante</button></header><input id="participant-search" type="search" aria-label="Buscar participantes" placeholder="Buscar nome, e-mail ou instituição" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="participants-list">${visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`}</div>`;
+}
+
+function openAdminCatalogEditor(type, record, opener) {
+  modalContext = {type, record};
+  const form = type === "institution"
+    ? `<label for="institution-name">Nome</label><input id="institution-name" name="name" required value="${escapeHtml(record?.name)}"><label for="institution-city">Cidade</label><input id="institution-city" name="city" required value="${escapeHtml(record?.city)}"><label for="institution-state">Estado</label><input id="institution-state" name="state" required value="${escapeHtml(record?.state)}"><label for="institution-description">Descrição</label><textarea id="institution-description" name="description">${escapeHtml(record?.description)}</textarea>`
+    : `<label for="participant-name">Nome</label><input id="participant-name" name="name" required value="${escapeHtml(record?.name)}"><label for="participant-cpf">CPF</label><input id="participant-cpf" name="cpf" required inputmode="numeric" value="${escapeHtml(record?.cpf)}"><label for="participant-email">E-mail</label><input id="participant-email" name="email" required type="email" value="${escapeHtml(record?.email)}"><label for="participant-institution">Instituição</label><select id="participant-institution" name="institutionId" required>${state.institutions.map((item) => `<option value="${item.id}"${item.id === record?.institutionId ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}</select>`;
+  showModal(record ? "Editar cadastro" : "Adicionar cadastro", `<form id="catalog-editor-form" class="editor-form">${form}</form>`, opener);
+}
+
+async function saveInstitution(form) { return saveAdminCatalog("institution", form); }
+async function saveParticipant(form) { return saveAdminCatalog("participant", form); }
+async function saveAdminCatalog(type, form) {
+  const data = Object.fromEntries(new FormData(form).entries());
+  if (type === "participant") data.cpf = data.cpf.replace(/\D/g, "");
+  const resource = type === "institution" ? "institutions" : "participants";
+  const record = modalContext.record;
+  const response = await apiFetch(record ? `/${resource}/${record.id}` : `/${resource}`, {method: record ? "PUT" : "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data)});
+  if (!response.ok) return showApiError(response, "Não foi possível salvar o cadastro.");
+  const canonical = await response.json();
+  const list = type === "institution" ? state.institutions : state.participants;
+  const index = list.findIndex((item) => item.id === canonical.id);
+  if (index < 0) list.push(canonical); else list[index] = canonical;
+  editorModal.close(); renderEditorSection(resource); announce("Cadastro salvo com sucesso.");
+}
+
+async function deleteInstitution(record) { return deleteAdminCatalog("institution", record); }
+async function deleteParticipant(record) { return deleteAdminCatalog("participant", record); }
+async function deleteAdminCatalog(type, record) {
+  if (!record || !confirmDeletion(`Excluir o cadastro de “${record.name}”?`)) return;
+  const resource = type === "institution" ? "institutions" : "participants";
+  const response = await apiFetch(`/${resource}/${record.id}`, {method: "DELETE"});
+  if (!response.ok) return showApiError(response, "Não foi possível excluir o cadastro.");
+  const list = type === "institution" ? state.institutions : state.participants;
+  list.splice(list.indexOf(record), 1); renderEditorSection(resource); announce("Cadastro excluído com sucesso.");
+}
+
 function applyModalDraft(form) {
   if (!modalContext) return;
   if (modalContext.type === "location") return saveLocation(form);
   if (modalContext.type === "location-group") return saveLocationGroup(form);
   if (modalContext.type === "axis") return saveKnowledgeAxis(form);
+  if (modalContext.type === "institution") return saveInstitution(form);
+  if (modalContext.type === "participant") return saveParticipant(form);
   const title = formValue(form, "title");
   if (!title) {
     announce("O título é obrigatório.");
@@ -1326,32 +1426,36 @@ async function saveSchedule() {
 
 async function loadAdminData() {
   const viewState = readEditorViewState();
-  const [scheduleResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse] =
+  const [scheduleResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse, institutionsResponse, participantsResponse] =
     await Promise.all([
       apiFetch("/schedule"),
       apiFetch("/locations"),
       apiFetch("/locations/groups"),
       apiFetch("/knowledge-axes"),
+      apiFetch("/institutions"),
+      apiFetch("/participants"),
     ]);
   if (
     !scheduleResponse.ok ||
     !locationsResponse.ok ||
     !locationGroupsResponse.ok ||
-    !knowledgeAxesResponse.ok
+    !knowledgeAxesResponse.ok || !institutionsResponse.ok || !participantsResponse.ok
   ) {
     throw new Error("load-failed");
   }
-  const [schedule, locations, locationGroups, knowledgeAxes] = await Promise.all([
+  const [schedule, locations, locationGroups, knowledgeAxes, institutions, participants] = await Promise.all([
     scheduleResponse.json(),
     locationsResponse.json(),
     locationGroupsResponse.json(),
     knowledgeAxesResponse.json(),
+    institutionsResponse.json(),
+    participantsResponse.json(),
   ]);
   if (
     !isCanonicalSchedule(schedule) ||
     !isCanonicalCatalogList(locations) ||
     !isCanonicalLocationGroupList(locationGroups) ||
-    !isCanonicalCatalogList(knowledgeAxes)
+    !isCanonicalCatalogList(knowledgeAxes) || !isCanonicalCatalogList(institutions) || !isCanonicalCatalogList(participants)
   ) {
     throw new Error("load-failed");
   }
@@ -1360,6 +1464,8 @@ async function loadAdminData() {
   state.locations = locations;
   state.locationGroups = locationGroups;
   state.knowledgeAxes = knowledgeAxes;
+  state.institutions = institutions;
+  state.participants = participants;
   restoreScheduleViewState(viewState);
   renderEditorSection(viewState?.section || "schedule");
 }
@@ -1370,9 +1476,15 @@ async function showEditor() {
     showLogin("Não foi possível validar sua sessão.");
     return;
   }
-  await loadAdminData();
   loginView.hidden = true;
   editorView.hidden = false;
+  try {
+    await loadAdminData();
+  } catch (error) {
+    if (error.message === "unauthorized") throw error;
+    renderCatalogError();
+    return;
+  }
   const scrollY = readEditorViewState()?.scrollY || 0;
   setTimeout(() => globalThis.scrollTo?.(0, scrollY), 0);
 }
@@ -1395,6 +1507,7 @@ async function handleEditorClick(event) {
   button.closest(".menu")?.removeAttribute("open");
 
   if (action === "save-schedule") return saveSchedule();
+  if (action === "retry-admin-data") return loadAdminData().catch(renderCatalogError);
   if (action === "add-section") {
     if (!state.schedule) {
       announce("A programação ainda está carregando.");
@@ -1424,6 +1537,12 @@ async function handleEditorClick(event) {
   if (action === "add-axis") return openKnowledgeAxisEditor(null, button);
   if (action === "edit-axis") return openKnowledgeAxisEditor(catalogRecord("axis", key), button);
   if (action === "delete-axis") return deleteKnowledgeAxis(catalogRecord("axis", key));
+  if (action === "add-institution") return openAdminCatalogEditor("institution", null, button);
+  if (action === "add-participant") return openAdminCatalogEditor("participant", null, button);
+  if (action === "edit-institution") return openAdminCatalogEditor("institution", state.institutions.find((item) => item.id === button.dataset.id), button);
+  if (action === "edit-participant") return openAdminCatalogEditor("participant", state.participants.find((item) => item.id === button.dataset.id), button);
+  if (action === "delete-institution") return deleteInstitution(state.institutions.find((item) => item.id === button.dataset.id));
+  if (action === "delete-participant") return deleteParticipant(state.participants.find((item) => item.id === button.dataset.id));
   if (action === "select-section") {
     const section = findSectionByKey(key);
     if (section) {
@@ -1558,11 +1677,11 @@ editorContent.addEventListener("change", (event) => {
   markScheduleChanged();
 });
 editorContent.addEventListener("input", (event) => {
-  if (event.target.id !== "location-search" && event.target.id !== "knowledge-axis-search") return;
+  if (!["location-search", "knowledge-axis-search", "institution-search", "participant-search"].includes(event.target.id)) return;
   const searchInput = event.target;
   const selectionStart = searchInput.selectionStart;
   const selectionEnd = searchInput.selectionEnd;
-  const renderSearch = searchInput.id === "location-search" ? renderLocations : renderKnowledgeAxes;
+  const renderSearch = {"location-search": renderLocations, "knowledge-axis-search": renderKnowledgeAxes, "institution-search": renderInstitutions, "participant-search": renderParticipants}[searchInput.id];
   renderSearch(searchInput.value);
   const nextSearchInput = searchInput.id === "location-search"
     ? document.querySelector("#location-search")
