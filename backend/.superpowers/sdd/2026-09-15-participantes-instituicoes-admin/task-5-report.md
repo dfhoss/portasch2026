@@ -56,3 +56,7 @@ e markup seguro. As verificações finais registraram 98 testes focados e 18 E2E
 `ruff check`, `ty check` e `git diff --check` passaram. `ruff format --check .` continua apontando
 somente `clients/locations.py`, snippets da documentação/plano e os testes preexistentes que não
 foram reformata­dos fora do escopo.
+
+## Rodada de correção 2
+
+Removidas as cinco funções legacy mortas e acrescentado contrato de ausência delas. Testes focados: 98 passed. E2E: 18 passed. Ruff check, ty check e git diff --check passaram. O format check global continua limitado aos arquivos preexistentes fora do escopo, conforme registrado anteriormente.

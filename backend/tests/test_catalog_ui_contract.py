@@ -61,6 +61,8 @@ def test_catalog_markup_escapes_participant_institution_id(client):
     script = client.get("/home/static/home.js").text
     assert 'option value="${escapeHtml(item.id)}"' in script
     assert "renderCatalogLoading" in script
+    for dead_name in ("legacyMaskCpf", "legacyParticipantRow", "legacyInstitutionRow", "legacyRenderInstitutions", "legacyRenderParticipants"):
+        assert dead_name not in script
 
 
 def test_more_action_icon_is_solid_without_changing_other_icons():
