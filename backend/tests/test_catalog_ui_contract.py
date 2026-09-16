@@ -174,6 +174,16 @@ def test_catalog_headers_share_schedule_toolbar_and_primary_action_structure():
         assert.match(html, /class="secondary-action location-group-edit"[\s\S]*data-action="edit-axis"/);
         assert.equal((html.match(/data-action="edit-axis"/g) || []).length, 1);
         assert.equal((html.match(/data-action="delete-axis"/g) || []).length, 0);
+
+        api.state.institutions = [];
+        api.renderInstitutions();
+        html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar instituição/);
+
+        api.state.participants = [];
+        api.renderParticipants();
+        html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /content-header[\s\S]*toolbar-actions[\s\S]*primary-action[\s\S]*Adicionar participante/);
         """
     )
 

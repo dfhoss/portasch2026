@@ -172,6 +172,7 @@ def test_schedule_and_catalog_headers_share_action_style_and_content_spacing(
               const style = getComputedStyle(button);
               return {
                 gap: next.getBoundingClientRect().top - header.getBoundingClientRect().bottom,
+                actionTopOffset: button.getBoundingClientRect().top - header.getBoundingClientRect().top,
                 height: button.getBoundingClientRect().height,
                 padding: style.padding,
                 radius: style.borderRadius,
@@ -186,10 +187,17 @@ def test_schedule_and_catalog_headers_share_action_style_and_content_spacing(
     locations = header_metrics("Adicionar sala")
     admin_page.get_by_role("button", name="Eixos").click()
     axes = header_metrics("Adicionar eixo")
+    admin_page.get_by_role("button", name="Instituições").click()
+    institutions = header_metrics("Adicionar instituição")
+    admin_page.get_by_role("button", name="Participantes").click()
+    participants = header_metrics("Adicionar participante")
 
     assert schedule["gap"] > 0
+    assert schedule["actionTopOffset"] == 0
     assert locations == schedule
     assert axes == schedule
+    assert institutions == schedule
+    assert participants == schedule
 
 
 def test_malformed_token_is_removed_and_returns_to_login(live_server_url: str, browser) -> None:

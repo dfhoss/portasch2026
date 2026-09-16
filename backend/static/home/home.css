@@ -405,6 +405,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   flex-wrap: wrap;
 }
 .content-header {
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: var(--space-5);
 }

@@ -85,11 +85,22 @@ Por solicitação de revisão visual, foi criado ainda um teste RED específico 
 do menu (`1 failed, 55 deselected, 3 warnings`). A correção foi somente aplicar
 `border-radius: var(--space-0)` em `.menu-panel .menu-item`; o teste GREEN passou.
 
+Por solicitação adicional, medi os cabeçalhos de Programação, Locais, Eixos, Instituições e
+Participantes no navegador. O botão tinha o mesmo contrato próprio em todas as telas (`40px`,
+`1px 16px`, raio `8px`, cor `rgb(22, 115, 74)`), mas o bloco de título dos dois catálogos tinha
+uma linha extra de contagem. Com `align-items: center`, isso deslocava a ação `13,89px` do topo,
+contra `3,39px` nas demais telas. O teste E2E reproduziu o RED; a correção usa
+`align-items: flex-start` no `.content-header` e envolve as ações dos catálogos em
+`.toolbar-actions`, conforme o contrato documentado. O GREEN confirmou offset superior zero e
+igualdade de dimensões, espaçamento, raio, padding e cor nos cinco cabeçalhos.
+
 ## Arquivos alterados
 
-- `DESIGN.md`: contratos de ação primária, busca, menus CRUD e selects, com referências técnicas.
-- `static/home/home.css`: contratos autônomos de ações, campos, popup e selects.
-- `static/home/home.js`: labels de busca, menus CRUD com SVG, estado acessível e selects padronizados.
+- `DESIGN.md`: contratos de ação primária, busca, menus CRUD, selects e alinhamento de cabeçalhos,
+  com referências técnicas.
+- `static/home/home.css`: contratos autônomos de ações, campos, popup, selects e cabeçalhos.
+- `static/home/home.js`: labels de busca, menus CRUD com SVG, estado acessível, selects padronizados
+  e contêiner compartilhado das ações dos catálogos.
 - `tests/test_home_page.py`: contrato completo de `.primary-action`.
 - `tests/test_catalog_ui_contract.py`: contratos de busca, ações, popup, raio zero e selects.
 - `tests/e2e/test_home_panel.py`: uso do menu CRUD e pré-condição de catálogo baseada no nome único.
@@ -100,9 +111,11 @@ os corrigidos na primeira parte da Tarefa 7.
 
 ## Validações
 
-- `uv run pytest --basetemp .pytest-tmp-design-final-focused tests/test_home_page.py tests/test_home_editor_js.py tests/test_catalog_ui_contract.py -q` — **113 passed**, 1 warning preexistente.
-- `uv run pytest --basetemp .pytest-tmp-design-standardization-e2e-final tests/e2e -q` — **19 passed**, 1 warning preexistente de depreciação do Starlette/httpx.
-- `uv run pytest --basetemp .pytest-tmp-full-final -q` — **259 passed, 3 falhas do baseline**:
+- `uv run pytest --basetemp .pytest-tmp-design-final-focused-2 tests/test_home_page.py tests/test_home_editor_js.py tests/test_catalog_ui_contract.py -q` — **113 passed**, 1 warning preexistente.
+- `uv run pytest --basetemp .pytest-tmp-design-standardization-e2e-final-serial tests/e2e -q` — **19 passed**, 1 warning preexistente de depreciação do Starlette/httpx.
+- `uv run pytest --basetemp .pytest-tmp-primary-alignment-unit-green tests/test_catalog_ui_contract.py -k catalog_headers_share_schedule_toolbar_and_primary_action_structure -q` — **1 passed**.
+- `uv run pytest --basetemp .pytest-tmp-primary-alignment-e2e-green tests/e2e/test_home_panel.py::test_schedule_and_catalog_headers_share_action_style_and_content_spacing -q` — **1 passed**.
+- `uv run pytest --basetemp .pytest-tmp-full-final-serial -q` — **259 passed, 3 falhas do baseline**:
   os testes de dados esperam `db/participants.json` vazio, mas esse arquivo já estava modificado
   com um participante antes desta execução; ele não foi alterado nem revertido.
 - `uv run ruff check .` — **passou**.
@@ -119,7 +132,8 @@ alteração em `.env`, credenciais, usuários, `locations.json`, `ideas.md` ou a
 arquitetura. O `db/participants.json` já estava modificado antes desta extensão e não foi
 incluído nem alterado por ela. Os ícones usam `currentColor`, os estados usam tokens semânticos,
 os nomes acessíveis são explícitos e os controles preservam foco, contraste, responsividade e
-`prefers-reduced-motion`.
+`prefers-reduced-motion`. Os cabeçalhos agora usam a mesma estrutura de ação e não introduzem
+espaçamento vertical específico por catálogo.
 
 ## Verificação independente e resolução dos itens não verificáveis pela diff
 

@@ -268,7 +268,9 @@ ele ao implementar ou alterar a interface.
   legada `location` é aceita somente para migração ao formato de lista.
 - Todo `.content-header` no nível da página usa `--space-5` abaixo dele. Ações primárias do
   cabeçalho pertencem a `.toolbar-actions` para que as telas de agenda e catálogo compartilhem
-  dimensões e alinhamento.
+  dimensões e alinhamento. O cabeçalho usa `align-items: flex-start`, sem margem ou padding
+  vertical adicional na ação; assim, contagens ou textos auxiliares de um catálogo não deslocam
+  o botão para baixo em relação aos demais cabeçalhos.
 - O espaço de trabalho da programação mantém uma única ação de criação no cabeçalho da página:
   `Adicionar seção` é representado por um botão compacto em formato de pílula, com ícone de mais e
   texto visível, ao final da lista de seções, com nome acessível `Adicionar seção`. O shell e o
