@@ -75,3 +75,38 @@ alteração em `.env`, credenciais, usuários, locations, `ideas.md`, dados pers
 herdam os estados ativo/inativo existentes e não introduzem nova paleta ou token. O contrato
 de foco, contraste, responsividade e movimento reduzido permaneceu coberto pela implementação
 existente e pelas asserções revisadas.
+
+## Verificação independente e resolução dos itens não verificáveis pela diff
+
+A revisão da tarefa marcou como `⚠️` os contratos mantidos em arquivos inalterados. A inspeção
+direta confirmou:
+
+- `static/home/index.html:30-43` mantém rótulos textuais, SVGs decorativos com
+  `aria-hidden="true"` e nomes acessíveis para os cinco itens principais, Perfil,
+  Configurações e Sair.
+- `static/home/home.css:58-71` declara os tokens semânticos; `:112-115` aplica foco visível
+  com `--color-focus`; `:173-230` usa superfícies, texto, bordas e estados de navegação
+  semânticos; `:235-293` cobre o gatilho e as opções de Perfil com contraste e foco.
+- `static/home/home.js:657-664` mantém `aria-current="page"` somente no item ativo, enquanto
+  `home.css:226-230` diferencia o estado ativo por superfície e cor além do rótulo.
+- `static/home/home.css:1097-1104` respeita `prefers-reduced-motion`; `:1106-1115` mantém
+  duas colunas e reduz a barra lateral entre 750px e 1024px; `:1117-1158` converte a
+  navegação para uma barra horizontal até 749px sem ocultar os rótulos.
+- `tests/test_home_page.py:136-167` verifica a estrutura da barra lateral, os oito controles,
+  os SVGs e `aria-hidden`; `tests/e2e/test_home_panel.py:85-124` verifica os breakpoints do
+  layout e a ausência de lacuna entre status e conteúdo.
+
+A execução independente das validações da Tarefa 7, após o commit do implementador, produziu:
+
+- contratos UI: `109 passed`, com o warning preexistente de depreciação Starlette/httpx;
+- E2E: `19 passed`, com o mesmo warning preexistente;
+- `uv run ruff check .`: passou;
+- `uv run ty check`: passou;
+- `git diff --check`: passou;
+- `uv run ruff format --check .`: falhou somente nos seis arquivos preexistentes fora do
+  escopo (`clients/locations.py`, plano/spec e testes anteriores); os arquivos da Tarefa 7
+  permanecem formatados.
+
+A primeira execução E2E relatada pelo implementador encontrou uma corrida de limpeza do
+`basetemp`; a repetição independente acima passou integralmente, portanto essa limitação não
+permanece como falha da implementação. Nenhum ajuste adicional de código foi necessário.
