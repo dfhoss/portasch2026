@@ -326,7 +326,7 @@ function renderActivities(group) {
             <div class="session-summary">${renderSessions(activity)}</div>
           </div>
           <details class="menu card-menu">
-            <summary class="menu-trigger card-menu-trigger" aria-label="Ações da atividade ${escapeHtml(activity.title || "Atividade sem título")}">${actionIcon("more")}</summary>
+            <summary class="menu-trigger card-menu-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Ações da atividade ${escapeHtml(activity.title || "Atividade sem título")}">${actionIcon("more")}</summary>
             <div class="menu-panel card-menu-panel" role="menu">
               <button class="menu-item" type="button" role="menuitem" data-action="edit-activity" data-key="${key}">${actionIcon("edit")}Editar</button>
               <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-activity" data-key="${key}">${actionIcon("delete")}Excluir</button>
@@ -356,7 +356,7 @@ function renderGroups(section = selectedSection()) {
               <span class="group-toggle-indicator">${actionIcon("chevron")}</span>
             </button>
             <details class="menu card-menu">
-              <summary class="menu-trigger card-menu-trigger" aria-label="Ações do grupo ${escapeHtml(group.title || "Grupo sem título")}">${actionIcon("more")}</summary>
+              <summary class="menu-trigger card-menu-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Ações do grupo ${escapeHtml(group.title || "Grupo sem título")}">${actionIcon("more")}</summary>
               <div class="menu-panel card-menu-panel" role="menu">
                 <button class="menu-item" type="button" role="menuitem" data-action="add-activity-to-group" data-key="${key}">${actionIcon("activity")}Adicionar atividade</button>
                 <button class="menu-item" type="button" role="menuitem" data-action="edit-group" data-key="${key}">${actionIcon("edit")}Editar</button>
@@ -399,14 +399,14 @@ function renderSections() {
           </div>
           <div class="card-actions">
             <details class="menu toolbar-menu section-create-menu">
-              <summary class="menu-trigger toolbar-menu-trigger"><span>Adicionar</span><span class="menu-chevron">${actionIcon("chevron")}</span></summary>
+              <summary class="menu-trigger toolbar-menu-trigger" aria-haspopup="menu" aria-expanded="false"><span>Adicionar</span><span class="menu-chevron">${actionIcon("chevron")}</span></summary>
               <div class="menu-panel toolbar-menu-panel" role="menu">
                 <button class="menu-item" type="button" role="menuitem" data-action="add-group">${actionIcon("collection")}Adicionar grupo</button>
                 <button class="menu-item" type="button" role="menuitem" data-action="add-activity">${actionIcon("activity")}Adicionar atividade</button>
               </div>
             </details>
             <details class="menu card-menu">
-              <summary class="menu-trigger card-menu-trigger" aria-label="Ações da seção ${escapeHtml(section.title || "Seção sem título")}">${actionIcon("more")}</summary>
+              <summary class="menu-trigger card-menu-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Ações da seção ${escapeHtml(section.title || "Seção sem título")}">${actionIcon("more")}</summary>
               <div class="menu-panel card-menu-panel" role="menu">
                 <button class="menu-item" type="button" role="menuitem" data-action="edit-section" data-key="${draftKey(section)}">${actionIcon("edit")}Editar seção</button>
                 <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-section" data-key="${draftKey(section)}">${actionIcon("delete")}Excluir seção</button>
@@ -489,8 +489,9 @@ function renderLocations(searchQuery = "") {
       </div>
     </header>
     <div class="locations-workspace">
-      <div class="location-toolbar">
-        <input id="location-search" type="search" placeholder="Buscar sala, grupo ou descrição" value="${escapeHtml(searchQuery)}" aria-label="Buscar salas">
+      <div class="location-toolbar search-bar" role="search" aria-label="Busca de salas">
+        <label class="search-label" for="location-search">Buscar salas</label>
+        <input class="search-field" id="location-search" type="search" placeholder="Buscar sala, grupo ou descrição" value="${escapeHtml(searchQuery)}">
       </div>
       <div class="locations-workspace-body">
         <nav id="location-group-nav" class="location-group-nav" aria-label="Grupos de locais">
@@ -594,8 +595,9 @@ function renderKnowledgeAxes(searchQuery = "") {
       </div>
     </header>
     <div class="locations-workspace knowledge-axes-workspace">
-      <div class="location-toolbar">
-        <input id="knowledge-axis-search" type="search" placeholder="Buscar eixo" value="${escapeHtml(searchQuery)}" aria-label="Buscar eixos">
+      <div class="location-toolbar search-bar" role="search" aria-label="Busca de eixos">
+        <label class="search-label" for="knowledge-axis-search">Buscar eixos</label>
+        <input class="search-field" id="knowledge-axis-search" type="search" placeholder="Buscar eixo" value="${escapeHtml(searchQuery)}">
       </div>
       <div class="locations-workspace-body">
         <nav id="knowledge-axis-nav" class="location-group-nav axis-nav" aria-label="Eixos de conhecimento">
@@ -616,6 +618,17 @@ function renderKnowledgeAxes(searchQuery = "") {
     </div>`;
 }
 
+function cardActionMenu(label, editAction, deleteAction, keyAttribute, key) {
+  const escapedKey = escapeHtml(key);
+  return `<details class="menu card-menu">
+    <summary class="menu-trigger card-menu-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Ações ${escapeHtml(label)}">${actionIcon("more")}</summary>
+    <div class="menu-panel card-menu-panel" role="menu">
+      <button class="menu-item" type="button" role="menuitem" data-action="${editAction}" ${keyAttribute}="${escapedKey}">${actionIcon("edit")}Editar</button>
+      <button class="menu-item danger-action" type="button" role="menuitem" data-action="${deleteAction}" ${keyAttribute}="${escapedKey}">${actionIcon("delete")}Excluir</button>
+    </div>
+  </details>`;
+}
+
 function locationCard(location, extraClass = "") {
   const key = catalogKey(location);
   return `<article class="catalog-card${extraClass}">
@@ -624,13 +637,7 @@ function locationCard(location, extraClass = "") {
       ${location.description ? `<p class="secondary-text">${escapeHtml(location.description)}</p>` : ""}
     </div>
     <div class="card-actions">
-      <details class="menu card-menu">
-        <summary class="menu-trigger card-menu-trigger" aria-label="Ações do local ${escapeHtml(location.name)}">${actionIcon("more")}</summary>
-        <div class="menu-panel card-menu-panel" role="menu">
-          <button class="menu-item" type="button" role="menuitem" data-action="edit-location" data-key="${key}">${actionIcon("edit")}Editar</button>
-          <button class="menu-item danger-action" type="button" role="menuitem" data-action="delete-location" data-key="${key}">${actionIcon("delete")}Excluir</button>
-        </div>
-      </details>
+      ${cardActionMenu(`do local ${location.name}`, "edit-location", "delete-location", "data-key", key)}
     </div>
   </article>`;
 }
@@ -700,6 +707,14 @@ function selectOptions(items, selectedValue, emptyLabel, multiple = false) {
   return options.join("");
 }
 
+function selectControl(attributes, options, multiple = false) {
+  const modifier = multiple ? " select-control-wrap--multiple" : "";
+  const chevron = multiple
+    ? ""
+    : `<span class="select-chevron" aria-hidden="true">${actionIcon("chevron")}</span>`;
+  return `<span class="select-control-wrap${modifier}"><select class="select-control" ${attributes}>${options}</select>${chevron}</span>`;
+}
+
 function showModal(title, content, opener) {
   modalOpener = opener || document.activeElement;
   modalOpenerTarget = modalOpener
@@ -744,11 +759,10 @@ function openGroupEditor(group = null, section = selectedSection(), opener = nul
     `<form id="item-editor-form" class="editor-form">
       <label>Título <input name="title" required value="${escapeHtml(group?.title)}"></label>
       <label>Eixo de conhecimento
-        <select name="knowledgeAxis">${selectOptions(
-          state.knowledgeAxes,
-          group?.knowledgeAxis,
-          "Sem eixo",
-        )}</select>
+        ${selectControl(
+          'name="knowledgeAxis"',
+          selectOptions(state.knowledgeAxes, group?.knowledgeAxis, "Sem eixo"),
+        )}
       </label>
     </form>`,
     opener,
@@ -768,20 +782,21 @@ function openCatalogEditor(type, record = null, opener = null) {
   const label = location ? "Nome do local" : "Nome do eixo";
   const locationFields = location
     ? `<label>Grupo
-        <select name="groupId">
-          <option value="">Sem grupo</option>
-          ${state.locationGroups
+        ${selectControl(
+          'name="groupId"',
+          `<option value="">Sem grupo</option>${state.locationGroups
             .map((item) => `<option value="${escapeHtml(item.id)}"${item.id === selectedGroupId ? " selected" : ""}>${escapeHtml(item.name)}</option>`)
-            .join("")}
-        </select>
+            .join("")}`,
+        )}
       </label>
       <label>Categoria
-        <select name="category">
-          <option value="blocos"${record?.category === "blocos" ? " selected" : ""}>Blocos</option>
+        ${selectControl(
+          'name="category"',
+          `<option value="blocos"${record?.category === "blocos" ? " selected" : ""}>Blocos</option>
           <option value="laboratorios"${record?.category === "laboratorios" ? " selected" : ""}>Laboratórios</option>
           <option value="estacionamentos"${record?.category === "estacionamentos" ? " selected" : ""}>Estacionamentos</option>
-          <option value="outros"${record?.category === "outros" || (!record && selectedGroup?.category === "outros") ? " selected" : ""}>Outros</option>
-        </select>
+          <option value="outros"${record?.category === "outros" || (!record && selectedGroup?.category === "outros") ? " selected" : ""}>Outros</option>`,
+        )}
       </label>
       <label>Número da sala/local <input name="roomNumber" maxlength="80" value="${escapeHtml(record?.roomNumber)}"></label>
       <label>Descrição <textarea name="description" maxlength="500">${escapeHtml(record?.description)}</textarea></label>`
@@ -810,12 +825,13 @@ function openLocationGroupEditor(record = null, opener = null) {
     `<form id="location-group-form" class="editor-form">
       <label>Nome do grupo <input name="name" required maxlength="200" value="${escapeHtml(record?.name)}"></label>
       <label>Tipo
-        <select name="category" required>
-          <option value="blocos"${record?.category === "blocos" || (!record && selectedGroup?.category === "blocos") ? " selected" : ""}>Blocos</option>
+        ${selectControl(
+          'name="category" required',
+          `<option value="blocos"${record?.category === "blocos" || (!record && selectedGroup?.category === "blocos") ? " selected" : ""}>Blocos</option>
           <option value="laboratorios"${record?.category === "laboratorios" || (!record && selectedGroup?.category === "laboratorios") ? " selected" : ""}>Laboratórios</option>
           <option value="estacionamentos"${record?.category === "estacionamentos" || (!record && selectedGroup?.category === "estacionamentos") ? " selected" : ""}>Estacionamentos</option>
-          <option value="outros"${record?.category === "outros" ? " selected" : ""}>Outros</option>
-        </select>
+          <option value="outros"${record?.category === "outros" ? " selected" : ""}>Outros</option>`,
+        )}
       </label>
     </form>`,
     opener,
@@ -830,7 +846,7 @@ function sessionEditorMarkup(session, index) {
   return `<div class="session-editor" data-session-index="${index}">
     <label>Início <input name="startTime" type="time" step="60" required value="${escapeHtml(session.startTime)}"></label>
     <label>Fim <input name="endTime" type="time" step="60" required value="${escapeHtml(session.endTime)}"></label>
-    <label>Locais <select name="locations" multiple size="4">${selectOptions(state.locations, session.locations ?? (session.location ? [session.location] : []), "Sem local", true)}</select></label>
+    <label>Locais ${selectControl('name="locations" multiple size="4"', selectOptions(state.locations, session.locations ?? (session.location ? [session.location] : []), "Sem local", true), true)}</label>
     <button class="danger-action" type="button" data-action="delete-session">Excluir horário</button>
   </div>`;
 }
@@ -873,7 +889,7 @@ function openActivityEditor(activity = null, group = null, opener = null) {
   showModal(
     activity ? "Editar atividade" : "Adicionar atividade",
     `<form id="item-editor-form" class="editor-form">
-      <label>Grupo <select name="groupKey">${groupOptions}</select></label>
+      <label>Grupo ${selectControl('name="groupKey"', groupOptions)}</label>
       <label>Título <input name="title" required value="${escapeHtml(activity?.title)}"></label>
       <label>Descrição <textarea name="description">${escapeHtml(activity?.description)}</textarea></label>
       <label>Link <input name="link" type="text" inputmode="url" autocomplete="url" value="${escapeHtml(activity?.link)}"></label>
@@ -1155,22 +1171,22 @@ function maskCpf(cpf) {
 
 function participantRow(item) {
   const institution = state.institutions.find((record) => record.id === item.institutionId);
-  return `<article class="catalog-card participant-row"><div><strong>${escapeHtml(item.name)}</strong><span class="secondary-text">CPF: ${maskCpf(item.cpf)}</span><span class="secondary-text">${escapeHtml(item.email)}</span><span class="secondary-text">Instituição: ${escapeHtml(institution?.name || "Não encontrada")}</span></div><div class="card-actions"><button type="button" data-action="edit-participant" data-id="${escapeHtml(item.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-participant" data-id="${escapeHtml(item.id)}">Excluir</button></div></article>`;
+  return `<article class="catalog-card participant-row"><div><strong>${escapeHtml(item.name)}</strong><span class="secondary-text">CPF: ${maskCpf(item.cpf)}</span><span class="secondary-text">${escapeHtml(item.email)}</span><span class="secondary-text">Instituição: ${escapeHtml(institution?.name || "Não encontrada")}</span></div><div class="card-actions">${cardActionMenu(`do participante ${item.name}`, "edit-participant", "delete-participant", "data-id", item.id)}</div></article>`;
 }
 function institutionRow(item) {
-  return `<article class="catalog-card"><div><strong>${escapeHtml(item.name)}</strong><span class="secondary-text">${escapeHtml(item.city)} · ${escapeHtml(item.state)}</span></div><div class="card-actions"><button type="button" data-action="edit-institution" data-id="${escapeHtml(item.id)}">Editar</button><button type="button" class="danger-action" data-action="delete-institution" data-id="${escapeHtml(item.id)}">Excluir</button></div></article>`;
+  return `<article class="catalog-card"><div><strong>${escapeHtml(item.name)}</strong><span class="secondary-text">${escapeHtml(item.city)} · ${escapeHtml(item.state)}</span></div><div class="card-actions">${cardActionMenu(`da instituição ${item.name}`, "edit-institution", "delete-institution", "data-id", item.id)}</div></article>`;
 }
 
 function renderInstitutions(searchQuery = "") {
   const query = searchQuery.trim().toLocaleLowerCase();
   const visible = state.institutions.filter((item) => `${item.name} ${item.city} ${item.state}`.toLocaleLowerCase().includes(query));
-  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Instituições</h2><p>${state.institutions.length} cadastrada(s)</p></div><button type="button" class="primary-action" data-action="add-institution">Adicionar instituição</button></header><input id="institution-search" type="search" aria-label="Buscar instituições" placeholder="Buscar instituição, cidade ou estado" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="institutions-list">${visible.length ? visible.map(institutionRow).join("") : `<p class="empty-state">${query ? "Nenhuma instituição encontrada" : "Nenhuma instituição cadastrada."}</p>`}</div>`;
+  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Instituições</h2><p>${state.institutions.length} cadastrada(s)</p></div><button type="button" class="primary-action" data-action="add-institution">Adicionar instituição</button></header><div class="search-bar catalog-search" role="search" aria-label="Busca de instituições"><label class="search-label" for="institution-search">Buscar instituições</label><input class="search-field" id="institution-search" type="search" placeholder="Buscar instituição, cidade ou estado" value="${escapeHtml(searchQuery)}"></div><div class="catalog-list" id="institutions-list">${visible.length ? visible.map(institutionRow).join("") : `<p class="empty-state">${query ? "Nenhuma instituição encontrada" : "Nenhuma instituição cadastrada."}</p>`}</div>`;
 }
 
 function renderParticipants(searchQuery = "") {
   const query = searchQuery.trim().toLocaleLowerCase();
   const visible = state.participants.filter((item) => `${item.name} ${item.email} ${state.institutions.find((i) => i.id === item.institutionId)?.name || ""}`.toLocaleLowerCase().includes(query));
-  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Participantes</h2><p>${state.participants.length} cadastrado(s)</p></div><button type="button" class="primary-action" data-action="add-participant">Adicionar participante</button></header><input id="participant-search" type="search" aria-label="Buscar participantes" placeholder="Buscar nome, e-mail ou instituição" value="${escapeHtml(searchQuery)}"><div class="catalog-list" id="participants-list">${visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`}</div>`;
+  editorContent.innerHTML = `<header class="content-header"><div><p class="eyebrow">Catálogo administrativo</p><h2>Participantes</h2><p>${state.participants.length} cadastrado(s)</p></div><button type="button" class="primary-action" data-action="add-participant">Adicionar participante</button></header><div class="search-bar catalog-search" role="search" aria-label="Busca de participantes"><label class="search-label" for="participant-search">Buscar participantes</label><input class="search-field" id="participant-search" type="search" placeholder="Buscar nome, e-mail ou instituição" value="${escapeHtml(searchQuery)}"></div><div class="catalog-list" id="participants-list">${visible.length ? visible.map(participantRow).join("") : `<p class="empty-state">${query ? "Nenhum participante encontrado" : "Nenhum participante cadastrado."}</p>`}</div>`;
 }
 
 async function openAdminCatalogEditor(type, record, opener) {
@@ -1186,7 +1202,7 @@ async function openAdminCatalogEditor(type, record, opener) {
   modalContext = {type, record};
   const form = type === "institution"
     ? `<label for="institution-name">Nome</label><input id="institution-name" name="name" required value="${escapeHtml(record?.name)}"><label for="institution-city">Cidade</label><input id="institution-city" name="city" required value="${escapeHtml(record?.city)}"><label for="institution-state">Estado</label><input id="institution-state" name="state" required value="${escapeHtml(record?.state)}"><label for="institution-description">Descrição</label><textarea id="institution-description" name="description">${escapeHtml(record?.description)}</textarea>`
-    : `<label for="participant-name">Nome</label><input id="participant-name" name="name" required value="${escapeHtml(record?.name)}"><label for="participant-cpf">CPF</label><input id="participant-cpf" name="cpf" required inputmode="numeric" value="${escapeHtml(record?.cpf)}"><label for="participant-email">E-mail</label><input id="participant-email" name="email" required type="email" value="${escapeHtml(record?.email)}"><label for="participant-institution">Instituição</label><select id="participant-institution" name="institutionId" required>${state.institutions.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === record?.institutionId ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("")}</select>`;
+    : `<label for="participant-name">Nome</label><input id="participant-name" name="name" required value="${escapeHtml(record?.name)}"><label for="participant-cpf">CPF</label><input id="participant-cpf" name="cpf" required inputmode="numeric" value="${escapeHtml(record?.cpf)}"><label for="participant-email">E-mail</label><input id="participant-email" name="email" required type="email" value="${escapeHtml(record?.email)}"><label for="participant-institution">Instituição</label>${selectControl('id="participant-institution" name="institutionId" required', state.institutions.map((item) => `<option value="${escapeHtml(item.id)}"${item.id === record?.institutionId ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join(""))}`;
   showModal(record ? "Editar cadastro" : "Adicionar cadastro", `<form id="catalog-editor-form" class="editor-form">${form}</form>`, opener);
 }
 
@@ -1604,9 +1620,19 @@ async function handleEditorClick(event) {
   }
 }
 
+function syncMenuTrigger(menu) {
+  const trigger = menu.querySelector?.(".menu-trigger");
+  if (!trigger?.setAttribute) return;
+  const open = Boolean(menu.open || menu.hasAttribute?.("open"));
+  trigger.setAttribute("aria-expanded", String(open));
+}
+
 function closeOpenMenus(exceptMenu = null) {
   editorContent.querySelectorAll(".menu[open]").forEach((openMenu) => {
-    if (openMenu !== exceptMenu) openMenu.removeAttribute("open");
+    if (openMenu !== exceptMenu) {
+      openMenu.removeAttribute("open");
+      syncMenuTrigger(openMenu);
+    }
   });
 }
 
@@ -1640,6 +1666,7 @@ editorContent.addEventListener("click", (event) => {
       closeOpenMenus(menu);
       if (menu.toggleAttribute) menu.toggleAttribute("open");
       else menu.open = !menu.open;
+      syncMenuTrigger(menu);
       if (menu.open) {
         requestAnimationFrame(() => {
           if (menu.closest(".location-room-card") || menu.closest(".group-nav-menu")) {
@@ -1666,6 +1693,7 @@ editorContent.addEventListener("keydown", (event) => {
   const menu = event.target.closest?.(".menu[open]");
   if (!menu) return;
   menu.removeAttribute("open");
+  syncMenuTrigger(menu);
   menu.querySelector(".menu-trigger")?.focus();
 });
 editorContent.addEventListener("change", (event) => {

@@ -71,6 +71,33 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
     assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
 
 
+def test_primary_action_owns_its_complete_visual_contract(client):
+    css = client.get("/home/static/home.css").text
+
+    primary = css_rule(css, ".primary-action")
+    for declaration in (
+        "min-height: var(--control-height);",
+        "padding-inline: var(--space-4);",
+        "border: var(--border-width) solid var(--color-action-primary);",
+        "border-radius: var(--radius-md);",
+        "background: var(--color-action-primary);",
+        "color: var(--color-text-on-dark);",
+        "font-family: var(--font-family-sans);",
+        "font-size: var(--font-size-sm);",
+        "font-weight: var(--font-weight-medium);",
+        "line-height: var(--line-height-normal);",
+        "transition: background-color var(--duration-fast) var(--ease-standard);",
+    ):
+        assert declaration in primary
+
+    assert "background: var(--color-action-primary-hover);" in css_rule(
+        css, ".primary-action:hover"
+    )
+    focus = css_rule(css, ".primary-action:focus-visible")
+    assert "outline: 3px solid var(--color-focus);" in focus
+    assert "outline-offset: 2px;" in focus
+
+
 def test_editor_content_fills_the_available_desktop_column(client):
     css = client.get("/home/static/home.css").text
     content_rule = css_rule(css, "#editor-content")
