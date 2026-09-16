@@ -134,8 +134,13 @@ def test_reload_restores_admin_view_schedule_context_and_scroll(admin_page: Page
 
     admin_page.get_by_role("button", name="Programação").click()
     sections = admin_page.locator("#section-list button")
-    sections.nth(2).click()
-    selected_title = sections.nth(2).text_content()
+    selected_index = next(
+        index
+        for index in range(sections.count())
+        if admin_page.locator(".schedule-section").nth(index).locator(".group-toggle").count()
+    )
+    sections.nth(selected_index).click()
+    selected_title = sections.nth(selected_index).text_content()
     assert selected_title is not None
     group_toggle = admin_page.locator(".group-toggle").first
     group_toggle.click()
@@ -167,6 +172,7 @@ def test_schedule_and_catalog_headers_share_action_style_and_content_spacing(
               const style = getComputedStyle(button);
               return {
                 gap: next.getBoundingClientRect().top - header.getBoundingClientRect().bottom,
+                actionTopOffset: button.getBoundingClientRect().top - header.getBoundingClientRect().top,
                 height: button.getBoundingClientRect().height,
                 padding: style.padding,
                 radius: style.borderRadius,
@@ -181,10 +187,17 @@ def test_schedule_and_catalog_headers_share_action_style_and_content_spacing(
     locations = header_metrics("Adicionar sala")
     admin_page.get_by_role("button", name="Eixos").click()
     axes = header_metrics("Adicionar eixo")
+    admin_page.get_by_role("button", name="Instituições").click()
+    institutions = header_metrics("Adicionar instituição")
+    admin_page.get_by_role("button", name="Participantes").click()
+    participants = header_metrics("Adicionar participante")
 
     assert schedule["gap"] > 0
+    assert schedule["actionTopOffset"] == 0
     assert locations == schedule
     assert axes == schedule
+    assert institutions == schedule
+    assert participants == schedule
 
 
 def test_malformed_token_is_removed_and_returns_to_login(live_server_url: str, browser) -> None:
@@ -473,7 +486,6 @@ def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page
     card = admin_page.locator(".catalog-card").filter(has_text="Local E2E renomeado")
     click_catalog_action(admin_page, card, "Excluir")
     expect(admin_page.get_by_text("Local excluído com sucesso.")).to_be_visible()
-
     existing = admin_page.locator(".catalog-card").filter(has_text="Sala 105").first
     admin_page.once("dialog", accept_dialog)
     click_catalog_action(admin_page, existing, "Excluir")
@@ -486,6 +498,7 @@ def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page
     admin_page.get_by_label("Nome do local").fill("Cancelado")
     admin_page.keyboard.press("Escape")
     expect(admin_page.locator("body")).not_to_contain_text("Cancelado")
+
 
     admin_page.get_by_role("button", name="Eixos").click()
     admin_page.get_by_role("button", name="Adicionar eixo").click()
@@ -511,6 +524,64 @@ def test_axis_programs_are_read_only_and_null_axis_is_visible(admin_page: Page) 
     expect(admin_page.get_by_text("Atividades gerais", exact=True)).to_be_visible()
     expect(admin_page.locator(".axis-program-preview")).to_contain_text("Recepção nos Auditórios")
     expect(admin_page.locator("body")).not_to_contain_text("administracao-negocios-e-direito")
+
+
+def test_institutions_and_participants_crud_and_reference_conflict(admin_page: Page) -> None:
+    login(admin_page)
+    admin_page.get_by_role("button", name="Instituições", exact=True).click()
+    expect(admin_page.get_by_role("heading", name="Instituições", exact=True)).to_be_visible()
+    institution_name = "Instituição visual E2E"
+    expect(admin_page.locator(".catalog-card")).to_have_count(11)
+    admin_page.get_by_label("Buscar instituições").fill("visual E2E")
+    expect(admin_page.locator(".catalog-card")).to_have_count(0)
+    admin_page.get_by_role("button", name="Adicionar instituição").click()
+    admin_page.get_by_label("Nome").fill(institution_name)
+    admin_page.get_by_label("Cidade").fill("Chapecó")
+    admin_page.get_by_label("Estado").fill("SC")
+    admin_page.get_by_role("button", name="Salvar", exact=True).click()
+    card = admin_page.locator(".catalog-card").filter(has_text=institution_name)
+    expect(card).to_be_visible()
+    click_catalog_action(admin_page, card, "Editar")
+    admin_page.get_by_label("Nome").fill(institution_name + " editada")
+    admin_page.get_by_role("button", name="Salvar", exact=True).click()
+    card = admin_page.locator(".catalog-card").filter(has_text=institution_name + " editada")
+    expect(card).to_be_visible()
+
+    admin_page.get_by_role("button", name="Participantes", exact=True).click()
+    admin_page.get_by_label("Buscar participantes").fill("visual E2E")
+    expect(admin_page.locator(".participant-row")).to_have_count(0)
+    admin_page.get_by_role("button", name="Adicionar participante").click()
+    admin_page.get_by_label("Nome").fill("Participante visual E2E")
+    admin_page.get_by_label("CPF").fill("529.982.247-25")
+    admin_page.get_by_label("E-mail").fill("visual-e2e@example.test")
+    admin_page.get_by_label("Instituição").select_option(label=institution_name + " editada")
+    admin_page.get_by_role("button", name="Salvar", exact=True).click()
+    participant = admin_page.locator(".participant-row").filter(has_text="Participante visual E2E")
+    expect(participant).to_contain_text("***.***.***-25")
+    expect(admin_page.locator("body")).not_to_contain_text("52998224725")
+    click_catalog_action(admin_page, participant, "Editar")
+    admin_page.get_by_label("Nome").fill("Participante visual E2E editado")
+    admin_page.get_by_role("button", name="Salvar", exact=True).click()
+    participant = admin_page.locator(".participant-row").filter(has_text="Participante visual E2E editado")
+    expect(participant).to_be_visible()
+
+    admin_page.get_by_role("button", name="Instituições", exact=True).click()
+    card = admin_page.locator(".catalog-card").filter(has_text=institution_name + " editada")
+    admin_page.once("dialog", accept_dialog)
+    click_catalog_action(admin_page, card, "Excluir")
+    expect(admin_page.get_by_text("Este registro ainda está em uso.")).to_be_visible()
+    expect(card).to_be_visible()
+    admin_page.get_by_role("button", name="Participantes", exact=True).click()
+    participant = admin_page.locator(".participant-row").filter(has_text="Participante visual E2E editado")
+    admin_page.once("dialog", accept_dialog)
+    click_catalog_action(admin_page, participant, "Excluir")
+    expect(admin_page.get_by_text("Cadastro excluído com sucesso.")).to_be_visible()
+    admin_page.get_by_role("button", name="Instituições", exact=True).click()
+    card = admin_page.locator(".catalog-card").filter(has_text=institution_name + " editada")
+    admin_page.once("dialog", accept_dialog)
+    click_catalog_action(admin_page, card, "Excluir")
+    expect(admin_page.get_by_text("Cadastro excluído com sucesso.")).to_be_visible()
+    expect(card).to_have_count(0)
     admin_page.get_by_role("button", name="Programação").click()
     click_section_action(admin_page, "add-group")
     admin_page.get_by_label("Título").fill("Grupo sem eixo")

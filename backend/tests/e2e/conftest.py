@@ -52,7 +52,14 @@ def temporary_databases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict
 
     paths = {
         name: tmp_path / name
-        for name in ("users.json", "schedule.json", "locations.json", "knowledge_axes.json")
+        for name in (
+            "users.json",
+            "schedule.json",
+            "locations.json",
+            "knowledge_axes.json",
+            "institutions.json",
+            "participants.json",
+        )
     }
     for name, destination in paths.items():
         shutil.copyfile(PROJECT_ROOT / "db" / name, destination)
@@ -78,6 +85,8 @@ def temporary_databases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict
     monkeypatch.setenv("SCHEDULE_PATH", str(paths["schedule.json"]))
     monkeypatch.setenv("LOCATIONS_PATH", str(paths["locations.json"]))
     monkeypatch.setenv("KNOWLEDGE_AXES_PATH", str(paths["knowledge_axes.json"]))
+    monkeypatch.setenv("INSTITUTIONS_PATH", str(paths["institutions.json"]))
+    monkeypatch.setenv("PARTICIPANTS_PATH", str(paths["participants.json"]))
     monkeypatch.setenv("TOKEN_JWT", TEST_JWT_SECRET)
     return paths
 

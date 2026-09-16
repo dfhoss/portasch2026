@@ -13,7 +13,7 @@ const vm = require("node:vm");
 
 class FakeElement {
   constructor(id = "") {
-    this.id = id;
+    this.id = id.startsWith("#") ? id.slice(1) : id;
     this.hidden = false;
     this.innerHTML = "";
     this.textContent = "";
@@ -42,6 +42,7 @@ class FakeElement {
   querySelectorAll() { return []; }
   closest() { return null; }
   focus() { this.focused = true; }
+  setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; }
   showModal() { this.open = true; }
   close() { this.open = false; this.dispatchEvent({type: "close"}); }
 }
@@ -77,6 +78,7 @@ const context = {
   CSS: {escape: (value) => value},
   FormData: class FormData {
     constructor() {}
+    entries() { return []; }
     get() { return null; }
   },
 };
@@ -87,7 +89,7 @@ const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, renderKnowledgeAxes, openActivityEditor,
   addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
-  openGroupEditor, handleEditorClick, showApiError, logout
+  openGroupEditor, handleEditorClick, showApiError, logout, participantRow, renderInstitutions, renderParticipants, renderCatalogLoading, renderCatalogError, saveAdminCatalog, deleteAdminCatalog, openAdminCatalogEditor
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
@@ -141,6 +143,246 @@ def test_editor_contains_every_required_control(client):
     required = ["add-section", "add-session", "save-schedule"]
     for control_id in required:
         assert f'id="{control_id}"' in html
+
+
+def test_participant_list_masks_cpf():
+    run_node_case(
+        """
+        const html = api.participantRow({name: "Aluno", cpf: "52998224725", institutionId: "institution-001", email: "a@e.org"});
+        assert.match(html, /\\*\\*\\*\\.\\*\\*\\*\\.\\*\\*\\*-25/);
+        assert.equal(html.includes("52998224725"), false);
+        """
+    )
+
+
+def test_participant_list_preserves_canonical_masked_cpf():
+    run_node_case(
+        """
+        const html = api.participantRow({name: "Aluno", cpf: "***.***.***-25", institutionId: "institution-001", email: "a@e.org"});
+        assert.match(html, /\*\*\*\.\*\*\*\.\*\*\*-25/);
+        assert.equal(html.includes("CPF não informado"), false);
+        """
+    )
+
+
+def test_catalog_search_restores_focus_and_cursor_for_both_new_fields():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i", name: "Escola", city: "C", state: "SC"}];
+        api.state.participants = [];
+        for (const id of ["institution-search", "participant-search"]) {
+          api[id === "institution-search" ? "renderInstitutions" : "renderParticipants"]();
+          const input = elementFor(`#${id}`); input.value = "es"; input.selectionStart = 1; input.selectionEnd = 1;
+          elementFor("#editor-content").dispatchEvent({type: "input", target: input});
+          assert.equal(elementFor(`#${id}`).selectionStart, 1);
+        }
+        """
+    )
+
+
+def test_catalog_network_failure_preserves_state_and_announces_safe_message():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i", name: "Escola"}];
+        context.fetch = async () => { throw new Error("network secret"); };
+        await api.saveAdminCatalog("institution", elementFor("#form"));
+        assert.equal(api.state.institutions.length, 1);
+        assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+        """
+    )
+
+
+def test_catalog_views_render_operational_states_and_crud_both_entities():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola", city: "C", state: "SC"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"}];
+        api.renderInstitutions(); assert.match(elementFor("#editor-content").innerHTML, /1 cadastrada/); assert.match(elementFor("#editor-content").innerHTML, /Escola/);
+        api.renderParticipants(); const participantHtml = elementFor("#editor-content").innerHTML; assert.match(participantHtml, /1 cadastrado/); assert.match(participantHtml, /\*\*\*\.\*\*\*\.\*\*\*-25/); assert.equal(participantHtml.includes("52998224725"), false);
+        api.state.institutions = []; api.renderInstitutions(); assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição cadastrada/); api.renderInstitutions("xyz"); assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição encontrada/);
+        api.renderCatalogLoading(); assert.match(elementFor("#editor-content").innerHTML, /Carregando catálogo/); api.renderCatalogError(); assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+        context.FormData = class { entries() { return [["name", "Nova"], ["city", "C"], ["state", "SC"]]; } };
+        context.fetch = async (_path, options) => ({ok: true, status: 201, json: async () => ({id: "i-2", name: "Nova", city: "C", state: "SC"})});
+        await api.saveAdminCatalog("institution", elementFor("#form")); assert.equal(api.state.institutions.length, 1); assert.match(elementFor("#editor-content").innerHTML, /Nova/);
+        api.openAdminCatalogEditor("institution", api.state.institutions[0], elementFor("#form")); context.fetch = async () => ({ok: true, status: 200, json: async () => ({id: "i-2", name: "Editada", city: "C", state: "SC"})}); await api.saveAdminCatalog("institution", elementFor("#form")); assert.equal(api.state.institutions[0].name, "Editada");
+        context.fetch = async () => ({ok: true, status: 204, json: async () => null}); await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 0);
+        api.state.institutions = [{id: "i-3", name: "Escola", city: "C", state: "SC"}]; context.FormData = class { entries() { return [["name", "Aluno"], ["cpf", "529.982.247-25"], ["email", "a@e.org"], ["institutionId", "i-3"]]; } }; context.fetch = async (_path, options) => { assert.equal(JSON.parse(options.body).cpf, "52998224725"); return {ok: true, status: 201, json: async () => ({id: "p-2", name: "Aluno", cpf: "52998224725", email: "a@e.org", institutionId: "i-3"})}; }; await api.saveAdminCatalog("participant", elementFor("#form")); assert.equal(api.state.participants.some((p) => p.id === "p-2"), true);
+        context.fetch = async () => ({ok: true, status: 204, json: async () => null}); await api.deleteAdminCatalog("participant", api.state.participants.find((p) => p.id === "p-2")); assert.equal(api.state.participants.some((p) => p.id === "p-2"), false);
+        """
+    )
+
+
+def test_catalog_delete_conflict_unauthorized_and_network_keep_state():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i", name: "Vinculada"}];
+        context.fetch = async () => ({ok: false, status: 409, json: async () => ({detail: {message: "em uso", references: ["p-1"]}})});
+        await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 1); assert.match(elementFor("#editor-message").textContent, /uso/);
+        context.fetch = async () => ({ok: false, status: 401, json: async () => ({})}); await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 1);
+        context.fetch = async () => { throw new Error("secret"); }; await api.deleteAdminCatalog("institution", api.state.institutions[0]); assert.equal(api.state.institutions.length, 1); assert.match(elementFor("#editor-message").textContent, /Não foi possível excluir/);
+        """
+    )
+
+
+def test_institution_catalog_has_independent_states_and_async_retry():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola", city: "C", state: "SC"}];
+        api.renderInstitutions();
+        assert.match(elementFor("#editor-content").innerHTML, /1 cadastrada/);
+        api.state.institutions = []; api.renderInstitutions();
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição cadastrada/);
+        api.renderInstitutions("inexistente");
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhuma instituição encontrada/);
+
+        let release;
+        context.fetch = () => new Promise((resolve) => { release = resolve; });
+        api.renderCatalogLoading();
+        const loading = api.loadAdminData();
+        assert.match(elementFor("#editor-content").innerHTML, /Carregando catálogo/);
+        release({ok: false, status: 503, json: async () => ({})});
+        await loading;
+        assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+
+        let retry = elementFor("#retry"); retry.dataset = {action: "retry-admin-data"};
+        const responses = [
+          {id: "i-2", name: "Nova", city: "C", state: "SC"},
+        ];
+        let retryCalls = 0;
+        context.fetch = async (path) => path === "/institutions"
+          ? {ok: true, status: 200, json: async () => responses}
+          : {ok: true, status: 200, json: async () => []};
+        const retryEvent = {target: {closest: () => retry}};
+        retryCalls += 1; await api.handleEditorClick(retryEvent);
+        assert.equal(retryCalls, 1);
+        assert.equal(api.state.institutions[0].name, "Nova");
+        assert.match(elementFor("#editor-content").innerHTML, /Instituições/);
+        """
+    )
+
+
+def test_participant_catalog_has_independent_states_and_async_retry():
+    run_node_case(
+        """
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: null}];
+        api.renderParticipants();
+        assert.match(elementFor("#editor-content").innerHTML, /1 cadastrado/);
+        api.state.participants = []; api.renderParticipants();
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhum participante cadastrado/);
+        api.renderParticipants("inexistente");
+        assert.match(elementFor("#editor-content").innerHTML, /Nenhum participante encontrado/);
+
+        let release;
+        context.fetch = () => new Promise((resolve) => { release = resolve; });
+        api.renderCatalogLoading();
+        const loading = api.loadAdminData();
+        assert.match(elementFor("#editor-content").innerHTML, /Carregando catálogo/);
+        release({ok: false, status: 503, json: async () => ({})});
+        await loading;
+        assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
+
+        const retry = elementFor("#retry-participants"); retry.dataset = {action: "retry-admin-data"};
+        context.fetch = async (path) => path === "/participants"
+          ? {ok: true, status: 200, json: async () => [{id: "p-2", name: "Bia", cpf: "12345678901", email: "b@e.org", institutionId: null}]}
+          : {ok: true, status: 200, json: async () => []};
+        await api.handleEditorClick({target: {closest: () => retry}});
+        assert.equal(api.state.participants[0].name, "Bia");
+        assert.match(elementFor("#editor-content").innerHTML, /Participantes/);
+        """
+    )
+
+
+def test_participant_edit_updates_rendered_state_after_success_and_search_selection():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola", city: "C", state: "SC"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"}];
+        api.renderParticipants();
+        const search = elementFor("#participant-search"); search.value = "ana"; search.selectionStart = 1; search.selectionEnd = 3;
+        elementFor("#editor-content").dispatchEvent({type: "input", target: search});
+        assert.equal(elementFor("#participant-search").focused, true);
+        assert.equal(elementFor("#participant-search").selectionStart, 1);
+        assert.equal(elementFor("#participant-search").selectionEnd, 3);
+        assert.match(elementFor("#editor-content").innerHTML, /Ana/);
+        api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
+        context.FormData = class { entries() { return [["name", "Bea"], ["cpf", "529.982.247-25"], ["email", "b@e.org"], ["institutionId", "i-1"]]; } };
+        context.fetch = async (_path, options) => {
+          assert.equal(JSON.parse(options.body).cpf, "52998224725");
+          return {ok: true, status: 200, json: async () => ({id: "p-1", name: "Bea", cpf: "52998224725", email: "b@e.org", institutionId: "i-1"})};
+        };
+        await api.saveAdminCatalog("participant", elementFor("#form"));
+        assert.equal(api.state.participants[0].name, "Bea");
+        assert.match(elementFor("#editor-content").innerHTML, /Bea/);
+        assert.equal(elementFor("#editor-content").innerHTML.includes("52998224725"), false);
+        """
+    )
+
+
+def test_participant_edit_loads_authenticated_detail_when_list_cpf_is_masked():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "***.***.***-25", email: "a@e.org", institutionId: "i-1"}];
+        const calls = [];
+        context.fetch = async (path) => { calls.push(path); return {ok: true, status: 200, json: async () => ({id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"})}; };
+        await api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
+        assert.deepEqual(calls, ["/participants/p-1"]);
+        assert.match(elementFor("#modal-content").innerHTML, /52998224725/);
+        """
+    )
+
+
+def test_participant_edit_detail_failure_keeps_modal_closed_and_announces_safe_error():
+    run_node_case(
+        """
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "***.***.***-25"}];
+        context.fetch = async () => ({ok: false, status: 401, json: async () => ({detail: "segredo interno"})});
+        await api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
+        assert.equal(elementFor("#modal-content").innerHTML, "");
+        assert.equal(elementFor("#editor-message").textContent, "");
+        """
+    )
+
+
+def test_institution_search_filters_and_preserves_focus_and_selection():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola Azul", city: "Chapecó", state: "SC"}, {id: "i-2", name: "Outra", city: "Lages", state: "SC"}];
+        api.renderInstitutions();
+        const search = elementFor("#institution-search"); search.value = "azul"; search.selectionStart = 1; search.selectionEnd = 3;
+        elementFor("#editor-content").dispatchEvent({type: "input", target: search});
+        assert.equal(elementFor("#institution-search").focused, true);
+        assert.equal(elementFor("#institution-search").selectionStart, 1);
+        assert.equal(elementFor("#institution-search").selectionEnd, 3);
+        assert.match(elementFor("#editor-content").innerHTML, /Escola Azul/);
+        assert.equal(elementFor("#editor-content").innerHTML.includes("Outra"), false);
+        """
+    )
+
+
+def test_catalog_save_and_delete_failures_preserve_both_entities_safely():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "i-1", name: "Escola"}];
+        api.state.participants = [{id: "p-1", name: "Ana", cpf: "52998224725"}];
+        context.FormData = class { entries() { return [["name", "Atual"], ["cpf", "52998224725"], ["email", "a@e.org"], ["institutionId", "i-1"]]; } };
+        for (const type of ["institution", "participant"]) {
+          const list = type === "institution" ? api.state.institutions : api.state.participants;
+          api.openAdminCatalogEditor(type, list[0], elementFor("#form"));
+          context.fetch = async () => ({ok: false, status: 401, json: async () => ({detail: "segredo"})});
+          await api.saveAdminCatalog(type, elementFor("#form"));
+          assert.equal(list.length, 1); assert.equal(list[0].name, type === "institution" ? "Escola" : "Ana");
+          context.fetch = async () => { throw new Error("rede-secreta"); };
+          await api.saveAdminCatalog(type, elementFor("#form"));
+          assert.equal(list.length, 1); assert.match(elementFor("#editor-message").textContent, /Não foi possível salvar/);
+          context.fetch = async () => ({ok: false, status: 401, json: async () => ({})});
+          await api.deleteAdminCatalog(type, list[0]); assert.equal(list.length, 1);
+          context.fetch = async () => { throw new Error("rede-secreta"); };
+          await api.deleteAdminCatalog(type, list[0]); assert.equal(list.length, 1);
+          assert.match(elementFor("#editor-message").textContent, /Não foi possível excluir/);
+        }
+        """
+    )
 
 
 def test_schedule_creation_actions_are_grouped_by_context():
@@ -392,7 +634,9 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         const locations = [{id: "loc-1", name: "Auditório"}];
         const groups = [{id: "group-1", name: "Bloco C", category: "blocos"}];
         const axes = [{id: "geral", name: "Geral"}];
-        const responses = [schedule, locations, groups, axes].map((payload) => ({
+        const institutions = [{id: "institution-1", name: "Escola", city: "Chapecó", state: "SC"}];
+        const participants = [{id: "participant-1", name: "Aluno", cpf: "52998224725", email: "a@e.org", institutionId: "institution-1"}];
+        const responses = [schedule, locations, groups, axes, institutions, participants].map((payload) => ({
           ok: true,
           status: 200,
           json: async () => payload,
@@ -404,7 +648,9 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), schedule);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), locations);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locationGroups)), groups);
-        assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
+            assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
+            assert.deepEqual(JSON.parse(JSON.stringify(api.state.institutions)), institutions);
+            assert.deepEqual(JSON.parse(JSON.stringify(api.state.participants)), participants);
         assert.equal(api.state.selectedSectionId, "secao");
         assert.match(elementFor("#editor-content").innerHTML, /Seção/);
         assert.equal(elementFor("#editor-message").textContent, "");

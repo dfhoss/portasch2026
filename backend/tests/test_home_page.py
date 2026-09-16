@@ -13,6 +13,12 @@ def test_admin_page_is_served_without_embedding_schedule(client):
     assert "Programação completa" not in response.text
 
 
+def test_admin_page_contains_new_catalog_sections(client):
+    html = client.get("/home").text
+    assert 'data-editor-section="institutions"' in html
+    assert 'data-editor-section="participants"' in html
+
+
 def test_admin_javascript_is_served(client):
     """Removing the browser authentication asset must make this fail."""
     response = client.get("/home/static/home.js")
@@ -63,6 +69,33 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
     assert "var(--color-text)" in sidebar_rule
     assert "var(--color-action-primary)" in css_rule(css, ".primary-action")
     assert "var(--color-focus)" in css_rule(css, "button:focus-visible")
+
+
+def test_primary_action_owns_its_complete_visual_contract(client):
+    css = client.get("/home/static/home.css").text
+
+    primary = css_rule(css, ".primary-action")
+    for declaration in (
+        "min-height: var(--control-height);",
+        "padding-inline: var(--space-4);",
+        "border: var(--border-width) solid var(--color-action-primary);",
+        "border-radius: var(--radius-md);",
+        "background: var(--color-action-primary);",
+        "color: var(--color-text-on-dark);",
+        "font-family: var(--font-family-sans);",
+        "font-size: var(--font-size-sm);",
+        "font-weight: var(--font-weight-medium);",
+        "line-height: var(--line-height-normal);",
+        "transition: background-color var(--duration-fast) var(--ease-standard);",
+    ):
+        assert declaration in primary
+
+    assert "background: var(--color-action-primary-hover);" in css_rule(
+        css, ".primary-action:hover"
+    )
+    focus = css_rule(css, ".primary-action:focus-visible")
+    assert "outline: 3px solid var(--color-focus);" in focus
+    assert "outline-offset: 2px;" in focus
 
 
 def test_editor_content_fills_the_available_desktop_column(client):
@@ -136,7 +169,7 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     assert any(item.get("id") == "editor-title" for item in parser.sidebar_contents)
     assert any(item.get("id") == "logout-button" for item in parser.sidebar_contents)
     assert page.index('data-editor-section="account"') < page.index('id="logout-button"')
-    assert page.count('class="sidebar-icon"') == 5
+    assert page.count('class="sidebar-icon"') == 7
 
     desktop_css, _, mobile_css = css.partition("@media (max-width: 749px)")
     assert "grid-column: 1" in css_rule(desktop_css, ".editor-sidebar")
@@ -152,6 +185,24 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     assert "background: var(--color-surface);" in nav_rule
     assert "color: var(--color-text);" in nav_rule
     assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
+
+
+def test_every_sidebar_item_has_a_visible_accessible_svg_icon(client):
+    page = client.get("/home").text
+
+    sidebar = page.split('<aside class="editor-sidebar">', 1)[1].split("</aside>", 1)[0]
+    item_fragments = re.findall(
+        r'<(?:button|summary)[^>]*(?:data-editor-section="[^"]+"|id="logout-button"|'
+        r'class="sidebar-profile-trigger")[^>]*>.*?</(?:button|summary)>',
+        sidebar,
+        flags=re.DOTALL,
+    )
+
+    assert len(item_fragments) == 8
+    assert all(
+        'class="sidebar-icon"' in item for item in item_fragments if "profile-trigger" not in item
+    )
+    assert all('aria-hidden="true"' in item and "<svg" in item for item in item_fragments)
 
 
 def test_sidebar_groups_account_and_logout_under_profile_at_the_bottom(client):

@@ -7,7 +7,7 @@ from dependencies import validate_jwt_configured
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
-from routes import auth, home, knowledge_axes, locations, schedule
+from routes import auth, home, institutions, knowledge_axes, locations, participants, schedule
 from utils import brazil_time_formatter, get_brazil_time
 
 logger.configure(
@@ -58,6 +58,8 @@ app.include_router(auth.router)
 app.include_router(schedule.router)
 app.include_router(locations.router)
 app.include_router(knowledge_axes.router)
+app.include_router(institutions.router)
+app.include_router(participants.router)
 app.mount("/home/static", home.AdminStaticFiles(directory=home.HOME_STATIC_DIR), name="home-static")
 app.include_router(home.router)
 
