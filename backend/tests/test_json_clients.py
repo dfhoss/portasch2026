@@ -23,27 +23,14 @@ from models.schedule import ScheduleDocument
 
 AXIS_PAIRS = [
     ("geral", "Geral"),
-    (
-        "agricultura-silvicultura-pesca-e-veterinaria",
-        "Agricultura, silvicultura, pesca e veterinária",
-    ),
-    ("administracao-negocios-e-direito", "Administração, negócios e direito"),
-    (
-        "computacao-e-tecnologia-da-informacao",
-        "Computação e tecnologia da informação",
-    ),
-    ("educacao", "Educação"),
-    ("artes-e-humanidades", "Artes e humanidades"),
-    ("engenharia-industria-e-construcao", "Engenharia, indústria e construção"),
-    (
-        "ciencias-naturais-matematica-e-estatistica",
-        "Ciências naturais, matemática e estatística",
-    ),
-    ("saude-e-bem-estar", "Saúde e bem-estar"),
-    (
-        "ciencias-sociais-comunicacao-e-informacao",
-        "Ciências sociais, comunicação e informação",
-    ),
+    ("ciencias-exatas-e-da-terra", "Ciências Exatas e da Terra"),
+    ("ciencias-biologicas", "Ciências Biológicas"),
+    ("engenharias", "Engenharias"),
+    ("ciencias-da-saude", "Ciências da Saúde"),
+    ("ciencias-agrarias", "Ciências Agrárias"),
+    ("ciencias-humanas", "Ciências Humanas"),
+    ("ciencias-sociais-aplicadas", "Ciências Sociais Aplicadas"),
+    ("linguistica-letras-e-artes", "Linguística, Letras e Artes"),
 ]
 
 ENGLISH_AXIS_IDS = {
@@ -641,8 +628,9 @@ def test_repository_seed_catalogs_and_schedule_are_canonical(tmp_path: Path):
     assert locations["nextId"] > len(used_locations)
     assert list(axes) == ["knowledgeAxes"]
     assert [(item["id"], item["name"]) for item in axes["knowledgeAxes"]] == AXIS_PAIRS
-    assert ENGLISH_AXIS_IDS.isdisjoint(used_axes)
-    assert used_axes == {axis_id for axis_id, _ in AXIS_PAIRS}
+    assert used_axes == {
+        axis_id for axis_id, _ in AXIS_PAIRS if axis_id != "ciencias-biologicas"
+    }
 
 
 def test_location_group_can_be_renamed_without_changing_its_id(tmp_path: Path):

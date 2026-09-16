@@ -9,6 +9,35 @@ const SHIFTS = Object.freeze([
   { id: "evening", label: "Noite", startMinutes: 18 * 60, endMinutes: 21 * 60 + 1 },
 ]);
 
+const GUIDING_AXES = Object.freeze([
+  ["ciencias-exatas-e-da-terra", "Ciências Exatas e da Terra"],
+  //["ciencias-biologicas", "Ciências Biológicas"],
+  ["engenharias", "Engenharias"],
+  ["ciencias-da-saude", "Ciências da Saúde"],
+  ["ciencias-agrarias", "Ciências Agrárias"],
+  ["ciencias-humanas", "Ciências Humanas"],
+  ["ciencias-sociais-aplicadas", "Ciências Sociais Aplicadas"],
+  ["linguistica-letras-e-artes", "Linguística, Letras e Artes"],
+]);
+
+const COURSE_AXIS_MAP = Object.freeze({
+  "ciencia-da-computacao": "ciencias-exatas-e-da-terra",
+  "matematica": "ciencias-exatas-e-da-terra",
+  "engenharia-ambiental": "engenharias",
+  "engenharia-civil": "engenharias",
+  "enfermagem": "ciencias-da-saude",
+  "medicina": "ciencias-da-saude",
+  "agronomia": "ciencias-agrarias",
+  "ciencias-sociais": "ciencias-humanas",
+  "filosofia": "ciencias-humanas",
+  "geografia": "ciencias-humanas",
+  "historia": "ciencias-humanas",
+  "pedagogia": "ciencias-humanas",
+  "administracao": "ciencias-sociais-aplicadas",
+  "ciencias-economicas": "ciencias-sociais-aplicadas",
+  "letras": "linguistica-letras-e-artes",
+});
+
 function normalizeScheduleDocument(document, axisDocument = {}, locationDocument = {}) {
   const section = (document.sections || []).find(
     (candidate) => candidate.id === "complete-program",
@@ -18,7 +47,7 @@ function normalizeScheduleDocument(document, axisDocument = {}, locationDocument
   const locationNames = new Map(
     (locationDocument.locations || []).map((location) => [location.name, location.name]),
   );
-  const knowledgeAxes = (axisDocument.knowledgeAxes || []).map((axis) => [axis.id, axis.name]);
+  const knowledgeAxes = GUIDING_AXES;
 
   return {
     eventDate: document.eventDate,
@@ -27,6 +56,7 @@ function normalizeScheduleDocument(document, axisDocument = {}, locationDocument
       ...section,
       groups: section.groups.map((group) => ({
         ...group,
+        knowledgeAxis: group.knowledgeAxis || COURSE_AXIS_MAP[group.id] || null,
         items: group.items.map((item) => ({
           ...item,
           sessions: item.sessions.map((session) => ({
@@ -227,10 +257,11 @@ function deriveShiftView(section, eventDate, now, timeZone) {
 function deriveAxisView(section, knowledgeAxes, eventDate, now, timeZone) {
   const localNow = localDateAndMinutes(now, timeZone);
   const groups = [];
+  const axesToUse = GUIDING_AXES;
 
-  for (const [axisId, label] of knowledgeAxes) {
+  for (const [axisId, label] of axesToUse) {
     const courses = (section.groups || [])
-      .filter((g) => g.knowledgeAxis === axisId)
+      .filter((g) => (g.knowledgeAxis === axisId || COURSE_AXIS_MAP[g.id] === axisId))
       .map((sourceGroup) => ({
         id: sourceGroup.id,
         title: sourceGroup.title,
@@ -242,9 +273,7 @@ function deriveAxisView(section, knowledgeAxes, eventDate, now, timeZone) {
         })),
       }));
 
-    if (courses.length > 0) {
-      groups.push({ id: axisId, label, courses });
-    }
+    groups.push({ id: axisId, label, courses });
   }
   return groups;
 }
@@ -322,6 +351,63 @@ function renderGroups(container, groups) {
 }
 
 /**
+ * Fallback DOM extractor for resilient offline usage
+ */
+function extractSectionFromDOM(container) {
+  if (!container) return null;
+  const courseElements = container.querySelectorAll(".schedule-course[data-schedule-course]");
+  if (!courseElements || courseElements.length === 0) return null;
+
+  const coursesMap = new Map();
+  courseElements.forEach((el) => {
+    const courseId = el.getAttribute("data-schedule-course");
+    if (!courseId) return;
+
+    if (!coursesMap.has(courseId)) {
+      const titleEl = el.querySelector(".schedule-course__title");
+      const title = titleEl ? titleEl.textContent.trim() : courseId;
+      coursesMap.set(courseId, { id: courseId, title, itemsMap: new Map() });
+    }
+
+    const courseEntry = coursesMap.get(courseId);
+    el.querySelectorAll(".schedule-item[data-schedule-item]").forEach((itemEl) => {
+      const itemId = itemEl.getAttribute("data-schedule-item");
+      if (itemId && !courseEntry.itemsMap.has(itemId)) {
+        const titleEl = itemEl.querySelector(".schedule-item__title");
+        const descEl = itemEl.querySelector(".schedule-item__description");
+        const linkEl = itemEl.querySelector("a.schedule-item__link");
+        const sessions = [];
+        itemEl.querySelectorAll(".schedule-session").forEach((sEl) => {
+          const timeEls = sEl.querySelectorAll("time");
+          const startTime = timeEls[0]?.getAttribute("datetime") || timeEls[0]?.textContent || "";
+          const endTime = timeEls[1]?.getAttribute("datetime") || timeEls[1]?.textContent || "";
+          const locEl = sEl.querySelector(".schedule-session__location");
+          const location = locEl ? locEl.textContent.trim() : "";
+          sessions.push({ startTime, endTime, location });
+        });
+
+        courseEntry.itemsMap.set(itemId, {
+          id: itemId,
+          title: titleEl ? titleEl.textContent.trim() : "",
+          description: descEl ? descEl.textContent.trim() : "",
+          link: linkEl ? linkEl.getAttribute("href") : null,
+          sessions,
+        });
+      }
+    });
+  });
+
+  const groups = Array.from(coursesMap.values()).map((c) => ({
+    id: c.id,
+    title: c.title,
+    knowledgeAxis: COURSE_AXIS_MAP[c.id] || null,
+    items: Array.from(c.itemsMap.values()),
+  }));
+
+  return { id: "complete-program", groups };
+}
+
+/**
  * Initialize schedule view selector interactivity
  */
 function setupViewSelector({
@@ -354,12 +440,23 @@ function setupViewSelector({
       return;
     }
 
-    if (sectionData) {
+    const activeData =
+      sectionData ||
+      extractSectionFromDOM(groupsContainerEl) ||
+      (initialShiftHtml
+        ? (() => {
+            const temp = document.createElement("div");
+            temp.innerHTML = initialShiftHtml;
+            return extractSectionFromDOM(temp);
+          })()
+        : null);
+
+    if (activeData) {
       const now = new Date();
       const groups =
         mode === "knowledge-axis"
-          ? deriveAxisView(sectionData, knowledgeAxes, eventDate, now, timeZone)
-          : deriveShiftView(sectionData, eventDate, now, timeZone);
+          ? deriveAxisView(activeData, knowledgeAxes, eventDate, now, timeZone)
+          : deriveShiftView(activeData, eventDate, now, timeZone);
 
       renderGroups(groupsContainerEl, groups);
     }
@@ -479,22 +576,28 @@ if (typeof document !== "undefined") {
 if (typeof window !== "undefined") {
   window.CompleteProgram = {
     SHIFTS,
+    GUIDING_AXES,
+    COURSE_AXIS_MAP,
     normalizeScheduleDocument,
     deriveShiftView,
     deriveAxisView,
     renderGroups,
     setupViewSelector,
+    extractSectionFromDOM,
     initCompleteProgram,
   };
 }
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     SHIFTS,
+    GUIDING_AXES,
+    COURSE_AXIS_MAP,
     normalizeScheduleDocument,
     deriveShiftView,
     deriveAxisView,
     renderGroups,
     setupViewSelector,
+    extractSectionFromDOM,
     initCompleteProgram,
   };
 }

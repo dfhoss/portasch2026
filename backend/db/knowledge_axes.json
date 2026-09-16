@@ -1,32 +1,40 @@
 {
   "knowledgeAxes": [
-    { "id": "geral", "name": "Geral" },
     {
-      "id": "agricultura-silvicultura-pesca-e-veterinaria",
-      "name": "Agricultura, silvicultura, pesca e veterinária"
+      "id": "geral",
+      "name": "Geral"
     },
     {
-      "id": "administracao-negocios-e-direito",
-      "name": "Administração, negócios e direito"
+      "id": "ciencias-exatas-e-da-terra",
+      "name": "Ciências Exatas e da Terra"
     },
     {
-      "id": "computacao-e-tecnologia-da-informacao",
-      "name": "Computação e tecnologia da informação"
-    },
-    { "id": "educacao", "name": "Educação" },
-    { "id": "artes-e-humanidades", "name": "Artes e humanidades" },
-    {
-      "id": "engenharia-industria-e-construcao",
-      "name": "Engenharia, indústria e construção"
+      "id": "ciencias-biologicas",
+      "name": "Ciências Biológicas"
     },
     {
-      "id": "ciencias-naturais-matematica-e-estatistica",
-      "name": "Ciências naturais, matemática e estatística"
+      "id": "engenharias",
+      "name": "Engenharias"
     },
-    { "id": "saude-e-bem-estar", "name": "Saúde e bem-estar" },
     {
-      "id": "ciencias-sociais-comunicacao-e-informacao",
-      "name": "Ciências sociais, comunicação e informação"
+      "id": "ciencias-da-saude",
+      "name": "Ciências da Saúde"
+    },
+    {
+      "id": "ciencias-agrarias",
+      "name": "Ciências Agrárias"
+    },
+    {
+      "id": "ciencias-humanas",
+      "name": "Ciências Humanas"
+    },
+    {
+      "id": "ciencias-sociais-aplicadas",
+      "name": "Ciências Sociais Aplicadas"
+    },
+    {
+      "id": "linguistica-letras-e-artes",
+      "name": "Linguística, Letras e Artes"
     }
   ]
 }
