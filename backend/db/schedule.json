@@ -997,69 +997,7 @@
     {
       "id": "science-fair",
       "title": "Programação Feira de Ciências",
-      "groups": [
-        {
-          "id": "participating-teams",
-          "title": "Equipes participantes",
-          "items": [
-            {
-              "id": "team-01",
-              "title": "Eeb Candido Ramos",
-              "sessions": []
-            },
-            {
-              "id": "team-02",
-              "title": "EEB Prof Lourdes A. S. Lago",
-              "sessions": []
-            },
-            {
-              "id": "team-03",
-              "title": "EEB Olga Fin Travi",
-              "sessions": []
-            },
-            {
-              "id": "team-04",
-              "title": "EEB Professora Zitta Flach",
-              "sessions": []
-            },
-            {
-              "id": "team-05",
-              "title": "EEB Cordilheira Alta",
-              "sessions": []
-            },
-            {
-              "id": "team-06",
-              "title": "Colégio Trilíngue Inovação",
-              "sessions": []
-            },
-            {
-              "id": "team-07",
-              "title": "EEB BELERMINO VICTOR DALLA VECCHIA",
-              "sessions": []
-            },
-            {
-              "id": "team-08",
-              "title": "E.E.B. Jorge Lacerda",
-              "sessions": []
-            },
-            {
-              "id": "team-09",
-              "title": "Eeb Prof Manuel De Freitas Trancoso",
-              "sessions": []
-            },
-            {
-              "id": "team-10",
-              "title": "Eeb Cedrense",
-              "sessions": []
-            },
-            {
-              "id": "team-11",
-              "title": "EEB RuI Barbosa",
-              "sessions": []
-            }
-          ]
-        }
-      ]
+      "groups": []
     }
   ]
 }

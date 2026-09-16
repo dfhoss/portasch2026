@@ -2,8 +2,8 @@
 
 ## Objetivo
 
-Adicionar à API administrativa o cadastro de participantes do evento e o catálogo
-independente de instituições de ensino, sem introduzir banco de dados ou interface web.
+Adicionar à API e ao painel administrativo o cadastro de participantes do evento e o
+catálogo independente de instituições de ensino, sem introduzir banco de dados.
 Todos os endpoints exigem um JWT válido e seguem as fronteiras atuais de rotas,
 modelos Pydantic e clients de persistência JSON.
 
@@ -17,13 +17,13 @@ modelos Pydantic e clients de persistência JSON.
 - Referência de cada participante a uma instituição por `institutionId`.
 - Validação de nomes, campos obrigatórios, referências e conflitos de exclusão.
 - Testes de contrato HTTP, autenticação, persistência e integridade entre recursos.
+- Página administrativa protegida para o CRUD de instituições e participantes.
 
 ### Fora de escopo
 
 - Cadastro público sem autenticação.
 - Login, perfis ou permissões adicionais além do JWT existente.
 - Inscrição em atividades, presença, certificados ou dados de turma.
-- Interface no painel administrativo.
 - Cascata ou desvinculação automática ao excluir uma instituição.
 
 ## Recursos e contratos
@@ -41,6 +41,26 @@ Recurso persistido em `institutions.json`, com a forma:
   "institutions": []
 }
 ```
+
+O catálogo inicial deve ser criado a partir das escolas que estavam no grupo
+`participating-teams` da seção `science-fair` de `schedule.json`. Todas serão cadastradas
+com `state: "SC"` e `city: "Chapecó"`, preservando os nomes originais:
+
+- Eeb Candido Ramos
+- EEB Prof Lourdes A. S. Lago
+- EEB Olga Fin Travi
+- EEB Professora Zitta Flach
+- EEB Cordilheira Alta
+- Colégio Trilíngue Inovação
+- EEB BELERMINO VICTOR DALLA VECCHIA
+- E.E.B. Jorge Lacerda
+- Eeb Prof Manuel De Freitas Trancoso
+- Eeb Cedrense
+- EEB RuI Barbosa
+
+O grupo `participating-teams` será removido de `schedule.json`, mas a seção
+`science-fair` / “Programação Feira de Ciências” permanecerá como seção vazia para
+preservar a organização da programação.
 
 Cada instituição possui:
 
@@ -153,6 +173,50 @@ Rotas não acessam arquivos diretamente. O router valida o corpo e a autenticaç
 client aplica regras de domínio e persistência, e os modelos definem os contratos públicos
 de entrada e saída.
 
+## Página administrativa
+
+A página fica no painel autenticado servido em `/home`, seguindo os padrões visuais e de
+acessibilidade de `backend/DESIGN.md`. Ela adiciona as seções “Instituições” e
+“Participantes” à navegação existente.
+
+O dashboard deve apresentar duas visões administrativas reais, renderizadas depois da
+autenticação e do carregamento dos catálogos:
+
+- A visão “Instituições” exibe uma lista responsiva de cards ou linhas com nome, cidade e
+  estado, além da quantidade total cadastrada, busca, criação, edição e exclusão.
+- A visão “Participantes” exibe uma tabela ou lista responsiva com nome, CPF mascarado,
+  e-mail e instituição, além da quantidade total cadastrada, busca, criação, edição e
+  exclusão.
+- Cada visão deve ter estados explícitos de carregamento, lista vazia, erro e resultado da
+  busca; a ausência de registros não pode deixar o conteúdo indistinguível do carregamento.
+- A navegação deve selecionar uma visão por vez sem perder a sessão, e os dados devem ser
+  obtidos por `apiFetch` usando o JWT da sessão. Nenhum catálogo ou registro pessoal pode
+  ser embutido no HTML inicial.
+- Todo item da barra lateral deve exibir um ícone SVG visível e consistente ao lado do rótulo,
+  nos estados ativo e inativo e em todos os viewports; o acesso não pode depender de hover,
+  emoji ou caractere ASCII.
+- Formulários usam diálogos acessíveis, labels explícitos, foco visível, mensagens de
+  sucesso/erro e confirmação para exclusões.
+- O CPF é exibido mascarado na lista e o contrato de `GET /participants` contém apenas essa
+  máscara; o detalhe autenticado (`GET /participants/{id}`) e as respostas de escrita podem
+  conter o CPF normalizado somente para preencher ou concluir a edição.
+- A página usa o token JWT já armazenado pela sessão administrativa e não embute catálogos
+  nem dados pessoais no HTML inicial.
+- Instituições referenciadas por participantes exibem o conflito retornado pela API e não
+  podem ser excluídas.
+
+## Revisão obrigatória dos contratos de design
+
+A última tarefa de qualquer plano criado com Superpowers para esta spec deve revisar a
+implementação contra os contratos vigentes em `backend/DESIGN.md`. A revisão deve conferir,
+conforme aplicável, tokens semânticos, presença de ícone SVG em cada item da barra lateral,
+nomes acessíveis, foco visível, contraste, responsividade, componentes e interações, além do
+comportamento com `prefers-reduced-motion`.
+
+Essa tarefa deve registrar os contratos verificados, os testes ou inspeções que sustentam cada
+resultado, os desvios corrigidos e as limitações restantes. A implementação não é considerada
+entregue enquanto essa última revisão não estiver concluída e seu relatório não estiver salvo.
+
 ## Critérios de aceitação
 
 - Requisições sem ou com JWT inválido são rejeitadas antes de acessar os catálogos.
@@ -162,6 +226,15 @@ de entrada e saída.
 - Instituição vinculada não pode ser excluída.
 - Nomes equivalentes de instituições são rejeitados.
 - CPF ausente, inválido ou duplicado é rejeitado.
+- O grupo de equipes participantes não existe mais no `schedule.json`, e a seção da Feira
+  de Ciências continua presente sem esse grupo.
+- O painel autenticado permite gerenciar instituições e participantes sem expor CPF completo
+  na listagem.
+- As visões de instituições e participantes exibem dados reais dos respectivos endpoints,
+  com contagem, busca, estado vazio e atualização após criar, editar ou excluir.
+- A última tarefa do plano registra a revisão da implementação contra os contratos aplicáveis
+  de `backend/DESIGN.md`, sem deixar pendências de ícones, tokens, acessibilidade, foco,
+  responsividade ou animações reduzidas sem justificativa.
 - Falhas de leitura, validação estrutural ou escrita não vazam detalhes de filesystem na
   resposta HTTP.
 - A suíte existente continua passando sem alterar os arquivos de dados reais.

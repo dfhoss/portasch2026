@@ -1,0 +1,82 @@
+{
+  "nextId": 12,
+  "institutions": [
+    {
+      "id": "institution-001",
+      "name": "Eeb Candido Ramos",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-002",
+      "name": "EEB Prof Lourdes A. S. Lago",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-003",
+      "name": "EEB Olga Fin Travi",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-004",
+      "name": "EEB Professora Zitta Flach",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-005",
+      "name": "EEB Cordilheira Alta",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-006",
+      "name": "Colégio Trilíngue Inovação",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-007",
+      "name": "EEB BELERMINO VICTOR DALLA VECCHIA",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-008",
+      "name": "E.E.B. Jorge Lacerda",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-009",
+      "name": "Eeb Prof Manuel De Freitas Trancoso",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-010",
+      "name": "Eeb Cedrense",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    },
+    {
+      "id": "institution-011",
+      "name": "EEB RuI Barbosa",
+      "state": "SC",
+      "city": "Chapecó",
+      "description": null
+    }
+  ]
+}
