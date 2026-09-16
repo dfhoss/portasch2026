@@ -185,9 +185,13 @@ ele ao implementar ou alterar a interface.
   navegação usam `--color-surface` e `--color-border` para uma borda sutil em repouso; reserve
   `--color-surface-selected` e `--color-navigation` para o item ativo e sua ênfase, evitando uma
   barra lateral totalmente verde saturada.
-- Os itens da barra lateral usam um ícone consistente ao lado de cada rótulo. A navegação principal
-  fica no topo; “Configurações” e “Sair” compartilham um único dropdown “Perfil” no rodapé, sem
-  criar uma tela de perfil por enquanto. O gatilho e as opções mantêm foco acessível e contraste.
+- Todo item da barra lateral, sem exceção, exibe um ícone SVG consistente ao lado do rótulo, tanto
+  nos estados ativo e inativo quanto em todos os viewports. O rótulo permanece visível; o ícone não
+  pode depender de hover, emoji ou caractere ASCII para comunicar a ação. Ícones decorativos usam
+  `aria-hidden="true"`, enquanto o controle mantém nome acessível, foco visível e contraste. A
+  navegação principal fica no topo; “Configurações” e “Sair” compartilham um único dropdown
+  “Perfil” no rodapé, sem criar uma tela de perfil por enquanto. O gatilho e as opções mantêm foco
+  acessível e contraste.
 - A edição e a data do evento pertencem a “Configurações”, não ao espaço de trabalho da
   programação. Rotule a edição como “Edição do evento” para deixar sua finalidade explícita; salve-a
   pelo mesmo fluxo de persistência da agenda.

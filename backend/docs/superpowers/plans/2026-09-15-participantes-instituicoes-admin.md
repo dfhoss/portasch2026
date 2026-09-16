@@ -12,10 +12,11 @@
 
 ## Estado da execução
 
-Atualizado em 15/09/2026. As Tarefas 1 a 5 foram concluídas até `c3b5993 Valida fluxos
-visuais dos catálogos`. A Tarefa 6 auditou cobertura, segurança e documentação e não
-identificou lacuna de código diretamente exigida. O relatório final está em
-`.superpowers/sdd/2026-09-15-participantes-instituicoes-admin/task-6-report.md`.
+Atualizado em 16/09/2026. As Tarefas 1 a 6 foram concluídas, revisadas e integradas em
+`main`. A única tarefa pendente é a Tarefa 7, uma revisão final dos contratos de design
+definidos em `backend/DESIGN.md`; as tarefas anteriores não devem ser reexecutadas.
+Os relatórios anteriores estão em
+`.superpowers/sdd/2026-09-15-participantes-instituicoes-admin/`.
 
 ## Restrições globais
 
@@ -29,6 +30,11 @@ identificou lacuna de código diretamente exigida. O relatório final está em
   renderizadas via API após o login, com contagem, busca, estados vazio/carregando/erro e
   atualização após mutações; o HTML inicial continua sem catálogos e CPF completo.
 - Siga os tokens semânticos, acessibilidade e breakpoints de `backend/DESIGN.md`.
+- A última tarefa deste plano deve revisar a implementação contra todos os contratos aplicáveis
+  de `backend/DESIGN.md`, incluindo ícones, tokens, acessibilidade, foco, responsividade e
+  animações reduzidas.
+- Execute a Tarefa 7 com um subagent criado pelo fluxo Superpowers e spawnado com
+  `model: "gpt-5.6-luna"` e `reasoning_effort: "low"`.
 - Não altere credenciais, `backend/db/users.json` ou arquivos não relacionados.
 
 ## Mapa de arquivos
@@ -209,6 +215,44 @@ test("catalog views render counts and empty states", () => {
 - [x] **Passo 4: revisar o diff** com `git diff --check` e `git status --short`; não incluir `ideas.md`, imagens não relacionadas ou alterações acidentais de dados.
 - [x] **Passo 5: atualizar `backend/ARCHITECTURE.md`** somente se a implementação alterar fronteiras descritas; registrar no commit final em português e imperativo.
 
+### Tarefa 7: Revisar contratos de design da implementação (última tarefa)
+
+**Objetivo:** conferir a implementação entregue contra todos os contratos de design definidos
+em `backend/DESIGN.md`, corrigindo somente desvios comprovados e deixando evidência antes do
+commit final.
+
+**Arquivos:**
+- Ler: `backend/DESIGN.md`, `backend/AGENTS.md` e `backend/ARCHITECTURE.md`.
+- Revisar: `backend/static/home/index.html`, `home.js` e `home.css`.
+- Testar: `backend/tests/test_home_page.py`, `test_home_editor_js.py`,
+  `test_catalog_ui_contract.py` e `tests/e2e/test_home_panel.py`.
+- Relatar: `.superpowers/sdd/2026-09-15-participantes-instituicoes-admin/task-7-report.md`.
+
+**Execução:** usar `superpowers:subagent-driven-development` ou
+`superpowers:executing-plans` e spawnar o subagent com `model: "gpt-5.6-luna"` e
+`reasoning_effort: "low"`. Não reexecute as Tarefas 1 a 6 como implementação.
+
+- [ ] **Passo 1: mapear os contratos** — listar cada item da barra lateral e cada componente
+  alterado em `static/home/`, confrontando-o com `DESIGN.md`: ícone SVG visível ao lado de todo
+  rótulo, estados ativo/inativo, nome acessível, foco, contraste, tokens semânticos,
+  responsividade e `prefers-reduced-motion`.
+- [ ] **Passo 2: escrever ou ampliar os testes de contrato** — cobrir a presença de ícone em
+  todos os itens da barra lateral e os contratos de acessibilidade/foco que forem verificáveis
+  por HTML, JavaScript ou E2E; registrar o RED antes de qualquer ajuste.
+- [ ] **Passo 3: corrigir os desvios comprovados** — alterar somente `static/home/` e os testes
+  diretamente relacionados, reutilizando tokens existentes; atualizar `DESIGN.md` apenas se
+  uma regra nova e estável da interface for necessária.
+- [ ] **Passo 4: validar a implementação** — executar `uv run pytest --basetemp
+  .pytest-tmp-design-review tests/test_home_page.py tests/test_home_editor_js.py
+  tests/test_catalog_ui_contract.py -q`, `uv run pytest --basetemp
+  .pytest-tmp-design-review-e2e tests/e2e -q`, `uv run ruff check .`, `uv run ruff format
+  --check .`, `uv run ty check` e `git diff --check`; registrar falhas de baseline sem
+  mascará-las.
+- [ ] **Passo 5: fazer self-review e entregar** — confirmar que os dados do usuário,
+  `ideas.md`, credenciais e arquivos não relacionados não entraram no diff; escrever o relatório
+  com contratos verificados, evidências, arquivos e limitações; fazer commit curto, imperativo
+  e em português somente depois de todas as verificações.
+
 ## Checklist de conclusão
 
 - [x] `science-fair` existe e está com `groups: []`.
@@ -220,3 +264,4 @@ test("catalog views render counts and empty states", () => {
 - [x] A página administrativa é acessível e responsiva.
 - [x] A retenção até `31/07/2027` continua documentada em `TASKS.md`; este plano não apaga dados automaticamente.
 - [x] Ruff check, tipagem e testes passam; o format check global permanece limitado por arquivos preexistentes fora do escopo.
+- [ ] A Tarefa 7 revisou todos os contratos de design de `backend/DESIGN.md` e registrou suas evidências.
