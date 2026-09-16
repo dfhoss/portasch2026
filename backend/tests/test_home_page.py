@@ -142,7 +142,7 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     assert any(item.get("id") == "editor-title" for item in parser.sidebar_contents)
     assert any(item.get("id") == "logout-button" for item in parser.sidebar_contents)
     assert page.index('data-editor-section="account"') < page.index('id="logout-button"')
-    assert page.count('class="sidebar-icon"') == 5
+    assert page.count('class="sidebar-icon"') == 7
 
     desktop_css, _, mobile_css = css.partition("@media (max-width: 749px)")
     assert "grid-column: 1" in css_rule(desktop_css, ".editor-sidebar")
@@ -158,6 +158,24 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
     assert "background: var(--color-surface);" in nav_rule
     assert "color: var(--color-text);" in nav_rule
     assert "flex-direction: row" in css_rule(mobile_css, ".editor-sidebar nav")
+
+
+def test_every_sidebar_item_has_a_visible_accessible_svg_icon(client):
+    page = client.get("/home").text
+
+    sidebar = page.split('<aside class="editor-sidebar">', 1)[1].split("</aside>", 1)[0]
+    item_fragments = re.findall(
+        r'<(?:button|summary)[^>]*(?:data-editor-section="[^"]+"|id="logout-button"|'
+        r'class="sidebar-profile-trigger")[^>]*>.*?</(?:button|summary)>',
+        sidebar,
+        flags=re.DOTALL,
+    )
+
+    assert len(item_fragments) == 8
+    assert all(
+        'class="sidebar-icon"' in item for item in item_fragments if "profile-trigger" not in item
+    )
+    assert all('aria-hidden="true"' in item and "<svg" in item for item in item_fragments)
 
 
 def test_sidebar_groups_account_and_logout_under_profile_at_the_bottom(client):
