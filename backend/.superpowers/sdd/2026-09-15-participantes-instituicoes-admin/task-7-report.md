@@ -30,6 +30,25 @@ Atualizei a asserção de contagem de cinco para sete ícones de navegação/per
 um teste de contrato que inspeciona os oito controles da barra lateral, verificando SVG,
 `aria-hidden` e classe do ícone.
 
+## Complemento aprovado — ações, buscas e selects
+
+A revisão do código atual confirmou que `.primary-action` dependia de seletores genéricos e que
+as quatro buscas não compartilhavam um campo com label visível. Instituições e participantes
+renderizavam botões CRUD sem ícones, enquanto os locais já usavam o menu contextual. O formulário
+também não tinha um contrato visual próprio para `<select>`.
+
+O complemento padronizou `.primary-action`, `.search-bar`/`.search-field`, os menus CRUD de
+`.card-actions` e os controles `.select-control-wrap`/`.select-control`. Instituições,
+participantes e locais agora usam o mesmo menu com ícones SVG de editar/excluir, nomes acessíveis,
+ordem CRUD e separação semântica da ação destrutiva. O popup mantém o raio somente no contêiner;
+os itens internos, inclusive `Excluir`, usam raio zero. O select simples recebe chevron SVG e o
+select múltiplo preserva a UI nativa. O nome do landmark de busca usa “Busca de ...”, distinto
+do label do campo “Buscar ...”, evitando dois resultados para o mesmo `get_by_label`.
+
+As regras e referências WAI-ARIA/MDN foram registradas em `DESIGN.md`. Não foi criado um
+combobox falso: o popup de opções do `<select>` continua sob controle nativo do navegador e do
+sistema operacional.
+
 ## TDD — RED/GREEN
 
 RED, antes da alteração de produção:
@@ -50,31 +69,57 @@ uv run pytest --basetemp .pytest-tmp-design-review tests/test_home_page.py -k "e
 2 passed, 12 deselected, 1 warning
 ```
 
+Para o contrato autônomo de ação primária e busca compartilhada, o RED foi:
+
+```text
+uv run pytest --basetemp .pytest-tmp-design-standardization tests/test_home_page.py tests/test_catalog_ui_contract.py -k "primary_action_owns_its_complete_visual_contract or search_fields_share_accessible_visual_contract_and_design_documentation" -q
+2 failed, 67 deselected, 3 warnings
+```
+
+Para ações CRUD, popup e selects, o RED foi `2 failed, 54 deselected, 1 warning`. Depois da
+implementação, a suíte focada passou com `113 passed, 3 warnings`. A regressão E2E do nome
+duplicado do landmark de busca foi corrigida usando nomes distintos para landmark e campo; a
+suíte E2E completa passou depois com `19 passed, 1 warning`.
+
+Por solicitação de revisão visual, foi criado ainda um teste RED específico para o raio dos itens
+do menu (`1 failed, 55 deselected, 3 warnings`). A correção foi somente aplicar
+`border-radius: var(--space-0)` em `.menu-panel .menu-item`; o teste GREEN passou.
+
 ## Arquivos alterados
 
-- `static/home/index.html`: dois SVGs da barra lateral.
-- `tests/test_home_page.py`: contrato de ícones e contagem atualizada.
+- `DESIGN.md`: contratos de ação primária, busca, menus CRUD e selects, com referências técnicas.
+- `static/home/home.css`: contratos autônomos de ações, campos, popup e selects.
+- `static/home/home.js`: labels de busca, menus CRUD com SVG, estado acessível e selects padronizados.
+- `tests/test_home_page.py`: contrato completo de `.primary-action`.
+- `tests/test_catalog_ui_contract.py`: contratos de busca, ações, popup, raio zero e selects.
+- `tests/e2e/test_home_panel.py`: uso do menu CRUD e pré-condição de catálogo baseada no nome único.
 - Este relatório.
 
-`home.js`, `home.css` e os demais testes relacionados não exigiram correção.
+`static/home/index.html` não exigiu alteração nesta extensão; os ícones da barra lateral permanecem
+os corrigidos na primeira parte da Tarefa 7.
 
 ## Validações
 
-- `uv run pytest --basetemp .pytest-tmp-design-review tests/test_home_page.py tests/test_home_editor_js.py tests/test_catalog_ui_contract.py -q` — **109 passed**, 1 warning de depreciação do Starlette/httpx.
-- `uv run pytest --basetemp .pytest-tmp-design-review-e2e tests/e2e -q` — **limitado pelo baseline**: 1 falha de login porque `users.json` não foi encontrado no diretório temporário e 17 erros de fixture porque o cleanup removeu o diretório `basetemp` durante a execução.
+- `uv run pytest --basetemp .pytest-tmp-design-final-focused tests/test_home_page.py tests/test_home_editor_js.py tests/test_catalog_ui_contract.py -q` — **113 passed**, 1 warning preexistente.
+- `uv run pytest --basetemp .pytest-tmp-design-standardization-e2e-final tests/e2e -q` — **19 passed**, 1 warning preexistente de depreciação do Starlette/httpx.
+- `uv run pytest --basetemp .pytest-tmp-full-final -q` — **259 passed, 3 falhas do baseline**:
+  os testes de dados esperam `db/participants.json` vazio, mas esse arquivo já estava modificado
+  com um participante antes desta execução; ele não foi alterado nem revertido.
 - `uv run ruff check .` — **passou**.
-- `uv run ruff format --check .` — **falhou no baseline**: seis arquivos preexistentes fora do escopo continuam não formatados (`clients/locations.py`, plano/spec e testes anteriores, incluindo E2E); o teste alterado foi formatado.
+- `uv run ruff format --check .` — **falhou no baseline**: sete arquivos continuam não formatados,
+  incluindo blocos preexistentes em `clients/locations.py`, plano/spec e testes de contrato/E2E;
+  nenhuma regra de produção foi alterada para mascarar essa pendência.
 - `uv run ty check` — **passou**.
 - `git diff --check` — **passou**, apenas com avisos normais de conversão LF/CRLF.
 
 ## Self-review
 
-O diff contém somente os dois arquivos autorizados modificados e este relatório. Não houve
-alteração em `.env`, credenciais, usuários, locations, `ideas.md`, dados persistidos,
-`home.js`, `home.css` ou arquivos de arquitetura/design. Os ícones usam `currentColor`,
-herdam os estados ativo/inativo existentes e não introduzem nova paleta ou token. O contrato
-de foco, contraste, responsividade e movimento reduzido permaneceu coberto pela implementação
-existente e pelas asserções revisadas.
+O diff desta execução contém somente `DESIGN.md`, `static/home/`, os testes de contrato/E2E e este relatório. Não houve
+alteração em `.env`, credenciais, usuários, `locations.json`, `ideas.md` ou arquivos de
+arquitetura. O `db/participants.json` já estava modificado antes desta extensão e não foi
+incluído nem alterado por ela. Os ícones usam `currentColor`, os estados usam tokens semânticos,
+os nomes acessíveis são explícitos e os controles preservam foco, contraste, responsividade e
+`prefers-reduced-motion`.
 
 ## Verificação independente e resolução dos itens não verificáveis pela diff
 
@@ -96,17 +141,20 @@ direta confirmou:
   os SVGs e `aria-hidden`; `tests/e2e/test_home_panel.py:85-124` verifica os breakpoints do
   layout e a ausência de lacuna entre status e conteúdo.
 
-A execução independente das validações da Tarefa 7, após o commit do implementador, produziu:
+A execução independente das validações originais da Tarefa 7, após o commit do implementador,
+produziu:
 
 - contratos UI: `109 passed`, com o warning preexistente de depreciação Starlette/httpx;
 - E2E: `19 passed`, com o mesmo warning preexistente;
 - `uv run ruff check .`: passou;
 - `uv run ty check`: passou;
 - `git diff --check`: passou;
-- `uv run ruff format --check .`: falhou somente nos seis arquivos preexistentes fora do
-  escopo (`clients/locations.py`, plano/spec e testes anteriores); os arquivos da Tarefa 7
-  permanecem formatados.
+- `uv run ruff format --check .`: falhou somente nos sete arquivos que já possuem blocos fora
+  do formato (`clients/locations.py`, plano/spec e testes de contrato/E2E); a alteração de
+  produção permanece validada por `ruff check`.
 
 A primeira execução E2E relatada pelo implementador encontrou uma corrida de limpeza do
 `basetemp`; a repetição independente acima passou integralmente, portanto essa limitação não
-permanece como falha da implementação. Nenhum ajuste adicional de código foi necessário.
+permanece como falha da implementação. Nenhum ajuste adicional de código foi necessário nessa
+execução original; o complemento descrito acima foi implementado posteriormente a partir da
+revisão aprovada dos contratos de design.

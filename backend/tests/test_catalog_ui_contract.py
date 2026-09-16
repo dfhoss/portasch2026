@@ -106,7 +106,7 @@ const context = { console, URLSearchParams, Headers, setTimeout, clearTimeout, c
 };
 context.globalThis = context; vm.createContext(context);
 const source = fs.readFileSync(process.argv[2], "utf8");
-vm.runInContext(source + `\n;globalThis.editorUnderTest = {state, loadAdminData, renderLocations, renderKnowledgeAxes, openLocationEditor, openKnowledgeAxisEditor, saveLocation, saveKnowledgeAxis, deleteLocation, deleteKnowledgeAxis, handleEditorClick};`, context, {filename: "admin.js"});
+vm.runInContext(source + `\n;globalThis.editorUnderTest = {state, loadAdminData, renderLocations, renderKnowledgeAxes, renderInstitutions, renderParticipants, openLocationEditor, openKnowledgeAxisEditor, saveLocation, saveKnowledgeAxis, deleteLocation, deleteKnowledgeAxis, handleEditorClick};`, context, {filename: "admin.js"});
 const api = context.editorUnderTest;
 (async () => { __CASE__ })().catch((error) => { console.error(error); process.exitCode = 1; });
 """
@@ -237,7 +237,7 @@ def test_locations_use_group_navigation_and_compact_room_grid():
         assert.match(html, /data-action="select-location-group"/);
         assert.match(html, /class="catalog-list location-rooms-grid"/);
         assert.match(html, /id="location-search"/);
-        assert.match(html, /class="locations-workspace"[\s\S]*class="location-toolbar"[\s\S]*class="locations-workspace-body"/);
+        assert.match(html, /class="locations-workspace"[\s\S]*class="[^"]*location-toolbar[^"]*"[\s\S]*class="locations-workspace-body"/);
         assert.match(html, /class="location-group-add-card"[\s\S]*>Novo grupo/);
         assert.match(html, /data-action="edit-location-group"/);
         assert.equal((html.match(/class="catalog-card location-room-card"/g) || []).length, 2);
@@ -555,6 +555,122 @@ def test_dialog_save_uses_shared_primary_button_contract_and_stays_right():
     shared_rule = css.split(".primary-action", 1)[0]
     assert "#modal-apply" in shared_rule
     assert "#modal-apply { margin-left: auto; }" in css
+
+
+def test_search_fields_share_accessible_visual_contract_and_design_documentation():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    design = ADMIN_DESIGN.read_text(encoding="utf-8")
+
+    search_fields = {
+        "location-search": "Buscar salas",
+        "knowledge-axis-search": "Buscar eixos",
+        "institution-search": "Buscar instituições",
+        "participant-search": "Buscar participantes",
+    }
+    for input_id, label in search_fields.items():
+        assert f'<label class="search-label" for="{input_id}">{label}</label>' in script
+        assert f'class="search-field" id="{input_id}"' in script
+
+    search_bar = css.split(".search-bar {", 1)[1].split("}", 1)[0]
+    search_label = css.split(".search-label {", 1)[1].split("}", 1)[0]
+    search_field = css.split(".search-field {", 1)[1].split("}", 1)[0]
+    for declaration in ("display: grid;", "gap: var(--space-2);"):
+        assert declaration in search_bar
+    assert "font-weight: var(--font-weight-medium);" in search_label
+    for declaration in (
+        "width: 100%;",
+        "min-height: var(--control-height);",
+        "padding: var(--space-2) var(--space-3);",
+        "border: var(--border-width) solid var(--color-border-strong);",
+        "border-radius: var(--radius-md);",
+        "background: var(--color-surface);",
+        "color: var(--color-text);",
+    ):
+        assert declaration in search_field
+    assert "--color-focus" in css.split(".search-field:focus-visible", 1)[1]
+    assert ".search-bar" in design
+    assert ".search-field" in design
+    assert "placeholder" in design
+
+
+def test_catalog_records_share_icon_actions_and_accessible_menu_names():
+    run_node_case(
+        """
+        api.state.institutions = [{id: "institution-1", name: "Escola Azul", city: "Chapecó", state: "SC"}];
+        api.renderInstitutions();
+        let html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /class="menu card-menu"[\\s\\S]*aria-label="Ações da instituição Escola Azul"/);
+        assert.match(html, /data-action="edit-institution"[\\s\\S]*<svg class="action-icon"/);
+        assert.match(html, /data-action="delete-institution"[\\s\\S]*<svg class="action-icon"/);
+        assert.match(html, /data-action="edit-institution"[\\s\\S]*data-action="delete-institution"/);
+
+        api.state.participants = [{id: "participant-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "institution-1"}];
+        api.renderParticipants();
+        html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /aria-label="Ações do participante Ana"/);
+        assert.match(html, /data-action="edit-participant"[\\s\\S]*<svg class="action-icon"/);
+        assert.match(html, /data-action="delete-participant"[\\s\\S]*<svg class="action-icon"/);
+
+        api.state.locations = [{id: "location-1", name: "Sala 101", category: "blocos", groupId: "group-1"}];
+        api.state.locationGroups = [{id: "group-1", name: "Bloco A", category: "blocos"}];
+        api.renderLocations();
+        html = elementFor("#editor-content").innerHTML;
+        assert.match(html, /aria-label="Ações do local Sala 101"/);
+        assert.match(html, /data-action="edit-location"[\\s\\S]*<svg class="action-icon"/);
+        assert.match(html, /data-action="delete-location"[\\s\\S]*<svg class="action-icon"/);
+        """
+    )
+
+
+def test_action_menu_and_select_controls_have_shared_visual_contracts():
+    css = ADMIN_STYLES.read_text(encoding="utf-8")
+    script = ADMIN_SCRIPT.read_text(encoding="utf-8")
+    design = ADMIN_DESIGN.read_text(encoding="utf-8")
+
+    menu_css = css.split(".menu-panel {", 1)[1].split("}", 1)[0]
+    item_css = css.split(".menu-item {", 1)[1].split("}", 1)[0]
+    select_css = css.split(".select-control {", 1)[1].split("}", 1)[0]
+    select_wrapper_css = css.split(".select-control-wrap {", 1)[1].split("}", 1)[0]
+    for declaration in (
+        "overflow: hidden;",
+        "gap: var(--space-0);",
+        "background: var(--color-surface);",
+        "box-shadow: var(--shadow-dialog);",
+    ):
+        assert declaration in menu_css
+    for declaration in (
+        "min-height: var(--control-height);",
+        "padding: var(--space-2) var(--space-3);",
+        "font-family: var(--font-family-sans);",
+        "font-size: var(--font-size-sm);",
+    ):
+        assert declaration in item_css
+    assert "border-top: var(--border-width) solid var(--color-border);" in css.split(
+        ".menu-panel .danger-action", 1
+    )[1].split("}", 1)[0]
+    assert ".menu-panel .danger-action:hover" in css
+    menu_item_override = css.split(".menu-panel .menu-item", 1)[1].split("}", 1)[0]
+    assert "border-radius: var(--space-0);" in menu_item_override
+    for declaration in (
+        "width: 100%;",
+        "min-height: var(--control-height);",
+        "padding: var(--space-2) var(--space-8) var(--space-2) var(--space-3);",
+        "border: var(--border-width) solid var(--color-border-strong);",
+        "border-radius: var(--radius-md);",
+        "background: var(--color-surface);",
+        "color: var(--color-text);",
+        "appearance: none;",
+    ):
+        assert declaration in select_css
+    assert "position: relative;" in select_wrapper_css
+    assert ".select-chevron" in css
+    assert 'class="select-control"' in script
+    assert "select-control-wrap" in script
+    assert ".menu-panel" in design
+    assert ".select-control" in design
+    assert "ícone de lápis" in design
+    assert "select nativo" in design
 
 
 def test_location_rename_refreshes_schedule_and_locations_atomically():

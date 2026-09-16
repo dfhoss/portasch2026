@@ -135,6 +135,30 @@ ele ao implementar ou alterar a interface.
 
 - Variantes semânticas como `.primary-action`, `.secondary-action` e `.danger-action` carregam seu contrato visual
   completo (espaçamento, borda, raio, superfície e tipografia), independentemente do contêiner.
+- `.primary-action` é autônomo: declara `--control-height`, `--space-4`, `--border-width`,
+  `--radius-md`, `--color-action-primary`, `--color-text-on-dark`,
+  `--font-family-sans`, `--font-size-sm`, `--font-weight-medium`,
+  `--line-height-normal` e a transição de cor. O estado de foco usa `--color-focus`;
+  o rótulo usa verbo e entidade em caixa de frase. Cada contexto mantém uma única ação
+  primária, visualmente mais proeminente que as ações secundárias.
+- Campos de busca usam o componente compartilhado `.search-bar`/`.search-field`.
+  `.search-bar` organiza um rótulo visível e o campo em uma coluna; `.search-field` usa
+  `--control-height`, `--space-2`, `--space-3`, `--border-width`,
+  `--color-border-strong`, `--radius-md`, `--color-surface`, `--color-text` e
+  `--color-text-muted` no placeholder. O campo é `type="search"`, tem `label` associado,
+  nome acessível no contêiner de busca e foco visível com `--color-focus`.
+- Ações CRUD de registros usam o componente compartilhado `.card-actions`/`.menu`.
+  O gatilho de três pontos mantém nome acessível contextual, `aria-haspopup="menu"` e
+  `aria-expanded`; cada opção usa `.menu-item` com o ícone SVG correspondente e rótulo
+  visível. `Editar` aparece antes de `Excluir`; `Excluir` é a última opção e recebe
+  separação superior e os tokens semânticos de perigo.
+- Formulários usam `.select-control-wrap` e `.select-control` para selects simples.
+  O wrapper posiciona o chevron SVG sem capturar eventos; o select mantém `<label>` visível,
+  `--control-height`, `--space-2`, `--space-3`, `--space-8`, `--border-width`,
+  `--color-border-strong`, `--radius-md`, `--color-surface`, `--color-text` e `--color-focus`.
+  A seleção múltipla mantém o comportamento nativo e não exibe chevron. O popup de opções
+  segue a UI nativa do navegador/sistema; não substitua esse controle por uma combobox falsa
+  sem implementar o padrão completo de teclado e acessibilidade.
 
 ### Cor
 
@@ -267,7 +291,7 @@ ele ao implementar ou alterar a interface.
   overlays ou casos em que uma borda não consiga comunicar o limite.
 - Todo menu popup ou dropdown compartilha o componente `.menu`, com `.menu-trigger`, `.menu-panel`
   e `.menu-item`; classes de contexto podem existir apenas para posicionamento. O gatilho deve
-  ter rótulo acessível, ícone SVG adequado ao tipo de ação e chevron SVG para indicar abertura,
+  ter rótulo acessível, `aria-haspopup="menu"`, estado `aria-expanded`, ícone SVG adequado ao tipo de ação e chevron SVG para indicar abertura,
   nunca um caractere ASCII. Dropdowns com múltiplas opções de criação, como `Adicionar` na seção,
   usam somente o chevron no gatilho; o ícone da ação fica nas opções internas. O painel deve ser
   vertical, clicável, ter fundo opaco `--color-surface`, borda
@@ -278,6 +302,10 @@ ele ao implementar ou alterar a interface.
   seção. Opções com texto maior expandem o painel. Um limite relativo à viewport evita transbordamento
   em telas estreitas. Diálogos de edição usam
   `--dialog-width-default: 672px` como largura padrão, com `max-width` responsivo.
+- O `.menu-panel` usa `overflow: hidden` e `gap: 0` para manter os itens alinhados aos cantos
+  arredondados; seus itens usam raio zero, sem espaços ou bordas individuais. O item destrutivo usa
+  `--color-danger-surface` no hover e uma borda superior `--color-border` para separar a
+  consequência das ações de edição.
 - Nos cards de locais, o menu de ações usa o ícone SVG de três pontos já estabelecido no projeto,
   com rótulo acessível contextual. A edição do grupo selecionado fica como ação secundária explícita
   à direita do cabeçalho de `.locations-room-panel`, permitindo alterar nome e categoria sem trocar
@@ -336,7 +364,8 @@ ele ao implementar ou alterar a interface.
   entidade, como `Adicionar local` ou `Adicionar eixo`. Na programação, `Adicionar seção` é o
   botão compacto com `+` ao final da lista; criação de grupo e atividade fica no menu contextual
   `Adicionar` da seção selecionada.
-- `Editar` é uma ação secundária contextual. Em seções, grupos, atividades e locais, deve ficar no
+- `Editar` é uma ação secundária contextual. Em seções, grupos, atividades, locais, instituições e
+  participantes, deve ficar no
   menu de três pontos do próprio registro, com ícone de lápis e rótulo explícito. Em Eixos, o eixo
   selecionado segue o padrão de grupos de locais: “Editar eixo” é um botão secundário no header do
   painel. Não exiba outro menu de ações ou botão de excluir nessa tela.
@@ -441,3 +470,19 @@ estados de foco e o layout móvel.
   para esse SVG.
 - [MDN: `alignment-baseline` em SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/alignment-baseline)
   — referência para o comportamento de baseline e alinhamento de objetos SVG.
+- [Fluent 2 — Searchbox](https://fluent2.microsoft.design/components/web/react/core/searchbox/usage)
+  — comportamento, foco e responsividade de campos de busca.
+- [GOV.UK Design System — Text input](https://design-system.service.gov.uk/components/text-input/)
+  — labels visíveis e uso correto de placeholders.
+- [MDN: `input type="search"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/search)
+  — semântica, label acessível e landmark de busca.
+- [WAI: Focus Visible](https://www.w3.org/WAI/WCAG21/Understanding/focus-visible.html)
+  — requisito de foco perceptível em controles interativos.
+- [WAI-ARIA: Menu Button Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/)
+  — nome, estado expandido e comportamento acessível do gatilho de menu.
+- [WAI-ARIA: Menu and Menubar Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/menubar/)
+  — papéis e organização de menus de ações.
+- [WAI-ARIA: Combobox Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
+  — requisitos para substituir um select nativo por uma lista de opções acessível.
+- [MDN: elemento `<select>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/select)
+  — semântica nativa e limitações de estilização do popup de opções.
