@@ -13,6 +13,11 @@
       "category": "blocos"
     },
     {
+      "id": "group-007",
+      "name": "Estacionamentos",
+      "category": "estacionamentos"
+    },
+    {
       "id": "group-005",
       "name": "LAB 01",
       "category": "laboratorios"
@@ -26,11 +31,6 @@
       "id": "group-008",
       "name": "LAB 04",
       "category": "laboratorios"
-    },
-    {
-      "id": "group-007",
-      "name": "Estacionamento em frente à Cantina",
-      "category": "estacionamentos"
     }
   ],
   "locations": [
@@ -41,6 +41,14 @@
       "roomNumber": "Auditório",
       "description": null,
       "groupId": "group-002"
+    },
+    {
+      "id": "loc-038",
+      "name": "Auditório do Bloco B",
+      "category": "blocos",
+      "groupId": "group-003",
+      "roomNumber": "Auditório",
+      "description": null
     },
     {
       "id": "loc-002",
@@ -150,24 +158,8 @@
       "id": "loc-015",
       "name": "Bloco B - Hall",
       "category": "blocos",
-      "roomNumber": "",
-      "description": null,
-      "groupId": "group-003"
-    },
-    {
-      "id": "loc-016",
-      "name": "Bloco B - Sala 110",
-      "category": "blocos",
-      "roomNumber": "110",
-      "description": null,
-      "groupId": "group-003"
-    },
-    {
-      "id": "loc-017",
-      "name": "Bloco B - Sala 111",
-      "category": "blocos",
-      "roomNumber": "111",
-      "description": null,
+      "roomNumber": "1",
+      "description": "Uma sala que não existe de verdade",
       "groupId": "group-003"
     },
     {
@@ -195,11 +187,27 @@
       "groupId": "group-003"
     },
     {
+      "id": "loc-016",
+      "name": "Bloco B - Sala 110",
+      "category": "blocos",
+      "roomNumber": "110",
+      "description": null,
+      "groupId": "group-003"
+    },
+    {
       "id": "loc-021",
       "name": "Bloco B - Sala 110 CELUFFS",
       "category": "blocos",
       "roomNumber": "110",
       "description": "CELUFFS",
+      "groupId": "group-003"
+    },
+    {
+      "id": "loc-017",
+      "name": "Bloco B - Sala 111",
+      "category": "blocos",
+      "roomNumber": "111",
+      "description": null,
       "groupId": "group-003"
     },
     {
@@ -251,12 +259,20 @@
       "groupId": "group-003"
     },
     {
-      "id": "loc-029",
-      "name": "LAB 02 - Sala 103-3",
-      "category": "laboratorios",
-      "roomNumber": "103-3",
+      "id": "loc-034",
+      "name": "Estacionamento em frente à Cantina",
+      "category": "estacionamentos",
+      "roomNumber": "",
       "description": null,
-      "groupId": "group-004"
+      "groupId": "group-007"
+    },
+    {
+      "id": "loc-037",
+      "name": "LAB 01 - Sala 103",
+      "category": "laboratorios",
+      "roomNumber": "103",
+      "description": null,
+      "groupId": "group-005"
     },
     {
       "id": "loc-030",
@@ -283,6 +299,14 @@
       "groupId": "group-005"
     },
     {
+      "id": "loc-029",
+      "name": "LAB 02 - Sala 103-3",
+      "category": "laboratorios",
+      "roomNumber": "103-3",
+      "description": null,
+      "groupId": "group-004"
+    },
+    {
       "id": "loc-033",
       "name": "LAB 02 - Sala 109",
       "category": "laboratorios",
@@ -291,36 +315,12 @@
       "groupId": "group-004"
     },
     {
-      "id": "loc-034",
-      "name": "Estacionamento em frente à Cantina",
-      "category": "estacionamentos",
-      "roomNumber": "",
-      "description": null,
-      "groupId": "group-007"
-    },
-    {
       "id": "loc-036",
       "name": "LAB 04 - Sala 102",
       "category": "laboratorios",
       "roomNumber": "102",
       "description": null,
       "groupId": "group-008"
-    },
-    {
-      "id": "loc-037",
-      "name": "LAB 01 - Sala 103",
-      "category": "laboratorios",
-      "roomNumber": "103",
-      "description": null,
-      "groupId": "group-005"
-    },
-    {
-      "id": "loc-038",
-      "name": "Auditório do Bloco B",
-      "category": "blocos",
-      "groupId": "group-003",
-      "roomNumber": "Auditório",
-      "description": null
     }
   ]
 }
