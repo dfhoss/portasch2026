@@ -192,6 +192,9 @@ autenticação e do carregamento dos catálogos:
 - A navegação deve selecionar uma visão por vez sem perder a sessão, e os dados devem ser
   obtidos por `apiFetch` usando o JWT da sessão. Nenhum catálogo ou registro pessoal pode
   ser embutido no HTML inicial.
+- Todo item da barra lateral deve exibir um ícone SVG visível e consistente ao lado do rótulo,
+  nos estados ativo e inativo e em todos os viewports; o acesso não pode depender de hover,
+  emoji ou caractere ASCII.
 - Formulários usam diálogos acessíveis, labels explícitos, foco visível, mensagens de
   sucesso/erro e confirmação para exclusões.
 - O CPF é exibido mascarado na lista e o contrato de `GET /participants` contém apenas essa
@@ -201,6 +204,18 @@ autenticação e do carregamento dos catálogos:
   nem dados pessoais no HTML inicial.
 - Instituições referenciadas por participantes exibem o conflito retornado pela API e não
   podem ser excluídas.
+
+## Revisão obrigatória dos contratos de design
+
+A última tarefa de qualquer plano criado com Superpowers para esta spec deve revisar a
+implementação contra os contratos vigentes em `backend/DESIGN.md`. A revisão deve conferir,
+conforme aplicável, tokens semânticos, presença de ícone SVG em cada item da barra lateral,
+nomes acessíveis, foco visível, contraste, responsividade, componentes e interações, além do
+comportamento com `prefers-reduced-motion`.
+
+Essa tarefa deve registrar os contratos verificados, os testes ou inspeções que sustentam cada
+resultado, os desvios corrigidos e as limitações restantes. A implementação não é considerada
+entregue enquanto essa última revisão não estiver concluída e seu relatório não estiver salvo.
 
 ## Critérios de aceitação
 
@@ -217,6 +232,9 @@ autenticação e do carregamento dos catálogos:
   na listagem.
 - As visões de instituições e participantes exibem dados reais dos respectivos endpoints,
   com contagem, busca, estado vazio e atualização após criar, editar ou excluir.
+- A última tarefa do plano registra a revisão da implementação contra os contratos aplicáveis
+  de `backend/DESIGN.md`, sem deixar pendências de ícones, tokens, acessibilidade, foco,
+  responsividade ou animações reduzidas sem justificativa.
 - Falhas de leitura, validação estrutural ou escrita não vazam detalhes de filesystem na
   resposta HTTP.
 - A suíte existente continua passando sem alterar os arquivos de dados reais.
