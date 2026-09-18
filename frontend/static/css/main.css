@@ -6,8 +6,21 @@
 
 body {
     min-height: 100vh;
-    background: #f8f8f0;
-    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--color-page);
+    color: var(--color-text);
+    font-family: var(--font-body);
+}
+
+::selection {
+    background: var(--color-selection-surface);
+    color: var(--color-selection-text);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
 }
 
 /* ===== HEADER FULL WIDTH ===== */
@@ -15,7 +28,7 @@ body {
     position: relative;
     width: 100%;
     height: clamp(280px, 36vw, 480px);
-    background-color: #393ce4;
+    background-color: var(--color-hero-surface);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -29,8 +42,8 @@ body {
     position: absolute;
     inset: -60px;
     background-image: radial-gradient(circle,
-            #4f52e8 0%,
-            #4f52e8 42%,
+            var(--color-hero-grid) 0%,
+            var(--color-hero-grid) 42%,
             transparent 43%);
     background-size: 110px 110px;
     pointer-events: none;
@@ -56,9 +69,9 @@ body {
 
 .badge {
     display: inline-block;
-    background: #ed54ce;
-    color: #ffffff;
-    font-family: "Courier New", "Lucida Console", monospace;
+    background: var(--color-badge-surface);
+    color: var(--color-badge-text);
+    font-family: var(--font-pixel);
     font-weight: bold;
     text-transform: uppercase;
     font-weight: 700;
@@ -71,10 +84,10 @@ body {
 }
 
 .title {
-    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font-heading);
     font-weight: bold;
-    font-weight: 900;
-    color: #e3ff00;
+    font-weight: 700;
+    color: var(--color-hero-text);
     font-size: clamp(48px, 9vw, 120px);
     line-height: 0.88;
     letter-spacing: -0.025em;
@@ -96,7 +109,7 @@ body {
     transform: rotate(-20deg);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(2px 3px 0 var(--color-card-shadow-hover));
     pointer-events: none;
 }
 
@@ -121,18 +134,18 @@ body {
     width: clamp(28px, 3.5vw, 44px);
     height: clamp(28px, 3.5vw, 44px);
     border-radius: 50%;
-    border: 3px solid #e3ff00;
+    border: 3px solid var(--color-hero-text);
     background: linear-gradient(to right,
-            #e3ff00 0% 50%,
-            #00c853 50% 100%);
+            var(--color-accent) 0% 50%,
+            var(--palette-green-bright) 50% 100%);
     flex-shrink: 0;
 }
 
 .logo-text {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-info);
     font-weight: 700;
     font-size: clamp(13px, 1.7vw, 22px);
-    color: #e3ff00;
+    color: var(--color-hero-text);
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
@@ -144,7 +157,7 @@ body {
     left: 0;
     right: 0;
     height: 5px;
-    background: #c8ff00;
+    background: var(--color-accent-line);
     z-index: 4;
 }
 
@@ -153,7 +166,7 @@ main {
     max-width: 1100px;
     margin: 0 auto;
     padding: 48px 24px 80px;
-    color: #333;
+    color: var(--color-text);
     line-height: 1.6;
 }
 
@@ -171,10 +184,10 @@ main {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-    font-weight: 900;
+    font-family: var(--font-heading);
+    font-weight: 700;
     font-size: clamp(28px, 5vw, 40px);
-    color: #393ce4;
+    color: var(--color-brand);
     text-transform: uppercase;
     letter-spacing: -0.02em;
     margin-bottom: 8px;
@@ -183,7 +196,7 @@ main {
 .live-dot {
     width: 14px;
     height: 14px;
-    background: #ed54ce;
+    background: var(--color-live);
     border-radius: 50%;
     position: relative;
     flex-shrink: 0;
@@ -195,7 +208,7 @@ main {
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    border: 2px solid #ed54ce;
+    border: 2px solid var(--color-live);
     opacity: 0.6;
     animation: pulse-ring 1.6s ease-in-out infinite;
 }
@@ -211,7 +224,7 @@ main {
 }
 
 .section-subtitle {
-    color: #555;
+    color: var(--color-text-muted);
     font-size: 1.05rem;
     max-width: 480px;
     margin: 0 auto;
@@ -241,11 +254,11 @@ main {
 /* ===== CARDS ===== */
 .activity-card {
     flex: 0 0 calc((100% - 40px) / 3);
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 22px 22px 20px;
     border: 2px solid transparent;
-    box-shadow: 0 4px 20px rgba(57, 60, 228, 0.08);
+    box-shadow: 0 4px 20px var(--color-card-shadow);
     display: flex;
     flex-direction: column;
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -254,8 +267,8 @@ main {
 
 .activity-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(57, 60, 228, 0.14);
-    border-color: #393ce4;
+    box-shadow: 0 12px 32px var(--color-card-shadow-hover);
+    border-color: var(--color-border-hover);
 }
 
 .card-top {
@@ -267,7 +280,7 @@ main {
 }
 
 .status-badge {
-    font-family: "Courier New", "Lucida Console", monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -278,27 +291,27 @@ main {
 }
 
 .status-badge.live {
-    background: #ed54ce;
-    color: #fff;
+    background: var(--color-status-live-surface);
+    color: var(--color-status-live-text);
 }
 
 .status-badge.soon {
-    background: #e3ff00;
-    color: #222;
+    background: var(--color-status-soon-surface);
+    color: var(--color-status-soon-text);
 }
 
 .card-time {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #393ce4;
+    color: var(--color-brand);
     white-space: nowrap;
 }
 
 .card-title {
-    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-    font-weight: 900;
+    font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 1.2rem;
-    color: #1a1a2e;
+    color: var(--color-text);
     line-height: 1.25;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -310,7 +323,7 @@ main {
     align-items: flex-start;
     gap: 6px;
     font-size: 0.88rem;
-    color: #555;
+    color: var(--color-text-muted);
     margin-bottom: 12px;
     line-height: 1.4;
 }
@@ -318,12 +331,12 @@ main {
 .card-location svg {
     flex-shrink: 0;
     margin-top: 2px;
-    color: #393ce4;
+    color: var(--color-brand);
 }
 
 .card-desc {
     font-size: 0.92rem;
-    color: #444;
+    color: var(--color-text-muted);
     line-height: 1.5;
     flex-grow: 1;
     margin-bottom: 16px;
@@ -339,8 +352,8 @@ main {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background: #f0f0ff;
-    color: #393ce4;
+    background: var(--color-tag-surface);
+    color: var(--color-tag-text);
     padding: 0.35em 0.75em;
     border-radius: 20px;
 }
@@ -351,24 +364,27 @@ main {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 2px solid #393ce4;
-    background: #fff;
-    color: #393ce4;
+    border: 2px solid var(--color-action-surface);
+    background: var(--color-action-surface);
+    color: var(--color-action-text);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
+    /* Theme changes must update action colors immediately; only elevation animates. */
+    transition: transform 0.2s;
 }
 
 .carousel-btn:hover:not(:disabled) {
-    background: #393ce4;
-    color: #e3ff00;
+    background: var(--color-action-hover);
+    color: var(--color-action-text);
     transform: scale(1.06);
 }
 
 .carousel-btn:disabled {
-    opacity: 0.3;
+    background: var(--color-disabled-surface);
+    color: var(--color-disabled-text);
+    border-color: var(--color-disabled-text);
     cursor: not-allowed;
 }
 
@@ -385,19 +401,19 @@ main {
     height: 10px;
     border-radius: 50%;
     border: none;
-    background: #ccc;
+    background: var(--color-disabled-text);
     cursor: pointer;
     padding: 0;
     transition: background 0.25s, transform 0.25s;
 }
 
 .dot.active {
-    background: #393ce4;
+    background: var(--color-selected-surface);
     transform: scale(1.25);
 }
 
 .dot:hover {
-    background: #ed54ce;
+    background: var(--color-live);
 }
 
 /* ===== RESPONSIVO ===== */
@@ -462,7 +478,7 @@ main {
   height: auto;
   max-width: 100%;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px var(--color-card-shadow-hover);
   display: block;
   object-fit: contain;
 }
@@ -517,7 +533,7 @@ main {
 
 .rule-card__title {
   font-family: var(--font-heading);
-  font-weight: 900;
+  font-weight: 700;
   font-size: 1.15rem;
   color: var(--color-brand);
   text-transform: uppercase;
@@ -561,49 +577,31 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-brand);
-  color: var(--color-accent);
+  background: var(--color-action-surface);
+  color: var(--color-action-text);
   font-family: var(--font-heading);
-  font-weight: 900;
+  font-weight: 700;
   font-size: 0.95rem;
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 0.05em;
   padding: 14px 28px;
   border-radius: var(--radius-pill);
-  border: var(--border-width) var(--border-style) var(--color-brand);
+  border: var(--border-width) var(--border-style) var(--color-action-surface);
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 14px var(--color-card-shadow);
 }
 
 .rule-btn:hover,
 .rule-btn:focus-visible {
-  background: var(--color-brand-soft);
-  color: var(--color-accent);
+  background: var(--color-action-hover);
+  color: var(--color-action-text);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--color-card-shadow-hover);
 }
 
 .rule-btn:focus-visible {
-  outline: 3px solid var(--color-accent-line);
+  outline: 3px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
-/* Suporte aos temas Escuro / Alto Contraste */
-:root[data-theme="high-contrast"] .rule-card,
-:root[data-theme="dark"] .rule-card {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-:root[data-theme="high-contrast"] .rule-btn,
-:root[data-theme="dark"] .rule-btn {
-  background: var(--color-accent);
-  color: #14152b;
-  border-color: var(--color-accent);
-}
-
-:root[data-theme="high-contrast"] .rule-btn:hover,
-:root[data-theme="dark"] .rule-btn:hover {
-  background: var(--color-accent-line);
-}

@@ -1,78 +1,7 @@
 /**
- * Complete Program Schedule - Design Tokens & Stylesheet
- * Alinhado com a identidade Contraste e os tokens de DESIGN.md
+ * Complete Program Schedule
+ * Tokens canônicos: tokens.css.
  */
-
-/* ==========================================================================
-   1. Design Tokens (CSS Custom Properties)
-   ========================================================================== */
-:root {
-  /* Tokens canônicos de cor (DESIGN.md) */
-  --color-page: #f8f8f0;
-  --color-brand: #393ce4;
-  --color-brand-soft: #4f52e8;
-  --color-accent: #e3ff00;
-  --color-accent-line: #c8ff00;
-  --color-live: #ed54ce;
-  --color-surface: #ffffff;
-  --color-text: #1a1a2e;
-  --color-text-muted: #555555;
-  --color-tag-surface: #f0f0ff;
-
-  /* Tokens semânticos complementares */
-  --color-border: rgba(57, 60, 228, 0.15);
-  --color-border-hover: #393ce4;
-  --color-focus: #393ce4;
-  --color-focus-ring: #e3ff00;
-  --color-card-shadow: rgba(57, 60, 228, 0.08);
-  --color-card-shadow-hover: rgba(57, 60, 228, 0.14);
-
-  /* Atividades finalizadas */
-  --color-finalized-surface: #f1f1f5;
-  --color-finalized-text: #666677;
-  --color-finalized-border: #d4d4e0;
-  --color-finalized-badge: #4d4d62;
-
-  /* Tipografia (DESIGN.md) */
-  --font-heading: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "Courier New", "Lucida Console", monospace;
-  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-
-  /* Dimensões & Raios (DESIGN.md) */
-  --radius-card: 16px;
-  --radius-sm: 8px;
-  --radius-badge: 4px;
-  --radius-pill: 9999px;
-  --border-width: 2px;
-  --border-style: solid;
-}
-
-/* Tema de Alto Contraste / Modo Escuro */
-:root[data-theme="high-contrast"],
-:root[data-theme="dark"] {
-  --color-page: #14152b;
-  --color-surface: #1e2040;
-  --color-brand: #c8ff00;
-  --color-brand-soft: #e3ff00;
-  --color-accent: #e3ff00;
-  --color-accent-line: #c8ff00;
-  --color-live: #ed54ce;
-  --color-text: #f8f8f0;
-  --color-text-muted: #c0c0d8;
-  --color-tag-surface: #2b2d5c;
-
-  --color-border: #f8f8f0;
-  --color-border-hover: #c8ff00;
-  --color-focus: #e3ff00;
-  --color-focus-ring: #ed54ce;
-  --color-card-shadow: rgba(0, 0, 0, 0.4);
-  --color-card-shadow-hover: rgba(0, 0, 0, 0.6);
-
-  --color-finalized-surface: #17182e;
-  --color-finalized-text: #9595aa;
-  --color-finalized-border: #4d4d68;
-  --color-finalized-badge: #3a3b54;
-}
 
 /* ==========================================================================
    2. Resets e Escopo do Componente
@@ -145,7 +74,7 @@
   color: var(--color-brand);
   font-family: var(--font-heading);
   font-size: clamp(28px, 5vw, 40px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.1;
   text-transform: uppercase;
   letter-spacing: -0.02em;
@@ -185,7 +114,7 @@
   color: var(--color-brand);
   font-family: var(--font-heading);
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   user-select: none;
@@ -208,7 +137,7 @@
   border-radius: var(--radius-pill);
   font-family: var(--font-heading);
   font-size: 0.85rem;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -226,17 +155,10 @@
 }
 
 .schedule-view-selector__option[aria-checked="true"] {
-  color: var(--color-accent);
-  background: var(--color-brand);
-  border-color: var(--color-brand);
-  box-shadow: 0 2px 8px rgba(57, 60, 228, 0.25);
-}
-
-:root[data-theme="high-contrast"] .schedule-view-selector__option[aria-checked="true"],
-:root[data-theme="dark"] .schedule-view-selector__option[aria-checked="true"] {
-  color: #14152b;
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  color: var(--color-selected-text);
+  background: var(--color-selected-surface);
+  border-color: var(--color-selected-surface);
+  box-shadow: 0 2px 8px var(--color-card-shadow-hover);
 }
 
 /* ==========================================================================
@@ -257,7 +179,7 @@
 }
 
 .schedule-view-group:hover {
-  border-color: rgba(57, 60, 228, 0.35);
+  border-color: var(--color-border-hover);
 }
 
 .schedule-view-group[open] {
@@ -303,7 +225,7 @@
   content: "+";
   font-family: var(--font-heading);
   font-size: 1.25rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   color: var(--color-brand);
   background: var(--color-surface);
@@ -312,22 +234,15 @@
 }
 
 .schedule-view-group:hover .schedule-view-group__summary::after {
-  background: var(--color-brand);
-  color: var(--color-surface);
+  background: var(--color-action-surface);
+  color: var(--color-action-text);
 }
 
 .schedule-view-group[open] > .schedule-view-group__summary::after {
   content: "−";
-  background: var(--color-brand);
-  color: var(--color-accent);
-  border-color: var(--color-brand);
-}
-
-:root[data-theme="high-contrast"] .schedule-view-group[open] > .schedule-view-group__summary::after,
-:root[data-theme="dark"] .schedule-view-group[open] > .schedule-view-group__summary::after {
-  background: var(--color-accent);
-  color: #14152b;
-  border-color: var(--color-accent);
+  background: var(--color-selected-surface);
+  color: var(--color-selected-text);
+  border-color: var(--color-selected-surface);
 }
 
 .schedule-view-group__summary h3,
@@ -342,7 +257,7 @@
   color: var(--color-brand);
   font-family: var(--font-heading);
   font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: -0.01em;
 }
@@ -400,7 +315,7 @@
   color: var(--color-brand);
   font-family: var(--font-heading);
   font-size: clamp(1rem, 1.8vw, 1.2rem);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -472,7 +387,7 @@
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: 1.1rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: -0.01em;
@@ -530,7 +445,7 @@
   width: fit-content;
   margin-block-start: 0.5rem;
   padding: 0.35em 0.85em;
-  color: var(--color-brand);
+  color: var(--color-link);
   background: var(--color-tag-surface);
   border-radius: var(--radius-pill);
   font-family: var(--font-body);
@@ -541,14 +456,8 @@
 }
 
 .schedule-item__link:hover {
-  background: var(--color-brand);
-  color: var(--color-accent);
-}
-
-:root[data-theme="high-contrast"] .schedule-item__link:hover,
-:root[data-theme="dark"] .schedule-item__link:hover {
-  background: var(--color-accent);
-  color: #14152b;
+  background: var(--color-action-surface);
+  color: var(--color-action-text);
 }
 
 /* ==========================================================================
@@ -571,7 +480,7 @@
 }
 
 .schedule-item--finalized .schedule-item__course {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--color-disabled-surface);
   color: var(--color-finalized-text);
 }
 
@@ -585,7 +494,7 @@
   align-items: center;
   margin-block-end: 0.65rem;
   padding: 0.32em 0.65em;
-  color: #ffffff;
+  color: var(--color-finalized-badge-text);
   background: var(--color-finalized-badge);
   border-radius: var(--radius-badge);
   font-family: var(--font-mono);
