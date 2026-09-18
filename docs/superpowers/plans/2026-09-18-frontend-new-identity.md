@@ -71,7 +71,7 @@ Testar razão natural versus renderizada com tolerância de 1px, ausência de ov
   <h1 class="visually-hidden">UFFS de Portas Abertas</h1>
   <picture class="hero-picture">
     <source media="(max-width: 600px)" srcset="static/assets/images/hero-mobile.png" width="1080" height="437">
-    <img class="hero-image" src="static/assets/images/hero-desktop.jpg" width="2048" height="431"
+    <img class="hero-image" src="static/assets/images/hero-desktop.jpg" width="5938" height="1250"
       alt="Campus Chapecó. 27 de outubro, das 08h30 às 21h." fetchpriority="high">
   </picture>
 </header>
