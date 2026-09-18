@@ -23,10 +23,11 @@ textarea {
     font: inherit;
 }
 
-/* ===== HEADER FULL WIDTH ===== */
+/* ===== HERO RESPONSIVO CENTRALIZADO ===== */
 .banner {
     width: 100%;
-    margin: 0;
+    max-width: 1100px;
+    margin: 0 auto;
 }
 .hero-picture,
 .hero-image {
@@ -137,24 +138,37 @@ main {
     will-change: transform;
 }
 
+.carousel-track.is-resetting {
+    transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .carousel-track {
+        transition: none;
+    }
+}
+
 /* ===== CARDS ===== */
+.activity-card,
+.rule-card {
+    background: var(--color-surface);
+    border: var(--border-width) var(--border-style) var(--color-border);
+    border-radius: var(--radius-card);
+}
+
 .activity-card {
     flex: 0 0 calc((100% - 40px) / 3);
-    background: var(--color-surface);
-    border-radius: 16px;
     padding: 22px 22px 20px;
-    border: 2px solid transparent;
-    box-shadow: 0 4px 20px var(--color-card-shadow);
     display: flex;
     flex-direction: column;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     min-height: 260px;
 }
 
-.activity-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px var(--color-card-shadow-hover);
-    border-color: var(--color-border-hover);
+.activity-card:hover,
+.rule-card:hover,
+.activity-card:active,
+.rule-card:active {
+    border-color: var(--color-brand);
 }
 
 .card-top {
@@ -261,10 +275,12 @@ main {
     transition: transform 0.2s;
 }
 
-.carousel-btn:hover:not(:disabled) {
-    background: var(--color-action-hover);
-    color: var(--color-action-text);
-    transform: scale(1.06);
+@media (hover: hover) and (pointer: fine) {
+    .carousel-btn:hover:not(:disabled) {
+        background: var(--color-action-hover);
+        color: var(--color-action-text);
+        transform: scale(1.06);
+    }
 }
 
 .carousel-btn:disabled {
@@ -283,23 +299,78 @@ main {
 }
 
 .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
     border: none;
-    background: var(--color-disabled-text);
+    background: transparent;
     cursor: pointer;
     padding: 0;
-    transition: background 0.25s, transform 0.25s;
+    position: relative;
+}
+
+.dot::before {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    inset: 18px;
+    border-radius: 50%;
+    background: var(--color-disabled-text);
 }
 
 .dot.active {
-    background: var(--color-selected-surface);
-    transform: scale(1.25);
+    border-radius: 0;
 }
 
-.dot:hover {
-    background: var(--color-live);
+.dot.active::before {
+    background: var(--color-selected-surface);
+    outline: 2px solid var(--color-selected-surface);
+    outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+.dot:hover:not(.active) {
+        background: transparent;
+    }
+
+    .dot:hover:not(.active)::before {
+        background: var(--color-live);
+    }
+}
+
+.dot:focus-visible,
+.carousel:focus-visible,
+.carousel-btn:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 4px;
+}
+
+button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Prevent the mobile browser's rectangular tap overlay throughout the page.
+   Keyboard focus remains visible through :focus-visible. */
+html {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"] {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .schedule-view-selector__option:hover:not([aria-checked="true"]),
+    .schedule-item__link:hover,
+    .rule-btn:hover {
+        background: inherit;
+        color: inherit;
+        box-shadow: none;
+        transform: none;
+    }
 }
 
 /* ===== RESPONSIVO ===== */
@@ -323,8 +394,8 @@ main {
     }
 
     .carousel-btn {
-        width: 38px;
-        height: 38px;
+        width: 48px;
+        height: 48px;
     }
 
     .carousel-wrapper {
@@ -372,20 +443,9 @@ main {
 }
 
 .rule-card {
-  background: var(--color-surface);
-  border: var(--border-width) var(--border-style) var(--color-border);
-  border-radius: var(--radius-card);
   padding: 24px;
-  box-shadow: 0 4px 20px var(--color-card-shadow);
   display: flex;
   flex-direction: column;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.rule-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--color-brand);
-  box-shadow: 0 12px 32px var(--color-card-shadow-hover);
 }
 
 .rule-card__header {

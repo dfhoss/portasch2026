@@ -1,14 +1,22 @@
 (function () {
-  const track = document.querySelector(".carousel-track");
-  const cards = Array.from(document.querySelectorAll(".activity-card"));
+  const carousel = document.querySelector(".carousel");
+  const track = carousel?.querySelector(".carousel-track");
+  const cards = Array.from(track?.children || []);
   const prevBtn = document.querySelector(".carousel-btn.prev");
   const nextBtn = document.querySelector(".carousel-btn.next");
   const dotsContainer = document.querySelector(".carousel-dots");
-  const carousel = document.querySelector(".carousel");
+  if (!track || !cards.length || !prevBtn || !nextBtn || !dotsContainer) return;
 
-  let currentIndex = 0;
-  let cardsPerView = getCardsPerView();
-  let autoplayTimer = null;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let pageStarts = [];
+  let currentPage = 0;
+  let cloneCount = 0;
+  let autoplayTimer;
+  let transitionTimer;
+  let resumeTimer;
+  let autoplayPaused = false;
+  let animating = false;
+  let pendingNavigation = null;
 
   function getCardsPerView() {
     if (window.innerWidth <= 600) return 1;
@@ -16,138 +24,176 @@
     return 3;
   }
 
-  function createDots() {
-    dotsContainer.innerHTML = "";
-    const totalPages = Math.ceil(cards.length / cardsPerView);
-
-    for (let i = 0; i < totalPages; i++) {
-      const dot = document.createElement("button");
-      dot.classList.add("dot");
-      dot.setAttribute("role", "tab");
-      dot.setAttribute("aria-label", `Ir para página ${i + 1}`);
-      if (i === 0) dot.classList.add("active");
-      dot.addEventListener("click", () => goTo(i * cardsPerView));
-      dotsContainer.appendChild(dot);
+  function positionAt(index, instant = false) {
+    // Fractional layout widths avoid accumulating rounding errors at high zoom.
+    const step = cards[0].getBoundingClientRect().width + 20;
+    track.classList.toggle("is-resetting", instant);
+    track.style.transform = `translateX(-${(cloneCount + index) * step}px)`;
+    if (instant) {
+      // Commit the invisible reposition before enabling the next transition.
+      void track.offsetWidth;
+      track.classList.remove("is-resetting");
     }
   }
 
-  function updateCarousel() {
-    cardsPerView = getCardsPerView();
-    const maxIndex = Math.max(0, cards.length - cardsPerView);
-    if (currentIndex > maxIndex) currentIndex = maxIndex;
-
-    const cardWidth = cards[0].offsetWidth;
-    const gap = 20;
-    const offset = currentIndex * (cardWidth + gap);
-
-    track.style.transform = `translateX(-${offset}px)`;
-
-    // Atualiza dots
-    const dots = dotsContainer.querySelectorAll(".dot");
-    const activePage = Math.floor(currentIndex / cardsPerView);
-    dots.forEach((dot, i) => {
-      dot.classList.toggle("active", i === activePage);
+  function updateIndicators() {
+    Array.from(dotsContainer.children).forEach((dot, index) => {
+      const active = index === currentPage;
+      dot.classList.toggle("active", active);
+      dot.setAttribute("aria-current", String(active));
     });
-
-    // Estado dos botões
-    prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex >= maxIndex;
+    const singlePage = pageStarts.length <= 1;
+    prevBtn.disabled = singlePage;
+    nextBtn.disabled = singlePage;
   }
 
-  function goTo(index) {
-    const maxIndex = Math.max(0, cards.length - cardsPerView);
-    currentIndex = Math.max(0, Math.min(index, maxIndex));
-    updateCarousel();
-    resetAutoplay();
+  function finishTransition() {
+    if (!animating) return;
+    clearTimeout(transitionTimer);
+    animating = false;
+    positionAt(pageStarts[currentPage], true);
+    const pending = pendingNavigation;
+    pendingNavigation = null;
+    if (pending) pending();
   }
 
-  function next() {
-    const maxIndex = Math.max(0, cards.length - cardsPerView);
-    if (currentIndex < maxIndex) {
-      currentIndex++;
-    } else {
-      currentIndex = 0; // loop
+  function navigate(page, visualIndex) {
+    if (animating) {
+      pendingNavigation = () => navigate(page, visualIndex);
+      return;
     }
-    updateCarousel();
-  }
-
-  function prev() {
-    const maxIndex = Math.max(0, cards.length - cardsPerView);
-    if (currentIndex > 0) {
-      currentIndex--;
-    } else {
-      currentIndex = maxIndex;
+    currentPage = page;
+    updateIndicators();
+    if (reducedMotion.matches) {
+      positionAt(pageStarts[currentPage], true);
+      return;
     }
-    updateCarousel();
+    animating = true;
+    positionAt(visualIndex);
+    // Also settle when transitionend is suppressed (background tab/resize).
+    transitionTimer = setTimeout(finishTransition, 550);
   }
 
-  function startAutoplay() {
-    autoplayTimer = setInterval(next, 5000);
+  function move(direction) {
+    if (pageStarts.length <= 1) return;
+    if (animating) {
+      pendingNavigation = () => move(direction);
+      return;
+    }
+    const nextPage = (currentPage + direction + pageStarts.length) % pageStarts.length;
+    let visualIndex = pageStarts[nextPage];
+    if (direction > 0 && nextPage === 0) visualIndex = cards.length;
+    if (direction < 0 && currentPage === 0) visualIndex -= cards.length;
+    navigate(nextPage, visualIndex);
   }
 
   function resetAutoplay() {
     clearInterval(autoplayTimer);
-    startAutoplay();
+    if (autoplayPaused) return;
+    if (pageStarts.length > 1) autoplayTimer = setInterval(() => move(1), 5000);
   }
 
-  // Eventos
-  nextBtn.addEventListener("click", () => {
-    next();
-    resetAutoplay();
-  });
-  prevBtn.addEventListener("click", () => {
-    prev();
-    resetAutoplay();
-  });
-
-  // Teclado
-  carousel.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") {
-      next();
+  function pauseAutoplayForCard() {
+    autoplayPaused = true;
+    clearInterval(autoplayTimer);
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => {
+      autoplayPaused = false;
       resetAutoplay();
-    }
-    if (e.key === "ArrowLeft") {
-      prev();
-      resetAutoplay();
-    }
-  });
+    }, 60000);
+  }
 
-  // Touch / swipe simples
-  let startX = 0;
-  carousel.addEventListener(
-    "touchstart",
-    (e) => {
-      startX = e.touches[0].clientX;
-    },
-    { passive: true },
-  );
+  function resumeAutoplay() {
+    if (!autoplayPaused) return;
+    autoplayPaused = false;
+    clearTimeout(resumeTimer);
+    resetAutoplay();
+  }
 
-  carousel.addEventListener(
-    "touchend",
-    (e) => {
-      const diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0) next();
-        else prev();
+  function cloneCard(card) {
+    const clone = card.cloneNode(true);
+    clone.setAttribute("data-carousel-clone", "");
+    clone.setAttribute("aria-hidden", "true");
+    clone.inert = true;
+    clone.removeAttribute("id");
+    clone.querySelectorAll("[id]").forEach(element => element.removeAttribute("id"));
+    return clone;
+  }
+
+  function rebuild() {
+    const previousStart = pageStarts[currentPage] || 0;
+    const focusedDot = Array.from(dotsContainer.children).indexOf(document.activeElement);
+    clearTimeout(transitionTimer);
+    animating = false;
+    pendingNavigation = null;
+    track.querySelectorAll("[data-carousel-clone]").forEach(clone => clone.remove());
+    const perView = getCardsPerView();
+    const lastStart = Math.max(0, cards.length - perView);
+    pageStarts = Array.from({ length: Math.ceil(cards.length / perView) },
+      (_, index) => Math.min(index * perView, lastStart));
+    const matchingPage = pageStarts.findIndex(start => start >= previousStart);
+    currentPage = matchingPage < 0 ? pageStarts.length - 1 : matchingPage;
+    cloneCount = pageStarts.length > 1 ? cards.length : 0;
+    if (cloneCount) {
+      track.prepend(...cards.map(cloneCard));
+      track.append(...cards.map(cloneCard));
+    }
+    dotsContainer.replaceChildren();
+    pageStarts.forEach((start, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "dot";
+      dot.setAttribute("aria-label", `Ir para página ${index + 1}`);
+      dot.addEventListener("click", () => {
+        navigate(index, start);
         resetAutoplay();
-      }
-    },
-    { passive: true },
-  );
+      });
+      dotsContainer.appendChild(dot);
+    });
+    updateIndicators();
+    positionAt(pageStarts[currentPage], true);
+    if (focusedDot >= 0) dotsContainer.children[Math.min(focusedDot, pageStarts.length - 1)].focus();
+    resetAutoplay();
+  }
 
-  // Resize
+  track.addEventListener("transitionend", event => {
+    if (event.target === track && event.propertyName === "transform") finishTransition();
+  });
+  track.addEventListener("click", event => {
+    if (event.target.closest(".activity-card")) pauseAutoplayForCard();
+  });
+  document.addEventListener("click", event => {
+    if (!carousel.contains(event.target)) resumeAutoplay();
+  });
+  prevBtn.addEventListener("click", () => { move(-1); resetAutoplay(); });
+  nextBtn.addEventListener("click", () => { move(1); resetAutoplay(); });
+  carousel.addEventListener("keydown", event => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    move(event.key === "ArrowRight" ? 1 : -1);
+    resetAutoplay();
+  });
+
+  let startX = null;
+  carousel.addEventListener("touchstart", event => {
+    startX = event.touches.length === 1 ? event.touches[0].clientX : null;
+  }, { passive: true });
+  carousel.addEventListener("touchcancel", () => { startX = null; }, { passive: true });
+  carousel.addEventListener("touchend", event => {
+    if (startX === null || !event.changedTouches.length) return;
+    const diff = startX - event.changedTouches[0].clientX;
+    startX = null;
+    if (Math.abs(diff) > 50) {
+      move(diff > 0 ? 1 : -1);
+      resetAutoplay();
+    }
+  }, { passive: true });
+
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      cardsPerView = getCardsPerView();
-      createDots();
-      updateCarousel();
-    }, 150);
+    resizeTimer = setTimeout(rebuild, 150);
   });
-
-  // Init
-  createDots();
-  updateCarousel();
-  startAutoplay();
+  reducedMotion.addEventListener("change", finishTransition);
+  rebuild();
 })();

@@ -9,7 +9,7 @@
   --palette-lime: #d8f93b;
   --palette-violet-electric: #352aff;
 
-  --color-page: var(--palette-sage);
+  --color-page: #f1f2ec;
   --color-surface: #ffffff;
   --color-brand: var(--palette-violet);
   --color-brand-soft: var(--palette-indigo);
@@ -18,7 +18,7 @@
   --color-live: var(--palette-magenta);
   --color-text: #171725;
   --color-text-muted: #42434d;
-  --color-tag-surface: var(--palette-sage);
+  --color-tag-surface: #e9e7ff;
   --color-tag-text: var(--palette-indigo);
   --color-border: var(--palette-indigo);
   --color-border-hover: var(--palette-violet);
@@ -26,7 +26,7 @@
   --color-focus-ring: var(--palette-lime);
   --color-card-shadow: rgb(57 60 179 / 8%);
   --color-card-shadow-hover: rgb(57 60 179 / 14%);
-  --color-finalized-surface: var(--palette-sage);
+  --color-finalized-surface: #e9e7ff;
   --color-finalized-text: #42434d;
   --color-finalized-border: var(--palette-indigo);
   --color-finalized-badge: var(--palette-indigo);
@@ -47,7 +47,7 @@
   --color-status-live-text: #171725;
   --color-status-soon-surface: var(--palette-lime);
   --color-status-soon-text: var(--palette-indigo);
-  --color-disabled-surface: var(--palette-sage);
+  --color-disabled-surface: #e9e7ff;
   --color-disabled-text: #42434d;
   --color-field-surface: #ffffff;
   --color-field-text: #171725;
