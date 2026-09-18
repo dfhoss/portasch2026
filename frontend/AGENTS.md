@@ -5,54 +5,42 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 
 ## Comandos de desenvolvimento
 
-- `py -m http.server 4173 --directory ..` — serve o repositório para que o frontend consiga ler
-  `backend/db/schedule.json`; abra `http://localhost:4173/frontend/`.
-- `python -m http.server 4173 --directory ..` — alternativa quando `py` não estiver disponível.
-- Não há etapa de build nem gerenciador de dependências no frontend legado; teste os arquivos
-  estáticos diretamente no navegador.
+- Na pasta `frontend/`, execute `uv run python -m http.server 4187 --bind 127.0.0.1 --directory ..`.
+  Abra `http://127.0.0.1:4187/frontend/`; a raiz servida inclui os JSONs de `backend/db/`.
+- Com Live Server, sirva a raiz do repositório e abra `/frontend/`: a agenda também precisa
+  acessar `backend/db/`. A presença de conteúdo na tela não comprova que os JSONs carregaram.
 
 ## Regras de design
 
-- Leia `DESIGN.md` antes de modificar a interface. Cores, tipografia, espaçamento, bordas e
-  comportamento responsivo devem continuar coerentes com os tokens documentados.
+- Leia `DESIGN.md` antes de modificar a interface e use os tokens documentados.
 - Preserve `lang="pt-BR"`, landmarks semânticos, rótulos acessíveis e foco visível. Não dependa
   apenas de cor, hover ou movimento para comunicar estado.
-- Mantenha os assets relativos à página. Não renomeie arquivos em `assets/` sem atualizar todos
-  os caminhos que dependem dos nomes originais.
-- Os arquivos servidos pela página ficam em `static/`: CSS em `static/css/`, JavaScript em
-  `static/js/` e assets em `static/assets/`. As fontes de dados são os JSONs do backend em
-  `backend/db/`: `schedule.json`, `knowledge_axes.json` e `locations.json`.
+- Mantenha assets relativos à página; renomeações exigem atualizar todas as referências.
 
 ## Armadilhas e pontos de atenção
 
 ### Carrossel
 
-- A quantidade de cartões visíveis é 3 acima de 900px, 2 entre 601px e 900px e 1 até 600px;
-  qualquer mudança no CSS precisa manter essa mesma divisão no JavaScript.
-- O deslocamento usa a largura real do primeiro cartão mais um gap fixo de `20px`; alterar o
-  gap somente no CSS desalinha a navegação.
-- O autoplay avança uma página a cada 5 segundos e reinicia após controles, teclado ou swipe. O
-  `resize` recria os indicadores após 150ms; preserve esse debounce para evitar estados
-  intermediários.
-- O swipe só navega quando a diferença horizontal ultrapassa 50px. Não transforme um toque curto
-  em navegação.
-- O carrossel inicia o timer automaticamente e não pausa sozinho em foco ou hover; qualquer
-  mudança nesse comportamento deve incluir uma decisão explícita de acessibilidade.
-- O trilho contém cópias visuais com `data-carousel-clone`, `aria-hidden` e `inert` para o loop.
-  Não conte essas cópias como atividades reais nem as inclua em foco ou leitura assistiva.
+- Breakpoints e gap do trilho são acoplados entre CSS e JavaScript; atualize ambos juntos.
+  Preserve a medição fracionada da largura dos cartões para evitar desvios em zoom.
+- O timeout de conclusão deve acompanhar a duração variável da transição; um valor fixo
+  pode interromper o loop antes do reposicionamento invisível.
+- Preserve o debounce de resize e a distinção entre toque curto e swipe.
+- Mudanças na política de autoplay em foco/hover exigem decisão explícita de acessibilidade.
+- Cópias `data-carousel-clone` não são atividades reais: exclua-as de contagens, foco e leitura assistiva.
 
 ### Conteúdo e integração
 
-- A versão-base documentada aqui contém conteúdo estático no HTML. Dados dinâmicos ou integração
-  com a API exigem manter a página utilizável quando a rede falhar.
-- A agenda completa lê diretamente `backend/db/schedule.json`; o formato e os IDs definidos pelo
-  backend ditam o funcionamento do frontend. Não crie uma cópia local da agenda em `frontend`.
+- O backend define o formato e os IDs da agenda; não crie cópias locais dos dados no frontend.
+- Preserve a página utilizável na falha de rede. Em `schedule.js`, falhas em qualquer um dos três
+  JSONs mantêm o HTML inicial silenciosamente: confira as respostas de rede, não apenas o console.
+- A normalização usa `GUIDING_AXES` de `schedule.js`, embora carregue `knowledge_axes.json`;
+  alterar apenas esse JSON não atualiza a lista de eixos exibida.
 
 ## Validação
 
-- Teste em desktop, tablet e celular; confirme que não há rolagem horizontal involuntária.
-- Use Tab e as setas esquerda/direita no carrossel e teste o gesto de swipe em dispositivo móvel.
-- Verifique console, carregamento das imagens e estados inicial/final dos botões após redimensionar
-  a janela.
-- Ao alterar comportamento ou estrutura, atualize `README.md` e `DESIGN.md` somente quando a
-  regra deixar de ser inferível pelo código ou passar a ser uma decisão visual/operacional.
+- Teste desktop, tablet, celular e zoom fracionado: sem overflow horizontal ou recorte dos cartões.
+- Confira Tab, setas, swipe curto/longo, loop nos dois sentidos e controles após resize.
+- Verifique imagens, console, respostas dos JSONs e fallback com falha de rede.
+- Atualize `README.md` e `DESIGN.md` para decisões visuais/operacionais; mantenha aqui apenas
+  restrições e armadilhas que não sejam rapidamente inferíveis pelo código.
