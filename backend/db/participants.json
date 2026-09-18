@@ -1,4 +1,12 @@
 {
-  "nextId": 1,
-  "participants": []
+  "nextId": 2,
+  "participants": [
+    {
+      "id": "participant-001",
+      "name": "matheus",
+      "cpf": "04181084124",
+      "email": "matheus1604.mh@gmail.com",
+      "institutionId": "institution-001"
+    }
+  ]
 }
