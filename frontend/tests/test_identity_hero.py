@@ -27,11 +27,18 @@ class HeroIdentityTests(BrowserTestCase):
     def test_assets_controls_and_responsive_carousel_contract(self):
         self.assertTrue(self.page.locator(".hero-image").evaluate("e => e.complete && e.naturalWidth > 0"))
         self.assertTrue(self.page.evaluate("document.fonts.status === 'loaded'"))
-        ratio = self.page.locator(".hero-image").evaluate("e => e.naturalWidth / e.naturalHeight")
-        rendered = self.page.locator(".hero-image").bounding_box()
-        self.assertAlmostEqual(ratio, rendered["width"] / rendered["height"], delta=0.01)
+        for width in (390, 768, 1440):
+            self.page.set_viewport_size({"width": width, "height": 1000})
+            self.page.wait_for_timeout(200)
+            natural = self.page.locator(".hero-image").evaluate("e => [e.naturalWidth, e.naturalHeight]")
+            rendered = self.page.locator(".hero-image").bounding_box()
+            self.assertAlmostEqual(rendered["height"], rendered["width"] * natural[1] / natural[0], delta=1)
         carousel = self.page.locator(".carousel")
         self.assertTrue(carousel.get_attribute("tabindex"))
+        prev = self.page.locator(".carousel-btn.prev")
+        next_button = self.page.locator(".carousel-btn.next")
+        self.assertTrue(prev.is_disabled())
+        self.assertFalse(next_button.is_disabled())
         before = self.page.locator(".carousel-track").evaluate("e => e.style.transform")
         carousel.focus()
         carousel.press("ArrowRight")
@@ -40,11 +47,18 @@ class HeroIdentityTests(BrowserTestCase):
         self.assertTrue(self.page.evaluate("document.activeElement.matches('button, [tabindex]')"))
         for width, expected in ((1440, 3), (768, 2), (390, 1)):
             self.page.set_viewport_size({"width": width, "height": 1000})
+            self.page.reload(wait_until="networkidle")
             self.page.wait_for_timeout(200)
-            count = self.page.locator(".carousel-track .activity-card").count()
-            self.assertGreaterEqual(count, expected)
+            viewport = self.page.locator(".carousel")
+            box = viewport.bounding_box()
+            visible = sum(1 for card in self.page.locator(".carousel-track .activity-card").all()
+                          if (rect := card.bounding_box()) and rect["x"] >= box["x"] - 1 and rect["x"] + rect["width"] <= box["x"] + box["width"] + 1)
+            self.assertEqual(visible, expected)
         self.assertEqual(self.page.locator(".carousel-btn").count(), 2)
-        self.page.screenshot(path=".superpowers/sdd/2026-09-18-frontend-new-identity/task-2-1440.png", full_page=True)
+        while not next_button.is_disabled():
+            next_button.click()
+        self.assertTrue(next_button.is_disabled())
+        self.assertFalse(prev.is_disabled())
 
     def test_short_swipe_does_not_navigate_but_long_swipe_does(self):
         carousel = self.page.locator(".carousel")
@@ -55,3 +69,21 @@ class HeroIdentityTests(BrowserTestCase):
         carousel.dispatch_event("touchstart", {"touches": [{"identifier": 1, "clientX": 300, "clientY": 100}]})
         carousel.dispatch_event("touchend", {"changedTouches": [{"identifier": 1, "clientX": 200, "clientY": 100}]})
         self.assertNotEqual(self.page.locator(".carousel-track").evaluate("e => e.style.transform"), before)
+
+    def test_agenda_failure_keeps_static_content_and_carousel_usable(self):
+        self.page.route("**/backend/db/schedule.json", lambda route: route.abort())
+        self.page.reload(wait_until="networkidle")
+        self.assertGreater(self.page.locator(".activity-card").count(), 0)
+        self.assertGreater(self.page.locator(".carousel-btn").count(), 0)
+        self.assertIn("ROLANDO AGORA", self.page.locator("main").inner_text().upper())
+
+    def test_successful_loads_have_no_application_page_errors_and_capture_viewports(self):
+        errors = []
+        self.page.on("pageerror", lambda error: errors.append(str(error)))
+        for width, name in ((390, "390"), (768, "768"), (1440, "1440")):
+            self.page.set_viewport_size({"width": width, "height": 1000})
+            self.page.reload(wait_until="networkidle")
+            self.page.screenshot(path=f".superpowers/sdd/2026-09-18-frontend-new-identity/task-2-{name}.png", full_page=True)
+        self.assertEqual(errors, [])
+        for path in ("schedule.json", "knowledge_axes.json", "locations.json"):
+            self.assertTrue(self.page.request.get(f"{self.base_url}/backend/db/{path}").ok)
