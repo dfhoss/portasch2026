@@ -5,31 +5,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UFFS de Portas Abertas – Contraste</title>
+  <link rel="stylesheet" href="static/css/fonts.css">
+  <link rel="stylesheet" href="static/css/tokens.css">
   <link rel="stylesheet" href="static/css/main.css">
   <link rel="stylesheet" href="./static/css/schedule.css">
 </head>
 
 <body>
 
-  <header class="banner" role="banner" aria-label="UFFS de Portas Abertas – Contraste">
-    <div class="content">
-      <div class="badge">UFFS DE</div>
-      <h1 class="title">
-        <span>PORTAS</span>
-        <span>ABERTAS</span>
-      </h1>
-    </div>
-
-    <div class="glasses">
-      <img src="static/assets/images/oculos.png" alt="">
-    </div>
-
-    <div class="logo">
-      <div class="logo-icon" aria-hidden="true"></div>
-      <span class="logo-text">CONTRASTE</span>
-    </div>
-
-    <div class="banner-bottom-line" aria-hidden="true"></div>
+  <header class="banner" role="banner" aria-label="UFFS de Portas Abertas">
+    <h1 class="visually-hidden">UFFS de Portas Abertas</h1>
+    <picture class="hero-picture">
+      <source media="(max-width: 600px)" srcset="static/assets/images/hero-mobile.png" width="1080" height="437">
+      <img class="hero-image" src="static/assets/images/hero-desktop.jpg" width="5938" height="1250"
+        alt="Campus Chapecó. 27 de outubro, das 08h30 às 21h." fetchpriority="high">
+    </picture>
   </header>
 
   <main>
@@ -168,7 +158,7 @@
       </div>
 
       <!-- Indicadores (dots) -->
-      <div class="carousel-dots" role="tablist" aria-label="Navegação do carrossel"></div>
+      <div class="carousel-dots" role="group" aria-label="Navegação do carrossel"></div>
     </section>
 
     <!-- ========== SEÇÃO PROGRAMAÇÃO COMPLETA ========== -->
@@ -1821,8 +1811,9 @@
 
       <div class="rules-action">
         <a href="https://www.uffs.edu.br/uffs/conteudo/Campus%20Chapec%C3%B3/SAE%20-%20CH/Modelos%20de%20documentos%20/REGULAMENTO%20DA%20GINCANA%20-%20Documentos%20Google.pdf"
-          class="rule-btn" target="_blank" rel="noopener noreferrer">
-          Baixar Regulamento Completo (PDF)
+          class="rule-btn" target="_blank" rel="noopener noreferrer" type="application/pdf"
+          aria-label="Abrir o regulamento completo em PDF em uma nova aba">
+          Abrir Regulamento Completo (PDF)
         </a>
       </div>
     </section>
