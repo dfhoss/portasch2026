@@ -1,0 +1,55 @@
+@font-face {
+  font-family: "Open Sans";
+  src: url("../assets/fonts/open-sans-400-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("../assets/fonts/open-sans-700-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Disket Mono";
+  src: url("../assets/fonts/disket-mono-400-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Disket Mono";
+  src: url("../assets/fonts/disket-mono-700-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Retropix";
+  src: url("../assets/fonts/retropix-400-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Garet";
+  src: url("../assets/fonts/garet-400-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Garet";
+  src: url("../assets/fonts/garet-700-normal.woff") format("woff");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}

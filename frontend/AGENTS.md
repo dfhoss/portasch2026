@@ -31,13 +31,15 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
   qualquer mudança no CSS precisa manter essa mesma divisão no JavaScript.
 - O deslocamento usa a largura real do primeiro cartão mais um gap fixo de `20px`; alterar o
   gap somente no CSS desalinha a navegação.
-- O autoplay chama `next()` a cada 5 segundos e reinicia após controles, teclado ou swipe. O
+- O autoplay avança uma página a cada 5 segundos e reinicia após controles, teclado ou swipe. O
   `resize` recria os indicadores após 150ms; preserve esse debounce para evitar estados
   intermediários.
 - O swipe só navega quando a diferença horizontal ultrapassa 50px. Não transforme um toque curto
   em navegação.
 - O carrossel inicia o timer automaticamente e não pausa sozinho em foco ou hover; qualquer
   mudança nesse comportamento deve incluir uma decisão explícita de acessibilidade.
+- O trilho contém cópias visuais com `data-carousel-clone`, `aria-hidden` e `inert` para o loop.
+  Não conte essas cópias como atividades reais nem as inclua em foco ou leitura assistiva.
 
 ### Conteúdo e integração
 
