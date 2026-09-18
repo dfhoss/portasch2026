@@ -38,7 +38,7 @@ class HeroIdentityTests(BrowserTestCase):
         self.assertTrue(carousel.get_attribute("tabindex"))
         prev = self.page.locator(".carousel-btn.prev")
         next_button = self.page.locator(".carousel-btn.next")
-        self.assertTrue(prev.is_disabled())
+        self.assertFalse(prev.is_disabled())
         self.assertFalse(next_button.is_disabled())
         before = self.page.locator(".carousel-track").evaluate("e => e.style.transform")
         carousel.focus()
@@ -56,9 +56,12 @@ class HeroIdentityTests(BrowserTestCase):
                           if (rect := card.bounding_box()) and rect["x"] >= box["x"] - 1 and rect["x"] + rect["width"] <= box["x"] + box["width"] + 1)
             self.assertEqual(visible, expected)
         self.assertEqual(self.page.locator(".carousel-btn").count(), 2)
-        while not next_button.is_disabled():
+        initial = self.page.locator(".carousel-track").evaluate("e => e.style.transform")
+        for _ in range(self.page.locator(".carousel-dots .dot").count()):
             next_button.click()
-        self.assertTrue(next_button.is_disabled())
+            self.page.wait_for_timeout(600)
+        self.assertEqual(self.page.locator(".carousel-track").evaluate("e => e.style.transform"), initial)
+        self.assertFalse(next_button.is_disabled())
         self.assertFalse(prev.is_disabled())
 
     def test_short_swipe_does_not_navigate_but_long_swipe_does(self):

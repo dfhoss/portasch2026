@@ -1,5 +1,8 @@
 # Nova identidade do frontend — especificação
-Data: 2026-09-18. Escopo aprovado pelo pedido do usuário: aplicar DESIGN.new.md ao frontend atual, usar os banners fornecidos para desktop/celular, renomear assets; executar com worktree, TDD e SDD.
+
+> Registro histórico da migração inicial. As decisões posteriores do usuário (fundo claro, banner centralizado, carrossel circular e consolidação documental) estão no [DESIGN único do frontend](../../../frontend/DESIGN.md). Ele prevalece sobre os valores e critérios antigos registrados abaixo.
+
+Data: 2026-09-18. Escopo aprovado pelo pedido do usuário: aplicar DESIGN.md ao frontend atual, usar os banners fornecidos para desktop/celular, renomear assets; executar com worktree, TDD e SDD.
 
 ## Objetivo
 A home usa a paleta nova de nove cores, fontes reais locais e hero responsivo com imagem integral. O conteúdo, agenda e interação existentes permanecem funcionais.
@@ -8,12 +11,12 @@ A home usa a paleta nova de nove cores, fontes reais locais e hero responsivo co
 - Criar frontend/static/css/tokens.css como fonte única de primitivas e tokens semânticos da aplicação.
 - Mover faces necessárias ao runtime para frontend/static/assets/fonts/ com nomes reais; criar frontend/static/css/fonts.css. O arquivo histórico static/design-old é referência, não dependência de runtime.
 - Ordem no head: fonts.css, tokens.css, main.css, schedule.css.
-- Consumir os 45 papéis de DESIGN.new.md; retirar cores antigas literais de componentes e declarações duplicadas da agenda. Cor transparente, currentColor e none não são cores de marca.
+- Consumir os 45 papéis de DESIGN.md; retirar cores antigas literais de componentes e declarações duplicadas da agenda. Cor transparente, currentColor e none não são cores de marca.
 - Fontes: Open Sans 400/700 para leitura; Disket Mono 400/700 para headings/mono; Retropix 400 como papel pixel; Garet 400/700 para informações. Não criar peso 900 sintético. Font-display swap e fallbacks.
 - CSS de layout atual preservado exceto hero e ajustes mínimos exigidos por fontes/overflow.
 
 ## Modos
-standard é o modo novo normal. high-contrast e dark continuam como aliases do tema legado já existente, centralizado e documentado como provisório, sem botão novo nem paleta inventada. Não há asset de alto contraste novo: o banner normal continua visível se o tema legado for forçado. DESIGN.new.md mantém placeholders da identidade futura; o bloco legado não é o preenchimento deles.
+standard é o modo novo normal. high-contrast e dark continuam como aliases do tema legado já existente, centralizado e documentado como provisório, sem botão novo nem paleta inventada. Não há asset de alto contraste novo: o banner normal continua visível se o tema legado for forçado. DESIGN.md mantém placeholders da identidade futura; o bloco legado não é o preenchimento deles.
 Para os pares novos, usar as cores do tema legado existente com função equivalente, para evitar textos/fundos incompatíveis. Nenhum marcador PENDENTE pode entrar em CSS servido.
 
 ## Hero e assets
@@ -49,6 +52,5 @@ Usar dados efetivamente fornecidos pela agenda ou interceptação explícita par
 Inspeção visual complementar via MCP Playwright em desktop/tablet/celular. Não afirmar equivalência ao alto contraste novo.
 
 ## Documentação
-Atualizar frontend/DESIGN.md para regras efetivas e frontend/README.md para carregamento/fontes/testes/hero; atualizar DESIGN.new.md como implementado no normal, com referências corretas e pendências mantidas.
+Atualizar frontend/DESIGN.md para regras efetivas e frontend/README.md para carregamento/fontes/testes/hero; atualizar DESIGN.md como implementado no normal, com referências corretas e pendências mantidas.
 Registrar evidência TDD e revisão em relatórios SDD; criar commits locais na branch isolada, sem merge/push nesta etapa.
-

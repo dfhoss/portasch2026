@@ -1,4 +1,7 @@
 # Nova identidade do frontend — Implementation Plan
+
+> Registro histórico da migração inicial. As decisões posteriores do usuário (fundo claro, banner centralizado, carrossel circular e consolidação documental) estão no [DESIGN único do frontend](../../../frontend/DESIGN.md). Ele prevalece sobre os valores e critérios antigos registrados abaixo.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Aplicar a nova paleta/fontes e os banners responsivos sem mudar os contratos da home.
@@ -28,7 +31,7 @@ Criar servidor HTTP temporário dentro do harness (ThreadingHTTPServer, SimpleHT
 
 ### Task 1: Tokens e fontes aplicados à home
 **Files:** criar frontend/static/css/tokens.css, fonts.css, frontend/static/assets/fonts/*.woff; criar frontend/tests/browser_support.py e test_identity_tokens.py; modificar head de frontend/index.html, frontend/static/css/main.css e schedule.css. Atualizar DESIGN.md e README.md apenas para os contratos de tokens/fontes desta tarefa.
-**Interfaces:** consumir a paleta/45 papéis exatos de frontend/DESIGN.new.md e faces em static/design-old/fonts-manifest.json. Produzir folhas fonts.css e tokens.css carregadas antes de main.css e schedule.css; preservar data-theme standard/high-contrast/dark.
+**Interfaces:** consumir a paleta/45 papéis exatos de frontend/DESIGN.md e faces em static/design-old/fonts-manifest.json. Produzir folhas fonts.css e tokens.css carregadas antes de main.css e schedule.css; preservar data-theme standard/high-contrast/dark.
 **Requisitos específicos:** migrar cores de componentes e pseudo-elementos; remover duplicação root e overrides legados de schedule.css para o bloco legado centralizado. Manter legado legível com pares semânticos equivalentes às cores atuais. Não alterar hero estruturalmente ainda; sua composição é substituída na Task 2. Aplicar Open Sans 400/700, Disket Mono 400/700, Retropix 400, Garet 400/700 conforme spec; eliminar peso 900 nos papéis sem face correspondente.
 - [ ] Escrever harness unittest/Playwright e testes de resultado no navegador antes de CSS. Padrão de asserções:
 ```python
@@ -40,7 +43,7 @@ self.assertEqual(self.page.locator(".carousel-btn.next").evaluate("(e) => getCom
 ```
 Adicionar comportamento selecionado/finalizado e troca via atributo legado em elementos reais. Verificar que faces solicitadas retornam FontFace carregada e que não há PENDENTE em stylesheets runtime.
 - [ ] Executar comando unittest acima, registrar falhas de cor/fonte esperadas (RED). Evitar falha por dependência/configuração como evidência.
-- [ ] Implementar tokens lendo bloco completo de DESIGN.new.md, centralizar legado e faces locais, migrar seletores. Exemplo de consumo:
+- [ ] Implementar tokens lendo bloco completo de DESIGN.md, centralizar legado e faces locais, migrar seletores. Exemplo de consumo:
 ```css
 body { background: var(--color-page); color: var(--color-text); font-family: var(--font-body); }
 .carousel-btn { background: var(--color-action-surface); color: var(--color-action-text); }
@@ -50,7 +53,7 @@ body { background: var(--color-page); color: var(--color-text); font-family: var
 - [ ] Atualizar docs de runtime e commit explícito somente dos arquivos desta tarefa; escrever relatório task-1-report.md com comandos e saída RED/GREEN, commits e limitações.
 
 ### Task 2: Hero desktop/mobile, nomes e regressões
-**Files:** renomear os dois assets da spec; modificar frontend/index.html e static/css/main.css; criar frontend/tests/test_identity_hero.py; atualizar frontend/DESIGN.md, DESIGN.new.md e README.md.
+**Files:** renomear os dois assets da spec; modificar frontend/index.html e static/css/main.css; criar frontend/tests/test_identity_hero.py; atualizar frontend/DESIGN.md e README.md.
 **Interfaces:** consumir fonts.css/tokens.css e o harness de Task 1. Produzir picture .hero-picture com img .hero-image; breakpoint mobile 600px.
 - [ ] Escrever testes de currentSrc e proporção antes de mudar HTML/arquivos:
 ```python
@@ -78,9 +81,8 @@ Testar razão natural versus renderizada com tolerância de 1px, ausência de ov
 ```
 Hero sem altura fixa/cover/corte, width 100%, height auto, display block. Remover CSS da composição antiga sem afetar classes de outras seções. Visually-hidden acessível e não display:none.
 - [ ] Executar suite completa; observar GREEN e conferir screenshots em 390/768/1440. Corrigir apenas regressões da mudança ou defeitos preexistentes que bloqueiem requisito, documentando estes últimos.
-- [ ] Atualizar documentação ativa, DESIGN.new.md (normal implementado, papel móvel confirmado, JPG preferido, placeholders HC mantidos), README incluindo comando de teste reproduzível com ambiente Playwright disponível; verificar caminhos dos renames.
+- [ ] Atualizar documentação ativa, DESIGN.md (normal implementado, papel móvel confirmado, JPG preferido, placeholders HC mantidos), README incluindo comando de teste reproduzível com ambiente Playwright disponível; verificar caminhos dos renames.
 - [ ] Commit explícito da tarefa e relatório task-2-report.md com hashes preservados, evidência RED/GREEN e screenshots/limitações.
 
 ## Revisão e entrega
 Após cada tarefa, controlador gera review-package e solicita revisão de spec/qualidade. Corrigir achados por subagente e revalidar testes afetados. Ao final, revisão de branch inteira e verificação independente no MCP Playwright. Guardar worktree/branch para integração revisável; nenhuma alteração de dados ou merge automático.
-

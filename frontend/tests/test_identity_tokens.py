@@ -5,7 +5,7 @@ from browser_support import BrowserTestCase
 
 class IdentityTokensTest(BrowserTestCase):
     def test_standard_theme_applies_new_component_pairs(self):
-        self.assertEqual(self.computed("body", "background-color"), "rgb(210, 222, 207)")
+        self.assertEqual(self.computed("body", "background-color"), "rgb(241, 242, 236)")
         self.assertEqual(
             self.computed(".activity-card", "background-color", first=True),
             "rgb(255, 255, 255)",
@@ -18,6 +18,10 @@ class IdentityTokensTest(BrowserTestCase):
         self.assertEqual(
             self.computed('.schedule-view-selector__option[aria-checked="true"]', "color"),
             "rgb(216, 249, 59)",
+        )
+        self.assertEqual(
+            self.computed(".activity-card .card-tag", "background-color", first=True),
+            "rgb(233, 231, 255)",
         )
 
     def test_finalized_activity_uses_the_complete_semantic_pair(self):
@@ -34,7 +38,7 @@ class IdentityTokensTest(BrowserTestCase):
         )
         self.assertEqual(
             item.evaluate("element => getComputedStyle(element).backgroundColor"),
-            "rgb(210, 222, 207)",
+            "rgb(233, 231, 255)",
         )
         self.assertEqual(
             item.locator(".schedule-item__status").evaluate(

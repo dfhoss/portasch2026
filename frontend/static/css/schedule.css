@@ -106,7 +106,6 @@
   background: var(--color-surface);
   border: var(--border-width) var(--border-style) var(--color-border);
   border-radius: var(--radius-pill);
-  box-shadow: 0 2px 10px var(--color-card-shadow);
 }
 
 .schedule-view-selector__label {
@@ -142,11 +141,14 @@
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.schedule-view-selector__option:hover:not([aria-checked="true"]) {
-  background: var(--color-tag-surface);
-  color: var(--color-brand);
+@media (hover: hover) and (pointer: fine) {
+  .schedule-view-selector__option:hover:not([aria-checked="true"]) {
+    background: var(--color-tag-surface);
+    color: var(--color-brand);
+  }
 }
 
 .schedule-view-selector__option:focus-visible {
@@ -158,7 +160,6 @@
   color: var(--color-selected-text);
   background: var(--color-selected-surface);
   border-color: var(--color-selected-surface);
-  box-shadow: 0 2px 8px var(--color-card-shadow-hover);
 }
 
 /* ==========================================================================
@@ -174,8 +175,7 @@
   background: var(--color-surface);
   border: var(--border-width) var(--border-style) var(--color-border);
   border-radius: var(--radius-card);
-  box-shadow: 0 4px 20px var(--color-card-shadow);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition: border-color 0.25s ease;
 }
 
 .schedule-view-group:hover {
@@ -184,7 +184,6 @@
 
 .schedule-view-group[open] {
   border-color: var(--color-brand);
-  box-shadow: 0 8px 28px var(--color-card-shadow-hover);
 }
 
 .schedule-view-group__summary {
@@ -197,6 +196,7 @@
   cursor: pointer;
   list-style: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
   background: var(--color-surface);
   transition: background-color 0.2s ease;
 }
@@ -348,14 +348,10 @@
   background: var(--color-surface);
   border: var(--border-width) var(--border-style) var(--color-border);
   border-radius: var(--radius-card);
-  box-shadow: 0 4px 20px var(--color-card-shadow);
   overflow-wrap: anywhere;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .schedule-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px var(--color-card-shadow-hover);
   border-color: var(--color-brand);
 }
 
@@ -470,8 +466,6 @@
 }
 
 .schedule-item--finalized:hover {
-  transform: none;
-  box-shadow: 0 4px 20px var(--color-card-shadow);
   border-color: var(--color-finalized-border);
 }
 
@@ -525,6 +519,7 @@
 
   .schedule-view-selector {
     width: 100%;
+    max-width: 100%;
     border-radius: 16px;
     padding: 8px;
   }
@@ -536,9 +531,9 @@
   }
 
   .schedule-view-selector__option {
-    flex: 1 1 calc(50% - 6px);
+    flex: 0 1 auto;
     text-align: center;
-    min-height: 38px;
+    min-height: 48px;
   }
 
   .schedule-view-group__summary {

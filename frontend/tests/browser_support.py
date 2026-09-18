@@ -11,6 +11,14 @@ class _QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
+    def copyfile(self, source, outputfile):
+        try:
+            super().copyfile(source, outputfile)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            # Navigation/source changes can cancel an in-flight image transfer.
+            # Only client disconnects are expected; other server errors propagate.
+            pass
+
 
 class BrowserTestCase(unittest.TestCase):
     @classmethod
