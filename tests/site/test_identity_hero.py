@@ -75,7 +75,7 @@ class HeroIdentityTests(BrowserTestCase):
         self.assertNotEqual(self.page.locator(".carousel-track").evaluate("e => e.style.transform"), before)
 
     def test_agenda_failure_keeps_static_content_and_carousel_usable(self):
-        self.page.route("**/backend/db/schedule.json", lambda route: route.abort())
+        self.page.route("**/db/schedule.json", lambda route: route.abort())
         self.page.reload(wait_until="networkidle")
         self.assertGreater(self.page.locator(".activity-card").count(), 0)
         self.assertGreater(self.page.locator(".carousel-btn").count(), 0)
@@ -90,4 +90,4 @@ class HeroIdentityTests(BrowserTestCase):
             self.page.screenshot(path=f".superpowers/sdd/2026-09-18-frontend-new-identity/task-2-{name}.png", full_page=True)
         self.assertEqual(errors, [])
         for path in ("schedule.json", "knowledge_axes.json", "locations.json"):
-            self.assertTrue(self.page.request.get(f"{self.base_url}/backend/db/{path}").ok)
+            self.assertTrue(self.page.request.get(f"{self.base_url}/db/{path}").ok)

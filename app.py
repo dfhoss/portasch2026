@@ -6,6 +6,7 @@ from clients.db import load_database
 from dependencies import validate_jwt_configured
 from fastapi import FastAPI, status
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from routes import auth, home, institutions, knowledge_axes, locations, participants, schedule
 from utils import brazil_time_formatter, get_brazil_time
@@ -62,6 +63,7 @@ app.include_router(institutions.router)
 app.include_router(participants.router)
 app.mount("/home/static", home.AdminStaticFiles(directory=home.HOME_STATIC_DIR), name="home-static")
 app.include_router(home.router)
+app.mount("/site", StaticFiles(directory="static/site", html=True), name="public-site")
 
 
 @app.get("/", tags=["Root"])

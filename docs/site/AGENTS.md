@@ -13,7 +13,7 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 
 ## Regras de design
 
-- Leia `DESIGN.md` antes de modificar a interface e use os tokens documentados.
+- Leia `static/site/DESIGN.md` antes de modificar a interface e use os tokens documentados.
 - Preserve `lang="pt-BR"`, landmarks semânticos, rótulos acessíveis e foco visível. Não dependa
   apenas de cor, hover ou movimento para comunicar estado.
 - Mantenha assets relativos à página; renomeações exigem atualizar todas as referências.
@@ -43,5 +43,5 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 - Teste desktop, tablet, celular e zoom fracionado: sem overflow horizontal ou recorte dos cartões.
 - Confira Tab, setas, swipe curto/longo, loop nos dois sentidos e controles após resize.
 - Verifique imagens, console, respostas dos JSONs e fallback com falha de rede.
-- Atualize `README.md` e `DESIGN.md` para decisões visuais/operacionais; mantenha aqui apenas
+- Atualize `docs/site/README.md` e `static/site/DESIGN.md` para decisões visuais/operacionais; mantenha aqui apenas
   restrições e armadilhas que não sejam rapidamente inferíveis pelo código.

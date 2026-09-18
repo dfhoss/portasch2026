@@ -43,7 +43,7 @@ class BrowserTestCase(unittest.TestCase):
 
     def setUp(self):
         self.page = self.browser.new_page(viewport={"width": 1440, "height": 1000})
-        self.page.goto(self.base_url + "/frontend/", wait_until="networkidle")
+        self.page.goto(self.base_url + "/site/", wait_until="networkidle")
 
     def tearDown(self):
         self.page.close()

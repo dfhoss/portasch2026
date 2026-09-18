@@ -15,10 +15,10 @@ O `TOKEN_JWT` já está configurado em `.env`; mantenha o arquivo fora do versio
 ## Regras de design
 
 - Leia `ARCHITECTURE.md` antes de adicionar ou reorganizar funcionalidades; atualize-o se mudar responsabilidades, fluxo, fronteiras de persistência ou o padrão de feature.
-- Para mudanças em `static/home/`, leia `DESIGN.md` e mantenha tokens semânticos, acessibilidade, foco, responsividade e animações reduzidas; altere `DESIGN.md` junto com novos tokens CSS.
-- Se um ajuste visual não produzir o efeito esperado, pare de acumular tentativas locais e pesquise referências técnicas confiáveis antes de propor outra alteração; registre a regra resultante em `DESIGN.md` quando ela for específica da interface.
+- Para mudanças em `static/admin/`, leia `static/admin/DESIGN.md` e mantenha tokens semânticos, acessibilidade, foco, responsividade e animações reduzidas; altere o documento junto com novos tokens CSS.
+- Se um ajuste visual não produzir o efeito esperado, pare de acumular tentativas locais e pesquise referências técnicas confiáveis antes de propor outra alteração; registre a regra resultante em `static/admin/DESIGN.md` quando ela for específica da interface.
 - Mantenha handlers finos e lance `HTTPException` apenas na fronteira HTTP; regras e acesso a dados ficam nos módulos apropriados.
-- Todo plano e toda spec criados com Superpowers devem terminar com uma última tarefa explícita chamada “Revisar contratos de design”. Ela deve revisar a implementação contra cada contrato aplicável de `DESIGN.md`, incluindo tokens semânticos, ícones, acessibilidade, foco, responsividade e animações reduzidas, registrar evidências e ser concluída antes do commit final.
+- Todo plano e toda spec criados com Superpowers devem terminar com uma última tarefa explícita chamada “Revisar contratos de design”. Ela deve revisar a implementação contra cada contrato aplicável de `static/admin/DESIGN.md`, incluindo tokens semânticos, ícones, acessibilidade, foco, responsividade e animações reduzidas, registrar evidências e ser concluída antes do commit final.
 - O subagent responsável pela execução de um plano ou spec criado com Superpowers deve ser criado pelo fluxo `superpowers:subagent-driven-development` ou `superpowers:executing-plans`, conforme o artefato. Não inicie essa execução com um subagent ad hoc fora do fluxo escolhido.
 - Todo subagent desta execução deve ser spawnado explicitamente com `model: "gpt-5.6-luna"` e `reasoning_effort: "low"`; essa regra vale para implementadores, revisores e agentes de correção.
 

@@ -1,6 +1,6 @@
 /**
  * Complete Program Schedule - Interactive Component Script
- * Portas Abertas UFFS - fonte de dados: ../backend/db/schedule.json
+ * Portas Abertas UFFS - fonte de dados: /db/schedule.json
  */
 
 const SHIFTS = Object.freeze([
@@ -535,7 +535,7 @@ function initCompleteProgram() {
   (async () => {
     try {
       const urls = ["schedule.json", "knowledge_axes.json", "locations.json"].map(
-        (fileName) => new URL(`../backend/db/${fileName}`, document.baseURI),
+        (fileName) => new URL(`/db/${fileName}`, document.baseURI),
       );
       const responses = await Promise.all(urls.map((url) => fetch(url)));
       if (responses.some((response) => !response.ok)) {

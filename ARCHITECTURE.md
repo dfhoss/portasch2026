@@ -1,23 +1,27 @@
-# Backend Architecture
+# Arquitetura do monólito
 
 ## 1. Objetivo e escopo
 
-O backend é uma API FastAPI modular para autenticação, agenda, locais, eixos de
-conhecimento e painel administrativo. A arquitetura separa composição da aplicação,
-contratos HTTP, modelos de domínio e persistência.
+O projeto é um monólito FastAPI que reúne a API, a página pública e o painel
+administrativo. A arquitetura separa composição da aplicação, contratos HTTP,
+modelos de domínio, persistência e os dois domínios visuais.
 
 ## 2. Visão estrutural — nível 1
 
 ```mermaid
 flowchart LR
-    Browser[ navegador / painel admin ] --> App[ app.py ]
+    Browser[ navegador / site público ] --> Site[ static/site/ ]
+    Browser --> Admin[ static/admin/ ]
+    Site --> App[ app.py ]
+    Admin --> App
     Client[ cliente HTTP ] --> App
     App --> Routes[ routes/ ]
     Routes --> Dependencies[ dependencies.py ]
     Routes --> Models[ models/ ]
     Routes --> Clients[ clients/ ]
     Clients --> JSON[ db/*.json ]
-    App --> Static[ static/home/ ]
+    App --> PublicDesign[ static/site/DESIGN.md ]
+    App --> AdminDesign[ static/admin/DESIGN.md ]
 ```
 
 ### Catálogo de elementos
@@ -30,7 +34,10 @@ flowchart LR
 | `models/`         | Contratos e validações de domínio reutilizáveis          | Pydantic                               |
 | `clients/`        | Ler, validar e persistir dados; encapsular erros         | Dicionários, listas e erros de domínio |
 | `db/*.json`       | Catálogos de desenvolvimento persistidos                 | Arquivos JSON                          |
-| `static/home/`    | Shell build-free do painel administrativo                | HTML, CSS e JavaScript                 |
+| `static/site/`    | Página pública, assets e scripts da agenda                | HTML, CSS e JavaScript                 |
+| `static/admin/`   | Shell build-free do painel administrativo                | HTML, CSS e JavaScript                 |
+| `static/site/DESIGN.md` | Tokens e contratos visuais da página pública        | Documento de design                    |
+| `static/admin/DESIGN.md` | Tokens e contratos visuais do painel             | Documento de design                    |
 
 As relações são direcionais: handlers usam clients e dependências; clients não devem
 depender da camada HTTP. Não importe routers novos em `dependencies.py`, pois isso pode
@@ -48,7 +55,12 @@ cliente -> app.py -> router -> CurrentTokenData/JWT
 Handlers devem validar entrada, chamar a lógica da feature e moldar a resposta. Erros
 de domínio são convertidos em `HTTPException` somente na fronteira HTTP.
 
-### 3.2 Painel administrativo
+### 3.2 Página pública
+
+`/site/` entrega a página pública e seus assets build-free. Ela usa os dados públicos
+expostos pela aplicação e mantém seus tokens em `static/site/DESIGN.md`.
+
+### 3.3 Painel administrativo
 
 ```text
 login -> /auth/token -> sessionStorage.adminToken
@@ -60,7 +72,7 @@ login -> /auth/token -> sessionStorage.adminToken
 buscar dados protegidos. O HTML inicial não deve conter agenda, catálogos, credenciais,
 hashes ou IDs persistidos.
 
-### 3.3 Falha em operação multi-arquivo
+### 3.4 Falha em operação multi-arquivo
 
 ```text
 validar estado atual -> gravar primeiro catálogo -> gravar segundo catálogo
@@ -105,8 +117,9 @@ propagado para as sessões da agenda.
 
 ## 5. Deployment e configuração
 
-O ambiente local executa a aplicação com Uvicorn. A API é servida em `/api`; o painel é
-servido em `/home`, com assets em `/home/static`. Os catálogos JSON são substituíveis
+O ambiente local executa a aplicação com Uvicorn. A API é servida em `/api`; a página
+pública é servida em `/site/`; o painel é servido em `/home`, com assets em
+`/home/static`. Os catálogos JSON são substituíveis
 por caminhos de ambiente para testes e deployments isolados.
 
 O `TOKEN_JWT` já está configurado em `.env`. O segredo deve permanecer fora do Git e o

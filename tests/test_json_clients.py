@@ -167,7 +167,7 @@ def test_path_getters_are_late_bound_and_defaults_ignore_process_cwd(
     assert get_schedule_path().parent.name == "db"
     assert get_locations_path().parent.name == "db"
     assert get_knowledge_axes_path().parent.name == "db"
-    assert get_schedule_path().parent.parent.name == "backend"
+    assert (get_schedule_path().parent.parent / "app.py").is_file()
 
     monkeypatch.setenv("SCHEDULE_PATH", str(tmp_path / "other-schedule.json"))
     monkeypatch.setenv("LOCATIONS_PATH", str(tmp_path / "other-locations.json"))

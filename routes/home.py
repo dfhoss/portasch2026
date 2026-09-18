@@ -8,7 +8,7 @@ from starlette.types import Scope
 
 router = APIRouter(tags=["admin"])
 
-HOME_STATIC_DIR = Path(__file__).parents[1] / "static" / "home"
+HOME_STATIC_DIR = Path(__file__).parents[1] / "static" / "admin"
 HOME_INDEX_PATH = HOME_STATIC_DIR / "index.html"
 
 
