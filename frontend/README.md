@@ -9,14 +9,11 @@ carrossel responsivo.
 Na pasta `frontend/`:
 
 ```powershell
-py -m http.server 4173 --directory ..
+uv run python -m http.server 4187 --bind 127.0.0.1 --directory ..
 ```
 
-Abra <http://localhost:4173/frontend/>. Se `py` não estiver disponível, use:
-
-```powershell
-python -m http.server 4173 --directory ..
-```
+Abra <http://127.0.0.1:4187/frontend/>. O comando requer `uv` disponível no PATH e serve
+a raiz do repositório para disponibilizar também os JSONs de `backend/db/`.
 
 Não há `package.json`, bundler ou dependências de frontend nessa versão; o navegador carrega
 `index.html`, `static/css/main.css`, `static/css/schedule.css`, `static/js/carousel.js`, `static/js/schedule.js` e os assets relativos diretamente. A programação é lida de
