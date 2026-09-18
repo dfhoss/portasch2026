@@ -6,12 +6,13 @@ carrossel responsivo.
 
 ## Executar localmente
 
-Na pasta `frontend/`:
+Na raiz do projeto (`portasch2026/`):
 
 ```powershell
-uv run python -m http.server 4187 --bind 127.0.0.1 --directory ..
+uv --directory frontend run python -m http.server 4187 --bind 127.0.0.1 --directory ..
 ```
 
+O `uv --directory frontend` executa o comando na pasta `frontend/`, sem precisar de `cd`.
 Abra <http://127.0.0.1:4187/frontend/>. O comando requer `uv` disponível no PATH e serve
 a raiz do repositório para disponibilizar também os JSONs de `backend/db/`.
 

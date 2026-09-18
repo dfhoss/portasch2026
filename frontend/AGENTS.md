@@ -5,7 +5,8 @@ Contraste, o funcionamento do carrossel e o acesso por teclado/toque ao alterar 
 
 ## Comandos de desenvolvimento
 
-- Na pasta `frontend/`, execute `uv run python -m http.server 4187 --bind 127.0.0.1 --directory ..`.
+- Na raiz do projeto (`portasch2026/`), execute `uv --directory frontend run python -m http.server 4187 --bind 127.0.0.1 --directory ..`.
+  O `uv` executa na pasta `frontend/`, sem exigir `cd` no terminal.
   Abra `http://127.0.0.1:4187/frontend/`; a raiz servida inclui os JSONs de `backend/db/`.
 - Com Live Server, sirva a raiz do repositório e abra `/frontend/`: a agenda também precisa
   acessar `backend/db/`. A presença de conteúdo na tela não comprova que os JSONs carregaram.
