@@ -19,7 +19,7 @@ semânticos. A identidade do painel administrativo não substitui a identidade p
 | Material | Dimensão real | Uso |
 | --- | --- | --- |
 | [Banner horizontal](<static/assets/images/Cópia de SITE HOME PORTAS ABERTAS UFFS 2025 (1900 x 400 px).png>) | 1900 × 400; proporção 4,75:1 | Arte horizontal ampla |
-| [Banner alternativo](<static/assets/images/Site banner 9 x 16.png>) | 1080 × 437; proporção aproximada 2,47:1 | Composição mais compacta |
+| [Hero móvel](static/assets/images/hero-mobile.png) | 1080 × 437; proporção aproximada 2,47:1 | Arte integral para até 600px |
 | [Palette.txt](static/assets/images/Palette.txt) | Nove cores HEX/RGB | Fonte dos valores primitivos |
 | [Palette.png](static/assets/images/Palette.png) | 2000 × 1000 | Conferência visual e amostragem das faixas |
 
@@ -311,7 +311,7 @@ o mesmo conteúdo já embutido na imagem. Não cortar campus, marca, data e hor�
 
 A proposta para imagem integral é `display: block; width: 100%; height: auto`, reservando
 a proporção via atributos `width`/`height`. Não impor ao banner 1900 × 400 a altura
-`clamp(280px, 36vw, 480px)` da composição antiga. O arquivo compacto é candidato a telas menores,
+`clamp(280px, 36vw, 480px)` da composição antiga. O arquivo compacto é a arte móvel confirmada,
 mas não é uma arte móvel vertical aprovada; verificar legibilidade real antes de definir o
 breakpoint de `picture`. Abaixo do tamanho legível, apresentar informação textual acessível
 fora da arte e solicitar/compor uma adaptação em uma etapa própria.
@@ -400,4 +400,3 @@ JSONs do backend. Troca de tema não deve recriar dados nem recolher grupos.
 Validação deste documento: leitura dos estilos e scripts atuais, inspeção visual dos dois
 banners e conferência dos nove HEX por amostragem do Palette.png. Não houve mudança de UI nem
 teste de uma implementação nova de tema. Os placeholders são intencionais e solicitados.
-

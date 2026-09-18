@@ -59,12 +59,13 @@ Dimensões importantes:
 
 ## Componentes
 
-### Banner
+### Banner / hero
 
-O banner ocupa toda a largura e usa altura fluida entre `280px` e `480px`. O padrão de círculos é
-decorativo e não recebe foco. A marca central combina o badge “UFFS DE”, o título em duas linhas,
-os óculos como imagem decorativa e a assinatura “CONTRASTE” no canto inferior direito. A linha
-verde-limão permanece no limite inferior.
+O banner ocupa toda a largura com a arte integral, sem altura fixa, `cover` ou corte. A imagem
+desktop é `static/assets/images/hero-desktop.jpg` (5938×1250); até 600px o `picture` seleciona
+`hero-mobile.png` (1080×437). Ambas usam `width: 100%`, `height: auto` e `display: block`.
+O `h1` continua semanticamente disponível com a classe `visually-hidden`; a arte informa campus,
+data e horário pelo `alt`.
 
 ### Cartão de atividade
 

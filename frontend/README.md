@@ -30,6 +30,17 @@ As faces locais (Open Sans, Disket Mono, Retropix e Garet) usam `font-display: s
 Os papéis semânticos e os aliases provisórios dos temas `high-contrast`/`dark` ficam centralizados
 em `tokens.css`; a identidade nova de alto contraste continua pendente.
 
+O hero usa as artes integrais `static/assets/images/hero-desktop.jpg` e `hero-mobile.png` via
+`picture`, com breakpoint móvel em 600px e sem recorte ou rolagem horizontal.
+
+### Testes automatizados
+
+Com o ambiente Playwright disponível em `backend/.venv`:
+
+```powershell
+..\backend\.venv\Scripts\python.exe -m unittest discover -s frontend/tests -p "test_*.py" -v
+```
+
 ## Organização
 
 | Caminho | Responsabilidade |
