@@ -2,3 +2,31 @@
 .worktrees/
 .superpowers/
 ideas.md
+.playwright-mcp/
+.pytest-tmp-*/
+.uv-cache/
+.uv-cache-menu/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Git and operating-system artifacts
+*.orig
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+Thumbs.db
+.DS_Store

@@ -4,9 +4,9 @@ import textwrap
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parents[1]
-ADMIN_SCRIPT = PROJECT_ROOT / "static" / "home" / "home.js"
-ADMIN_STYLES = PROJECT_ROOT / "static" / "home" / "home.css"
-ADMIN_DESIGN = PROJECT_ROOT / "DESIGN.md"
+ADMIN_SCRIPT = PROJECT_ROOT / "static" / "admin" / "home.js"
+ADMIN_STYLES = PROJECT_ROOT / "static" / "admin" / "home.css"
+ADMIN_DESIGN = PROJECT_ROOT / "static" / "admin" / "DESIGN.md"
 
 
 def test_location_form_only_asks_for_name(client):

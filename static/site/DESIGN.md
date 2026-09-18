@@ -161,7 +161,7 @@ informações sem repetir o título do `h1`. Não inferir ano ou alterar agenda 
 Os assets atualmente usados pela home são o JPG desktop e o PNG móvel descritos acima. Preservar
 bytes dos assets, suas proporções e caminhos locais.
 
-A agenda, eixos e locais vêm diretamente dos JSONs em `backend/db/`; não manter cópia local.
+A agenda, eixos e locais vêm diretamente dos JSONs em `db/`; não manter cópia local.
 Na falha de rede, preservar o conteúdo estático e a interação existentes.
 “Ao vivo”, “Em breve” e “Finalizada” precisam de rótulos textuais, além das cores.
 Novas animações devem respeitar movimento reduzido. O autoplay existente não pausa em hover/foco;
@@ -298,7 +298,7 @@ O atributo histórico `data-contrast` e a chave `uffs-high-contrast` não fazem 
 
 ## Validação
 
-Usar os comandos reproduzíveis do [README](README.md). Conferir cores computadas, faces locais,
+Usar os comandos reproduzíveis do [README](../../README.md). Conferir cores computadas, faces locais,
 assets desktop/móvel e proporção, ausência de overflow, foco/teclado, swipe curto e longo,
 indicadores, ciclo contínuo, resize, autoplay e falha de rede. Ao receber o novo alto contraste,
 validar todos os pares e assets antes de declarar o modo implementado.
