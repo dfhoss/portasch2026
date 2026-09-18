@@ -9,7 +9,7 @@ A home usa a paleta nova de nove cores, fontes reais locais e hero responsivo co
 
 ## Arquitetura
 - Criar frontend/static/css/tokens.css como fonte única de primitivas e tokens semânticos da aplicação.
-- Mover faces necessárias ao runtime para frontend/static/assets/fonts/ com nomes reais; criar frontend/static/css/fonts.css. O arquivo histórico static/design-old é referência, não dependência de runtime.
+- Mover faces necessárias ao runtime para frontend/static/assets/fonts/ com nomes reais; criar frontend/static/css/fonts.css. Assets históricos não fazem parte do runtime.
 - Ordem no head: fonts.css, tokens.css, main.css, schedule.css.
 - Consumir os 45 papéis de DESIGN.md; retirar cores antigas literais de componentes e declarações duplicadas da agenda. Cor transparente, currentColor e none não são cores de marca.
 - Fontes: Open Sans 400/700 para leitura; Disket Mono 400/700 para headings/mono; Retropix 400 como papel pixel; Garet 400/700 para informações. Não criar peso 900 sintético. Font-display swap e fallbacks.
