@@ -31,7 +31,7 @@ Criar servidor HTTP temporário dentro do harness (ThreadingHTTPServer, SimpleHT
 
 ### Task 1: Tokens e fontes aplicados à home
 **Files:** criar frontend/static/css/tokens.css, fonts.css, frontend/static/assets/fonts/*.woff; criar frontend/tests/browser_support.py e test_identity_tokens.py; modificar head de frontend/index.html, frontend/static/css/main.css e schedule.css. Atualizar DESIGN.md e README.md apenas para os contratos de tokens/fontes desta tarefa.
-**Interfaces:** consumir a paleta/45 papéis exatos de frontend/DESIGN.md e faces em static/design-old/fonts-manifest.json. Produzir folhas fonts.css e tokens.css carregadas antes de main.css e schedule.css; preservar data-theme standard/high-contrast/dark.
+**Interfaces:** consumir a paleta/45 papéis exatos de frontend/DESIGN.md e as faces disponíveis em frontend/static/assets/fonts/. Produzir folhas fonts.css e tokens.css carregadas antes de main.css e schedule.css; preservar data-theme standard/high-contrast/dark.
 **Requisitos específicos:** migrar cores de componentes e pseudo-elementos; remover duplicação root e overrides legados de schedule.css para o bloco legado centralizado. Manter legado legível com pares semânticos equivalentes às cores atuais. Não alterar hero estruturalmente ainda; sua composição é substituída na Task 2. Aplicar Open Sans 400/700, Disket Mono 400/700, Retropix 400, Garet 400/700 conforme spec; eliminar peso 900 nos papéis sem face correspondente.
 - [ ] Escrever harness unittest/Playwright e testes de resultado no navegador antes de CSS. Padrão de asserções:
 ```python
