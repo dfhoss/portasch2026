@@ -1,0 +1,146 @@
+[
+  {
+    "family": "Fira Sans",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/fira-sans-400-normal.woff",
+    "source": "assets/site/fonts/61fa03bfa5e6119810adf84612a6363f.woff",
+    "sha256": "a8cc0dbec382604d2bfa4e6e156e314556deed5c92b8cee555998b4a855426e0",
+    "bytes": 204160
+  },
+  {
+    "family": "Retropix",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/retropix-400-normal.woff",
+    "source": "assets/site/fonts/0fae080092ae08c1b8750c04002051cf.woff",
+    "sha256": "99e4e46ce32e439cc8fc1121dc58d7acfde73ae5737e9dcbc63f4f7b98907fb5",
+    "bytes": 7628
+  },
+  {
+    "family": "Disket Mono",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/disket-mono-400-normal.woff",
+    "source": "assets/site/fonts/11658dca291539cb9be2c7572689be00.woff",
+    "sha256": "8cc62c80e40feef400fd2f92506b31300eb8fa0c821ca1f4f992d83c395c3716",
+    "bytes": 25120
+  },
+  {
+    "family": "Disket Mono",
+    "weight": 700,
+    "style": "normal",
+    "file": "fonts/disket-mono-700-normal.woff",
+    "source": "assets/site/fonts/f29fa1268ec4a6d8344ab17a0202ee9c.woff",
+    "sha256": "f7b86336675f87f2ad4dbf06bafe3f8001e3478665e4fb17846a39ad99b97908",
+    "bytes": 24292
+  },
+  {
+    "family": "League Spartan",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/league-spartan-400-normal.woff",
+    "source": "assets/site/fonts/17bf2c0289a0315c35428e4164035c41.woff",
+    "sha256": "93ab9e87848b2c448a712990dcd8234bfc63e424b1b1c02bfe9c955d48f47f02",
+    "bytes": 17588
+  },
+  {
+    "family": "Open Sans",
+    "weight": 700,
+    "style": "italic",
+    "file": "fonts/open-sans-700-italic.woff",
+    "source": "assets/site/fonts/e6f5a8d7c514b74f11fd37c43f1fde08.woff",
+    "sha256": "b5298c1eabd33b02883183a7d9fcff65204f5609d1baef4c06b2a7d0f5475ce9",
+    "bytes": 56460
+  },
+  {
+    "family": "Open Sans",
+    "weight": 800,
+    "style": "normal",
+    "file": "fonts/open-sans-800-normal.woff",
+    "source": "assets/site/fonts/2910958f6684e68e634e4fc40152d6ea.woff",
+    "sha256": "d824ec1d22a9e2edb9389bcf9039664248ff24114a6872740d1c8e156dc94882",
+    "bytes": 76180
+  },
+  {
+    "family": "Open Sans",
+    "weight": 700,
+    "style": "normal",
+    "file": "fonts/open-sans-700-normal.woff",
+    "source": "assets/site/fonts/903046509a38aa787d25066b795b75d6.woff",
+    "sha256": "083ed31733f98d0464e73600c21d5406bd8cb5f1a1781c5fe1b06f2a9d67a41f",
+    "bytes": 61924
+  },
+  {
+    "family": "Open Sans",
+    "weight": 300,
+    "style": "italic",
+    "file": "fonts/open-sans-300-italic.woff",
+    "source": "assets/site/fonts/89d12e555d75229f7390d0f90514b81b.woff",
+    "sha256": "3f2315ff16e1ab5be5f67af4b5403441b77d54e84b6168a1f16777e3d5aef30b",
+    "bytes": 56592
+  },
+  {
+    "family": "Open Sans",
+    "weight": 300,
+    "style": "normal",
+    "file": "fonts/open-sans-300-normal.woff",
+    "source": "assets/site/fonts/4c32bb82ced808462d169bee169db0aa.woff",
+    "sha256": "cd327fb6fbd23da7051d813555d6f05f566d840988f0bc04a3e3ecd5b790a472",
+    "bytes": 60824
+  },
+  {
+    "family": "Open Sans",
+    "weight": 400,
+    "style": "italic",
+    "file": "fonts/open-sans-400-italic.woff",
+    "source": "assets/site/fonts/0bf5337961e349884b4fc3fe90250337.woff",
+    "sha256": "01ed9f6fd68e2ea3528f582bcdc2a479f432c18c50f1825adbaf15b3f7199b0d",
+    "bytes": 56596
+  },
+  {
+    "family": "Open Sans",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/open-sans-400-normal.woff",
+    "source": "assets/site/fonts/8a554be3f10d4a5c0b33a5b14bbcaa92.woff",
+    "sha256": "f376fd1f40a8b42be1ffa3f00549712cd8768480c7983725830a70e913afd2a8",
+    "bytes": 59056
+  },
+  {
+    "family": "Open Sans",
+    "weight": 800,
+    "style": "italic",
+    "file": "fonts/open-sans-800-italic.woff",
+    "source": "assets/site/fonts/03bba4b84e844fc04d6bb22ae0b607a9.woff",
+    "sha256": "3210e60ff8e046308f0a4b5273258a0d88979efb48605d2bd0d983a97a1da653",
+    "bytes": 79024
+  },
+  {
+    "family": "Garet",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/garet-400-normal.woff",
+    "source": "assets/site/fonts/71ae65d828bb9376b7c5efddfb6967b9.woff",
+    "sha256": "dd76c4ec5c815f82b75036cc3cc9234e20a5358b26b73e2cbe9c59f275d262f8",
+    "bytes": 56292
+  },
+  {
+    "family": "Garet",
+    "weight": 700,
+    "style": "normal",
+    "file": "fonts/garet-700-normal.woff",
+    "source": "assets/site/fonts/6e588505412a482372944b8ed0825cde.woff",
+    "sha256": "a73fa745fa95bd50ad029a41de99677a7c895a1d159f2c9317b097009ef17d0e",
+    "bytes": 58280
+  },
+  {
+    "family": "Antonio",
+    "weight": 400,
+    "style": "normal",
+    "file": "fonts/antonio-400-normal.woff",
+    "source": "assets/site/fonts/68c611726d194a3ba0fe88bc4f632cde.woff",
+    "sha256": "ad2c60d8cf7962a10ab945069f9faf02180d4530dc8f796b662145bf3db22042",
+    "bytes": 26516
+  }
+]
