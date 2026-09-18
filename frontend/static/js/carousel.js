@@ -36,6 +36,16 @@
     }
   }
 
+  function setTransitionDuration(visualIndex, fromPage) {
+    const referenceDistance = pageStarts.length > 1
+      ? Math.max(1, pageStarts[1] - pageStarts[0])
+      : 1;
+    const distance = Math.abs(visualIndex - pageStarts[fromPage]);
+    const duration = 0.45 * Math.max(1, distance / referenceDistance);
+    track.style.setProperty("--carousel-transition-duration", `${duration}s`);
+    return duration;
+  }
+
   function updateIndicators() {
     Array.from(dotsContainer.children).forEach((dot, index) => {
       const active = index === currentPage;
@@ -52,6 +62,7 @@
     clearTimeout(transitionTimer);
     animating = false;
     positionAt(pageStarts[currentPage], true);
+    track.style.removeProperty("--carousel-transition-duration");
     const pending = pendingNavigation;
     pendingNavigation = null;
     if (pending) pending();
@@ -62,6 +73,7 @@
       pendingNavigation = () => navigate(page, visualIndex);
       return;
     }
+    const previousPage = currentPage;
     currentPage = page;
     updateIndicators();
     if (reducedMotion.matches) {
@@ -69,9 +81,10 @@
       return;
     }
     animating = true;
+    const transitionDuration = setTransitionDuration(visualIndex, previousPage);
     positionAt(visualIndex);
     // Also settle when transitionend is suppressed (background tab/resize).
-    transitionTimer = setTimeout(finishTransition, 550);
+    transitionTimer = setTimeout(finishTransition, transitionDuration * 1000 + 100);
   }
 
   function move(direction) {

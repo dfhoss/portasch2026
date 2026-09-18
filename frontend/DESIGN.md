@@ -70,7 +70,8 @@ não inferir uma família da aparência da data/horário.
 ## Medidas e layout
 
 - Conteúdo e banner centralizados com máximo de 1100px.
-- Conteúdo: padding de 48px 24px 80px; até 600px, 32px 16px 60px.
+- Conteúdo: eixo horizontal alinhado ao banner, com largura máxima de 1100px; padding vertical de
+  48px 0 80px; até 600px, 32px 16px 60px.
 - Cartões: raio de 16px, borda de 2px, padding aproximado de 22px, altura mínima de 260px
   (240px até 600px); texto deve poder ampliar sem corte.
 - Controles: 44px no desktop, 38px até 600px.
@@ -95,6 +96,12 @@ descrição e tag. O cartão cresce para preencher a altura da faixa e não deve
 causa de um título mais longo. O hover pode elevar o cartão apenas como reforço secundário; o
 estado precisa continuar compreensível sem apontador.
 
+Os cabeçalhos dos cartões de regulamento alinham o número e o título pela baseline tipográfica
+(`align-items: baseline`). O número usa `inline-block`, `line-height` explícito e padding próprio;
+não trocar por `inline-flex` nem por alinhamento vertical baseado apenas no topo ou no centro,
+porque as métricas de fonte e o arredondamento de pixels podem expor desalinhamentos em níveis de
+zoom diferentes. Ao ajustar esse componente, conferir a baseline em zoom normal e fracionado.
+
 ### Carrossel
 
 O carrossel é uma região rotulada com botões anterior/próximo, indicadores em `role="group"` e
@@ -112,15 +119,21 @@ escala fracionada; o ativo tem contorno e `aria-current="true"`, além da cor, e
 próprio.
 
 Os indicadores mantêm círculo visual de 12px, mas cada botão oferece área de toque de 48×48px,
-seguindo a recomendação de alvos de interação do Material 3. As setas também mantêm 48×48px no
-celular. Cards e grupos da agenda usam o tratamento outlined/filled sem sombras por padrão; o
-estado de interação é comunicado pela borda, pela superfície selecionada ou pelo foco visível.
+seguindo a recomendação de alvos de interação do Material 3. Os alvos dos dots têm gap de 4px e
+ficam 8px abaixo da faixa do carrossel; reduzir o espaçamento visual não reduz a área de toque.
+As setas também mantêm 48×48px no celular. Cards e grupos da agenda usam o tratamento
+outlined/filled sem sombras por padrão; o estado de interação é comunicado pela borda, pela
+superfície selecionada ou pelo foco visível.
 
 A passagem entre última e primeira página continua no sentido da navegação, usando cópias
 visuais com `aria-hidden` e `inert`. Após a transição, o trilho volta à posição equivalente sem
 animação perceptível. Os controles permanecem disponíveis nos dois extremos; só são desabilitados
 quando todos os cartões cabem em uma página. Movimento reduzido torna a troca imediata, mantendo
 o autoplay existente de 5s. Resize preserva uma página próxima e o foco do indicador após 150ms.
+
+A duração da transição é proporcional à distância percorrida. O retorno contínuo pelas cópias do
+trilho pode atravessar mais cartões que uma página normal, mas deve manter a mesma velocidade
+visual; o reposicionamento final continua instantâneo e invisível.
 
 ## Responsividade, conteúdo e acessibilidade
 
