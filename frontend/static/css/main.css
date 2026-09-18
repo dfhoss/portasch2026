@@ -135,6 +135,7 @@ main {
 .carousel {
     overflow: hidden;
     width: 100%;
+    padding-inline: 4px;
     padding-block: 4px;
     outline: none;
 }
@@ -439,8 +440,8 @@ a,
 
 /* ===== SEÇÃO REGULAMENTO DA GINCANA ===== */
 .rules-section {
-  margin-top: 56px;
-  padding-top: 16px;
+  margin-top: 32px;
+  padding-top: 0;
 }
 
 .rules-grid {

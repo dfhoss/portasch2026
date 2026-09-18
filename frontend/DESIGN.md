@@ -76,6 +76,10 @@ não inferir uma família da aparência da data/horário.
   (240px até 600px); texto deve poder ampliar sem corte.
 - Controles: 44px no desktop, 38px até 600px.
 - Trilho: gap de 20px compartilhado entre CSS e JavaScript.
+- Viewport do carrossel: padding interno de 4px em todos os lados para separar as bordas dos
+  cartões da máscara de recorte sem alterar o gap de 20px do trilho.
+- Espaçamento entre blocos e novos títulos: 32px; manter esse intervalo entre as imagens da
+  programação e o título do regulamento.
 
 ## Componentes
 
