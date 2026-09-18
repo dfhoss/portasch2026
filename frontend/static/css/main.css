@@ -528,6 +528,7 @@ a,
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.95rem;
+  line-height: 1;
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 0.05em;
@@ -539,6 +540,7 @@ a,
 }
 
 .rule-btn__icon {
+  display: block;
   flex: 0 0 auto;
 }
 

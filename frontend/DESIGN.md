@@ -67,6 +67,10 @@ A troca de tema não muda famílias, pesos, tamanhos ou hierarquia.
 Texto longo permanece em caixa de frase. A tipografia embutida nas imagens é rasterizada;
 não inferir uma família da aparência da data/horário.
 
+Ícones acompanhados de texto devem ficar alinhados verticalmente ao texto correspondente. Usar
+alinhamento pelo centro do componente, `line-height` explícito e `display: block` em SVGs quando
+necessário; não depender da baseline inline padrão do navegador.
+
 ## Medidas e layout
 
 - Conteúdo e banner centralizados com máximo de 1100px.
