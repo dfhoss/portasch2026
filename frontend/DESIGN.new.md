@@ -5,11 +5,11 @@
 Referência criada em **17/09/2026** para a reconstrução do frontend. Define a paleta recebida,
 sua aplicação proposta aos componentes existentes e o contrato para receber o alto contraste.
 
-**Modo normal:** artes e nove cores recebidas; aplicação aos componentes documentada abaixo.
+**Modo normal:** artes e nove cores recebidas; aplicação aos componentes implementada abaixo.
 **Alto contraste:** identidade ainda não recebida; todos os valores desse modo estão pendentes.
-Este arquivo é uma especificação para integração futura. Não altera a home, seus estilos ou scripts.
+O modo normal está implementado por `fonts.css`, `tokens.css`, `main.css` e `schedule.css`.
 O [DESIGN.old.md](DESIGN.old.md) permanece como registro histórico; o [DESIGN.md](DESIGN.md)
-descreve a base anterior em funcionamento.
+descreve as regras efetivas da home.
 
 Seguir o modelo de [tokens do backend](../backend/DESIGN.md): separar valores primitivos de papéis
 semânticos. A identidade do painel administrativo não substitui a identidade pública.
@@ -18,7 +18,8 @@ semânticos. A identidade do painel administrativo não substitui a identidade p
 
 | Material | Dimensão real | Uso |
 | --- | --- | --- |
-| [Banner horizontal](<static/assets/images/Cópia de SITE HOME PORTAS ABERTAS UFFS 2025 (1900 x 400 px).png>) | 1900 × 400; proporção 4,75:1 | Arte horizontal ampla |
+| [Banner horizontal histórico](<static/assets/images/Cópia de SITE HOME PORTAS ABERTAS UFFS 2025 (1900 x 400 px).png>) | 1900 × 400; proporção 4,75:1 | Referência histórica; não selecionado pelo hero |
+| [Hero desktop](static/assets/images/hero-desktop.jpg) | 5938 × 1250; proporção 4,75:1 | Arte integral ativa acima de 600px |
 | [Hero móvel](static/assets/images/hero-mobile.png) | 1080 × 437; proporção aproximada 2,47:1 | Arte integral para até 600px |
 | [Palette.txt](static/assets/images/Palette.txt) | Nove cores HEX/RGB | Fonte dos valores primitivos |
 | [Palette.png](static/assets/images/Palette.png) | 2000 × 1000 | Conferência visual e amostragem das faixas |
@@ -70,9 +71,9 @@ definem estilos para cada controle.
 ## Estado da implementação examinada
 
 - `index.html` já declara `<html lang="pt-BR" data-theme="standard">`.
-- `static/css/main.css` ainda tem cores literais no body, banner, badge, título e carrossel.
-  Partes do regulamento já consomem variáveis de `schedule.css`.
-- `static/css/schedule.css` concentra os tokens atuais e os seletores
+- `static/css/fonts.css` e `static/css/tokens.css` são carregados antes dos componentes; `main.css`
+  e `schedule.css` consomem esses tokens sem cores de marca literais.
+- `static/css/schedule.css` mantém os consumidores da agenda e os seletores
   `data-theme="high-contrast"` e `data-theme="dark"`.
 - Há exceções por tema em seleção de visão, summaries, contagens, cursos, horários, links e
   regulamento; algumas usam o literal `#14152b`. Alterar só `:root` não elimina essas exceções.
@@ -87,9 +88,9 @@ Não importar o atributo `data-contrast` do exportado antigo. O alias `dark` hoj
 
 ## Tokens CSS do normal
 
-Bloco proposto para a futura folha central de tokens, carregada antes de `main.css` e
-`schedule.css`. Na integração, remover as declarações antigas duplicadas que sobrescreveriam
-esses valores por ordem de carregamento. As duas folhas devem consumir uma única fonte de tokens.
+Bloco efetivo da folha central de tokens, carregada antes de `main.css` e
+`schedule.css`; declarações antigas duplicadas que sobrescreviam esses valores foram removidas.
+As duas folhas consomem essa única fonte de tokens.
 
 Os nove `--palette-*` são recebidos. Branco, neutros de leitura e valores com alpha são
 complementos funcionais propostos, identificados nos papéis abaixo.
@@ -305,16 +306,14 @@ um seletor universal que force fundo ou cor em todas as tags.
 
 ## Banners, responsividade e conteúdo acessível
 
-Usar os PNGs recebidos como referência de composição e, na integração, como assets completos
-se essa for a estratégia escolhida. Não sobrepor o título antigo, óculos ou badge HTML sobre
+Usar o PNG horizontal histórico apenas como referência de composição. O hero ativo usa as artes
+completas `hero-desktop.jpg` e `hero-mobile.png`; não sobrepor o título antigo, óculos ou badge HTML sobre
 o mesmo conteúdo já embutido na imagem. Não cortar campus, marca, data e horário com `cover`.
 
-A proposta para imagem integral é `display: block; width: 100%; height: auto`, reservando
+A implementação de imagem integral usa `display: block; width: 100%; height: auto`, reservando
 a proporção via atributos `width`/`height`. Não impor ao banner 1900 × 400 a altura
-`clamp(280px, 36vw, 480px)` da composição antiga. O arquivo compacto é a arte móvel confirmada,
-mas não é uma arte móvel vertical aprovada; verificar legibilidade real antes de definir o
-breakpoint de `picture`. Abaixo do tamanho legível, apresentar informação textual acessível
-fora da arte e solicitar/compor uma adaptação em uma etapa própria.
+`clamp(280px, 36vw, 480px)` da composição antiga. O arquivo compacto é a arte móvel confirmada
+e é selecionado pelo `picture` até 600px.
 
 As artes incluem “27 de outubro”, “08h30 às 21h” e “Campus Chapecó”. Registrar isso como conteúdo
 da imagem recebida, sem inferir o ano ou substituir os dados do backend a partir do nome do arquivo.
@@ -366,8 +365,8 @@ Tokens tipográficos propostos, preservando os nomes consumidos pela agenda:
 }
 ```
 
-A home atual não carrega essas fontes. Na integração será necessário importar as faces locais
-e migrar os pesos 900 atuais: Disket Mono disponível tem 400/700, não 900.
+As faces locais são carregadas por `fonts.css`; os pesos de Disket Mono disponíveis são 400/700,
+sem peso 900 sintético.
 Rótulos de leitura longa permanecem em caixa de frase. A marca pode manter caixa alta.
 Fonte deve ter fallback, e o tema não muda a hierarquia tipográfica.
 
@@ -395,8 +394,8 @@ JSONs do backend. Troca de tema não deve recriar dados nem recolher grupos.
 - Testar Tab, Enter/Espaço no acionador futuro, setas e swipe no carrossel.
 - Após receber alto contraste, preencher a matriz inteira, testar standard → high-contrast →
   standard e verificar imagens, pseudo-elementos, links visitados, foco e estados restaurados.
-- Atualizar o DESIGN ativo e o README quando a nova identidade for integrada de fato.
+- DESIGN.md e README.md registram o carregamento efetivo da identidade normal e do hero.
 
-Validação deste documento: leitura dos estilos e scripts atuais, inspeção visual dos dois
-banners e conferência dos nove HEX por amostragem do Palette.png. Não houve mudança de UI nem
-teste de uma implementação nova de tema. Os placeholders são intencionais e solicitados.
+Validação deste documento: leitura dos estilos e scripts atuais, inspeção visual dos banners,
+suíte de identidade e conferência dos nove HEX por amostragem do Palette.png. Os placeholders
+de alto contraste permanecem intencionais e solicitados; o modo normal está implementado.

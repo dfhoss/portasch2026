@@ -32,6 +32,7 @@ class HeroIdentityTests(BrowserTestCase):
             self.page.wait_for_timeout(200)
             natural = self.page.locator(".hero-image").evaluate("e => [e.naturalWidth, e.naturalHeight]")
             rendered = self.page.locator(".hero-image").bounding_box()
+            self.assertIsNotNone(rendered, "O hero deve ter uma caixa renderizada")
             self.assertAlmostEqual(rendered["height"], rendered["width"] * natural[1] / natural[0], delta=1)
         carousel = self.page.locator(".carousel")
         self.assertTrue(carousel.get_attribute("tabindex"))
