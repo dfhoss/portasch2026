@@ -26,16 +26,32 @@ class HeroIdentityTests(BrowserTestCase):
 
     def test_assets_controls_and_responsive_carousel_contract(self):
         self.assertTrue(self.page.locator(".hero-image").evaluate("e => e.complete && e.naturalWidth > 0"))
-        self.assertTrue(self.page.locator("link[href*='fonts.css']").count())
+        self.assertTrue(self.page.evaluate("document.fonts.status === 'loaded'"))
+        ratio = self.page.locator(".hero-image").evaluate("e => e.naturalWidth / e.naturalHeight")
+        rendered = self.page.locator(".hero-image").bounding_box()
+        self.assertAlmostEqual(ratio, rendered["width"] / rendered["height"], delta=0.01)
         carousel = self.page.locator(".carousel")
         self.assertTrue(carousel.get_attribute("tabindex"))
         before = self.page.locator(".carousel-track").evaluate("e => e.style.transform")
         carousel.focus()
         carousel.press("ArrowRight")
         self.assertNotEqual(self.page.locator(".carousel-track").evaluate("e => e.style.transform"), before)
+        self.page.keyboard.press("Tab")
+        self.assertTrue(self.page.evaluate("document.activeElement.matches('button, [tabindex]')"))
         for width, expected in ((1440, 3), (768, 2), (390, 1)):
             self.page.set_viewport_size({"width": width, "height": 1000})
             self.page.wait_for_timeout(200)
             count = self.page.locator(".carousel-track .activity-card").count()
             self.assertGreaterEqual(count, expected)
         self.assertEqual(self.page.locator(".carousel-btn").count(), 2)
+        self.page.screenshot(path=".superpowers/sdd/2026-09-18-frontend-new-identity/task-2-1440.png", full_page=True)
+
+    def test_short_swipe_does_not_navigate_but_long_swipe_does(self):
+        carousel = self.page.locator(".carousel")
+        before = self.page.locator(".carousel-track").evaluate("e => e.style.transform")
+        carousel.dispatch_event("touchstart", {"touches": [{"identifier": 1, "clientX": 300, "clientY": 100}]})
+        carousel.dispatch_event("touchend", {"changedTouches": [{"identifier": 1, "clientX": 260, "clientY": 100}]})
+        self.assertEqual(self.page.locator(".carousel-track").evaluate("e => e.style.transform"), before)
+        carousel.dispatch_event("touchstart", {"touches": [{"identifier": 1, "clientX": 300, "clientY": 100}]})
+        carousel.dispatch_event("touchend", {"changedTouches": [{"identifier": 1, "clientX": 200, "clientY": 100}]})
+        self.assertNotEqual(self.page.locator(".carousel-track").evaluate("e => e.style.transform"), before)
