@@ -7,8 +7,10 @@ base `0e6d610`. A interface usa a linguagem visual do projeto Contraste: azul-vi
 verde-limão, magenta, tipografia pesada e cartões claros para apresentar atividades em andamento.
 
 O documento é a referência para alterações em `index.html` e `static/css/main.css`. A implementação deve
-preservar a hierarquia e os contratos de interação, mas pode substituir valores literais por
-tokens CSS ao evoluir a folha de estilos.
+preservar a hierarquia e os contratos de interação. Os valores efetivos vivem em `static/css/tokens.css`,
+que separa a paleta primitiva dos papéis semânticos; `fonts.css` registra as faces locais e pesos disponíveis.
+O modo normal usa a nova paleta. `high-contrast` e `dark` continuam aliases provisórios do tema legado,
+sem anunciar um controle novo; a identidade de alto contraste recebida permanece pendente.
 
 ## Princípios
 

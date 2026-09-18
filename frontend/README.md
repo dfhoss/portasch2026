@@ -23,6 +23,13 @@ Não há `package.json`, bundler ou dependências de frontend nessa versão; o n
 `backend/db/schedule.json`, `backend/db/knowledge_axes.json` e `backend/db/locations.json`, que são
 as fontes de verdade do backend.
 
+### Identidade e fontes
+
+`static/css/fonts.css` e `static/css/tokens.css` são carregados antes das folhas de componentes.
+As faces locais (Open Sans, Disket Mono, Retropix e Garet) usam `font-display: swap`, sem CDN.
+Os papéis semânticos e os aliases provisórios dos temas `high-contrast`/`dark` ficam centralizados
+em `tokens.css`; a identidade nova de alto contraste continua pendente.
+
 ## Organização
 
 | Caminho | Responsabilidade |
