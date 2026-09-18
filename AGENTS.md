@@ -46,3 +46,32 @@ O `TOKEN_JWT` já está configurado em `.env`; mantenha o arquivo fora do versio
 - Use `uv` para ambiente e comandos, quatro espaços, type hints públicos e o limite de 100 caracteres configurado no Ruff.
 - Toda documentação Markdown de orientação do agente deve usar exclusivamente português. Preserve em outros idiomas apenas nomes técnicos, identificadores de código, comandos, URLs, citações e textos que precisem corresponder literalmente à interface.
 - Commits devem ser curtos, imperativos e em português. PRs devem listar validações e destacar alterações de ambiente ou formato de dados.
+
+## Site público
+
+- Preserve a identidade visual do Contraste, o funcionamento do carrossel e o acesso por
+  teclado/toque ao alterar `static/site/`.
+- Leia `static/site/DESIGN.md` antes de modificar a interface e use os tokens documentados.
+- Preserve `lang="pt-BR"`, landmarks semânticos, rótulos acessíveis e foco visível. Não dependa
+  apenas de cor, hover ou movimento para comunicar estado.
+- Mantenha assets relativos à página; renomeações exigem atualizar todas as referências.
+- O backend define o formato e os IDs da agenda; não crie cópias locais dos dados no site.
+- Preserve a página utilizável na falha de rede. Em `static/site/js/schedule.js`, falhas nos
+  JSONs devem manter o HTML inicial silenciosamente.
+
+### Carrossel
+
+- Breakpoints e gap do trilho são acoplados entre CSS e JavaScript; atualize ambos juntos.
+- Preserve a medição fracionada da largura dos cartões para evitar desvios em zoom.
+- O timeout de conclusão deve acompanhar a duração variável da transição.
+- Preserve o debounce de resize e a distinção entre toque curto e swipe.
+- Mudanças na política de autoplay em foco/hover exigem decisão explícita de acessibilidade.
+- Cópias `data-carousel-clone` não são atividades reais: exclua-as de contagens, foco e leitura assistiva.
+
+### Validação do site
+
+- Teste desktop, tablet, celular e zoom fracionado: sem overflow horizontal ou recorte dos cartões.
+- Confira Tab, setas, swipe curto/longo, loop nos dois sentidos e controles após resize.
+- Verifique imagens, console, respostas dos JSONs e fallback com falha de rede.
+- Atualize `README.md` e `static/site/DESIGN.md` para decisões visuais/operacionais; mantenha aqui
+  apenas restrições e armadilhas que não sejam rapidamente inferíveis pelo código.
