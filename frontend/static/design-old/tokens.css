@@ -1,0 +1,120 @@
+/* Referência histórica isolada. Não é importada pela home.
+ * Ativação: <html data-legacy-design data-contrast="standard|high">.
+ * Valores observados e exceções: ../../../DESIGN.old.md.
+ */
+:root[data-legacy-design] {
+  /* Primitivos extraídos do Canva; não confundir os dois verdes. */
+  --old-violet: #393ce4;
+  --old-navy: #25265a;
+  --old-blue: #004aad;
+  --old-petrol: #015a83;
+  --old-blue-text: #144e99;
+  --old-lime: #d7f932;
+  --old-yellow: #e3ff00;
+  --old-magenta: #ed54ce;
+  --old-pink: #ffa5ed;
+  --old-paper: #fffff6;
+  --old-white: #ffffff;
+  --old-light-text: #f1f2f2;
+  --old-black: #000000;
+
+  /* Famílias iguais nos dois modos; arquivos em fonts.css. */
+  --old-font-body: "Open Sans", Arial, sans-serif;
+  --old-font-display: "Disket Mono", "Courier New", monospace;
+  --old-font-pixel: "Retropix", monospace;
+  --old-font-toggle: "League Spartan", Arial, sans-serif;
+  --old-font-info: "Garet", Arial, sans-serif;
+  --old-font-game: "Antonio", "Arial Narrow", sans-serif;
+  --old-font-fair: "Fira Sans", Arial, sans-serif;
+  --old-weight-regular: 400;
+  --old-weight-bold: 700;
+
+  /* Medidas de autoria observadas: não são uma escala responsiva nova. */
+  --old-size-table-small: 12px;
+  --old-size-table-body: 13.5491px;
+  --old-size-table-heading: 16.2589px;
+  --old-size-info: 26.6667px;
+  --old-size-live: 31.9999px;
+  --old-size-toggle: 37.4186px;
+  --old-size-social: 41.1466px;
+  --old-size-section: 46.6668px;
+  --old-size-pixel: 57.8849px;
+  --old-size-game: 66.6667px;
+  --old-size-hero-standard: 100.445px;
+  --old-size-hero-high: 141.621px;
+  --old-tracking-pixel: 0.15em;
+  --old-tracking-heading: -0.02em;
+  --old-tracking-game-callout: -0.095em;
+
+  /* Papéis semânticos: versão normal (também é o fallback). */
+  color-scheme: light;
+  --old-page-bg: var(--old-paper);
+  --old-fair-bg: var(--old-white);
+  --old-body-text: var(--old-petrol);
+  --old-section-text: var(--old-petrol);
+  --old-info-text: var(--old-blue-text);
+  --old-hero-bg: var(--old-violet);
+  --old-hero-text: var(--old-yellow);
+  --old-badge-bg: var(--old-magenta);
+  --old-badge-text: var(--old-lime);
+  --old-toggle-text: var(--old-lime);
+  --old-top-divider: var(--old-lime);
+  --old-lower-divider: var(--old-yellow);
+  --old-table-head-bg: var(--old-petrol);
+  --old-table-head-text: var(--old-paper);
+  --old-table-row-bg: var(--old-lime);
+  --old-table-row-text: var(--old-petrol);
+  --old-table-group-bg: var(--old-pink);
+  --old-table-group-text: var(--old-petrol);
+  --old-table-admin-bg: var(--old-pink);
+  --old-table-gap: var(--old-paper);
+  --old-game-badge-bg: var(--old-yellow);
+  --old-game-badge-text: var(--old-petrol);
+  --old-game-cell-bg: var(--old-yellow);
+  --old-game-cell-text: var(--old-petrol);
+  --old-game-callout-text: var(--old-magenta);
+  --old-map-campus-text: var(--old-petrol);
+  --old-map-blocks-text: var(--old-petrol);
+  --old-social-text: var(--old-petrol);
+  --old-fair-location-text: var(--old-petrol);
+
+  /* Contrato de reconstrução, não tokens encontrados no Canva. */
+  --old-control-bg: var(--old-paper);
+  --old-control-text: var(--old-petrol);
+  --old-control-border: var(--old-petrol);
+  --old-focus-on-light: var(--old-petrol);
+  --old-focus-on-dark: var(--old-paper);
+  --old-mode-duration: 0ms;
+}
+
+:root[data-legacy-design][data-contrast="high"] {
+  /* O site histórico continua com superfícies claras fora das áreas abaixo. */
+  --old-body-text: var(--old-navy);
+  --old-section-text: var(--old-navy);
+  --old-info-text: var(--old-navy);
+  --old-hero-bg: var(--old-navy);
+  --old-hero-text: var(--old-light-text);
+  --old-badge-bg: var(--old-blue);
+  --old-badge-text: var(--old-light-text);
+  --old-toggle-text: var(--old-light-text);
+  --old-top-divider: var(--old-magenta);
+  --old-table-head-bg: var(--old-navy);
+  --old-table-head-text: var(--old-light-text);
+  --old-table-row-bg: var(--old-navy);
+  --old-table-row-text: var(--old-light-text);
+  --old-table-group-bg: var(--old-blue);
+  --old-table-group-text: var(--old-light-text);
+  --old-table-admin-bg: var(--old-navy);
+  --old-game-badge-bg: var(--old-navy);
+  --old-game-badge-text: var(--old-light-text);
+  --old-game-cell-bg: var(--old-navy);
+  /* Valor serializado nas células vazias da publicação de alto contraste. */
+  --old-game-cell-text: var(--old-white);
+  --old-game-callout-text: var(--old-navy);
+  --old-map-campus-text: var(--old-black);
+  --old-control-bg: var(--old-navy);
+  --old-control-text: var(--old-light-text);
+  --old-control-border: var(--old-light-text);
+  --old-focus-on-light: var(--old-navy);
+  --old-focus-on-dark: var(--old-light-text);
+}
