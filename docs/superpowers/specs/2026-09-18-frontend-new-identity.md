@@ -17,7 +17,7 @@ standard é o modo novo normal. high-contrast e dark continuam como aliases do t
 Para os pares novos, usar as cores do tema legado existente com função equivalente, para evitar textos/fundos incompatíveis. Nenhum marcador PENDENTE pode entrar em CSS servido.
 
 ## Hero e assets
-- Renomear apenas frontend/static/assets/images/1dce2337-9bd4-40de-bc0d-6bb92b9a038c.jpg para hero-desktop.jpg (2048 × 431).
+- Renomear apenas frontend/static/assets/images/1dce2337-9bd4-40de-bc0d-6bb92b9a038c.jpg para hero-desktop.jpg (5938 × 1250).
 - Renomear frontend/static/assets/images/Site banner 9 x 16.png para hero-mobile.png (1080 × 437).
 - Preservar bytes originais; não recodificar/cortar imagens.
 - Usar picture com source media="(max-width: 600px)" para mobile; img fallback desktop. A imagem deve ter width/height intrínsecos corretos e estilos width:100%, height:auto, display:block. Source pode informar dimensões também para reservar razão mobile.
