@@ -23,9 +23,7 @@ def save_settings(document: SettingsDocument, path: Path) -> None:
     )
 
 
-def replace_settings(
-    document: SettingsDocument, path: Path | None = None
-) -> SettingsDocument:
+def replace_settings(document: SettingsDocument, path: Path | None = None) -> SettingsDocument:
     destination = path or get_settings_path()
     try:
         save_settings(document, destination)

@@ -32,9 +32,7 @@ class PublicScheduleTests(BrowserTestCase):
             > 0
         )
         assert (
-            self.page.locator(".activity-card")
-            .filter(has_text="Visita guiada ao Campus")
-            .count()
+            self.page.locator(".activity-card").filter(has_text="Visita guiada ao Campus").count()
             == 0
         )
 
@@ -85,7 +83,5 @@ class PublicScheduleTests(BrowserTestCase):
         assert self.page.locator(".campus-map-img").count() > 0
         assert self.page.locator("[data-schedule-root]").get_attribute("aria-busy") == "false"
         assert self.page.locator(".schedule-item").count() == 0
-        assert not any(
-            request.method in {"PUT", "POST", "PATCH", "DELETE"} for request in requests
-        )
+        assert not any(request.method in {"PUT", "POST", "PATCH", "DELETE"} for request in requests)
         assert errors == []
