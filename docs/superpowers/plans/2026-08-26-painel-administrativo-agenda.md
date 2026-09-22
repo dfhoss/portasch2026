@@ -85,10 +85,27 @@ def test_rejects_session_when_end_is_not_after_start():
     payload = {
         "version": 1,
         "eventDate": "2026-10-26",
-        "sections": [{"id": "s", "title": "S", "groups": [{
-            "id": "g", "title": "G", "items": [{"id": "a", "title": "A",
-            "sessions": [{"startTime": "10:00", "endTime": "09:00", "location": "Sala"}]}]
-        }]}],
+        "sections": [
+            {
+                "id": "s",
+                "title": "S",
+                "groups": [
+                    {
+                        "id": "g",
+                        "title": "G",
+                        "items": [
+                            {
+                                "id": "a",
+                                "title": "A",
+                                "sessions": [
+                                    {"startTime": "10:00", "endTime": "09:00", "location": "Sala"}
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
     }
     with pytest.raises(ValidationError):
         ScheduleDocument.model_validate(payload)

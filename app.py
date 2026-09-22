@@ -4,11 +4,9 @@ from contextlib import asynccontextmanager
 import uvicorn
 from clients.db import load_database
 from dependencies import validate_jwt_configured
-from fastapi import FastAPI, status
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
 from loguru import logger
-from routes import auth, home, institutions, knowledge_axes, locations, participants, schedule
+from routes import auth, home, institutions, knowledge_axes, locations, participants, schedule, site
 from utils import brazil_time_formatter, get_brazil_time
 
 logger.configure(
@@ -48,39 +46,26 @@ app = FastAPI(
         "locais, eixos de conhecimento e painel administrativo."
     ),
     version="1.0.0",
-    docs_url="/docs",  # Explicitly enable docs
-    redoc_url="/redoc",  # Enable ReDoc as well
-    openapi_url="/openapi.json",  # Ensure OpenAPI spec is available
-    root_path="/api",  # This tells FastAPI about the API Gateway stage prefix
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
     openapi_tags=tags_metadata,
     lifespan=lifespan,
 )
-app.include_router(auth.router)
-app.include_router(schedule.router)
-app.include_router(locations.router)
-app.include_router(knowledge_axes.router)
-app.include_router(institutions.router)
-app.include_router(participants.router)
-app.mount("/home/static", home.AdminStaticFiles(directory=home.HOME_STATIC_DIR), name="home-static")
+API_PREFIX = "/api"
+
+app.include_router(auth.router, prefix=API_PREFIX)
+app.include_router(schedule.router, prefix=API_PREFIX)
+app.include_router(locations.router, prefix=API_PREFIX)
+app.include_router(knowledge_axes.router, prefix=API_PREFIX)
+app.include_router(institutions.router, prefix=API_PREFIX)
+app.include_router(participants.router, prefix=API_PREFIX)
+app.mount(
+    "/admin/static",
+    home.AdminStaticFiles(directory=home.ADMIN_STATIC_DIR),
+    name="admin-static",
+)
 app.include_router(home.router)
-app.mount("/site", StaticFiles(directory="static/site", html=True), name="public-site")
-
-
-@app.get("/", tags=["Root"])
-async def read_root():
-    """
-    **Endpoint raiz - Acesso ao painel administrativo**
-
-    Redireciona automaticamente para a interface de administração do evento.
-    O painel permite gerenciar a programação, os locais e os eixos de conhecimento.
-
-    **Redireciona para:** `/home`
-
-    **Casos de Uso:**
-    - Acesso ao editor da programação
-    - Administração dos catálogos do evento
-    """
-    return RedirectResponse(url="/home", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/health", tags=["Health"])
@@ -107,6 +92,13 @@ async def health_check():
         "timestamp": get_brazil_time(),
         "service": "GeoGIS AI Backend Orchestrator",
     }
+
+
+app.mount(
+    "/",
+    site.PublicSiteStaticFiles(directory=site.SITE_STATIC_DIR, html=True),
+    name="public-site",
+)
 
 
 if __name__ == "__main__":

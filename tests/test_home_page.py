@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_admin_page_is_served_without_embedding_schedule(client):
     """Embedding schedule data in the public shell must make this fail."""
-    response = client.get("/home")
+    response = client.get("/admin")
 
     assert response.status_code == 200
     assert 'id="login-view"' in response.text
@@ -14,14 +14,14 @@ def test_admin_page_is_served_without_embedding_schedule(client):
 
 
 def test_admin_page_contains_new_catalog_sections(client):
-    html = client.get("/home").text
+    html = client.get("/admin").text
     assert 'data-editor-section="institutions"' in html
     assert 'data-editor-section="participants"' in html
 
 
 def test_admin_javascript_is_served(client):
     """Removing the browser authentication asset must make this fail."""
-    response = client.get("/home/static/home.js")
+    response = client.get("/admin/static/home.js")
 
     assert response.status_code == 200
     assert "sessionStorage" in response.text
@@ -29,8 +29,8 @@ def test_admin_javascript_is_served(client):
 
 def test_admin_static_assets_are_public_and_data_free(client):
     """Serving the shell from protected APIs or embedding catalog data must make this fail."""
-    css_response = client.get("/home/static/home.css")
-    script_response = client.get("/home/static/home.js")
+    css_response = client.get("/admin/static/home.css")
+    script_response = client.get("/admin/static/home.js")
 
     assert css_response.status_code == 200
     assert script_response.status_code == 200
@@ -40,7 +40,7 @@ def test_admin_static_assets_are_public_and_data_free(client):
 
 def test_hidden_admin_views_are_not_overridden_by_layout_css(client):
     """A visible hidden login/editor view must make this fail."""
-    css = client.get("/home/static/home.css").text
+    css = client.get("/admin/static/home.css").text
 
     hidden_rule = css_rule(css, "[hidden]")
     assert "display: none !important" in hidden_rule
@@ -48,7 +48,7 @@ def test_hidden_admin_views_are_not_overridden_by_layout_css(client):
 
 def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
     """Removing semantic tokens or bypassing them in key surfaces must make this fail."""
-    css = client.get("/home/static/home.css").text
+    css = client.get("/admin/static/home.css").text
 
     root_rule = css_rule(css, ":root")
     for token in (
@@ -72,7 +72,7 @@ def test_admin_visual_identity_is_driven_by_semantic_design_tokens(client):
 
 
 def test_primary_action_owns_its_complete_visual_contract(client):
-    css = client.get("/home/static/home.css").text
+    css = client.get("/admin/static/home.css").text
 
     primary = css_rule(css, ".primary-action")
     for declaration in (
@@ -99,7 +99,7 @@ def test_primary_action_owns_its_complete_visual_contract(client):
 
 
 def test_editor_content_fills_the_available_desktop_column(client):
-    css = client.get("/home/static/home.css").text
+    css = client.get("/admin/static/home.css").text
     content_rule = css_rule(css, "#editor-content")
 
     assert "width: 100%;" in content_rule
@@ -108,14 +108,14 @@ def test_editor_content_fills_the_available_desktop_column(client):
 
 def test_login_message_is_between_password_and_submit_and_uses_error_tone(client):
     """Session errors must be prominent and appear next to the action they explain."""
-    html = client.get("/home").text
+    html = client.get("/admin").text
     password_end = html.index('id="password"')
     message_position = html.index('id="login-message"')
     submit_position = html.index('type="submit"')
 
     assert password_end < message_position < submit_position
 
-    css = client.get("/home/static/home.css").text
+    css = client.get("/admin/static/home.css").text
     message_rule = css_rule(css, "#login-message:not(:empty)")
     login_color_rule = css_rule(css, ".login-card #login-message:not(:empty)")
     assert "border: var(--border-width) solid var(--green-200)" in message_rule
@@ -127,7 +127,7 @@ def test_login_message_is_between_password_and_submit_and_uses_error_tone(client
 
 
 def test_login_password_disables_browser_persistence(client):
-    html = client.get("/home").text
+    html = client.get("/admin").text
 
     assert 'id="login-form" class="login-card" autocomplete="off"' in html
     assert 'id="password" name="password" type="password" autocomplete="off"' in html
@@ -158,8 +158,8 @@ def css_rule(css: str, selector: str, start: int = 0) -> str:
 
 def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client):
     """Placing the navigation beside the sidebar or keeping it horizontal on desktop must fail."""
-    page = client.get("/home").text
-    css = client.get("/home/static/home.css").text
+    page = client.get("/admin").text
+    css = client.get("/admin/static/home.css").text
     parser = EditorShellParser()
     parser.feed(page)
 
@@ -188,7 +188,7 @@ def test_editor_navigation_is_sidebar_on_desktop_and_top_bar_below_750px(client)
 
 
 def test_every_sidebar_item_has_a_visible_accessible_svg_icon(client):
-    page = client.get("/home").text
+    page = client.get("/admin").text
 
     sidebar = page.split('<aside class="editor-sidebar">', 1)[1].split("</aside>", 1)[0]
     item_fragments = re.findall(
@@ -206,8 +206,8 @@ def test_every_sidebar_item_has_a_visible_accessible_svg_icon(client):
 
 
 def test_sidebar_groups_account_and_logout_under_profile_at_the_bottom(client):
-    page = client.get("/home").text
-    css = client.get("/home/static/home.css").text
+    page = client.get("/admin").text
+    css = client.get("/admin/static/home.css").text
     nav = page.split('<nav aria-label="Seções administrativas">', 1)[1].split("</nav>", 1)[0]
     profile = page.split('<details class="sidebar-profile">', 1)[1].split("</details>", 1)[0]
 
@@ -221,7 +221,7 @@ def test_sidebar_groups_account_and_logout_under_profile_at_the_bottom(client):
 
 def test_browser_authentication_contract_validates_identity_before_loading_data(client):
     """Loading data early or storing anything beyond token and view state must make this fail."""
-    script = client.get("/home/static/home.js").text
+    script = client.get("/admin/static/home.js").text
 
     assert 'sessionStorage.setItem("adminToken", token.access_token)' in script
     assert 'const ADMIN_VIEW_STATE_KEY = "adminViewState"' in script

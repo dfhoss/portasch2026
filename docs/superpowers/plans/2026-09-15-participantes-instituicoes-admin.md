@@ -66,6 +66,7 @@ def test_science_fair_keeps_section_without_participating_teams():
     section = next(item for item in payload["sections"] if item["id"] == "science-fair")
     assert section["groups"] == []
 
+
 def test_institutions_seed_contains_eleven_schools():
     payload = read_json(Path(__file__).parents[1] / "db" / "institutions.json")
     assert payload["nextId"] == 12
@@ -95,11 +96,32 @@ def test_institution_repository_normalizes_values_and_generates_id(tmp_path):
     path = tmp_path / "institutions.json"
     write_json(path, {"nextId": 1, "institutions": []})
     created = InstitutionRepository(path).create("  Escola  Nova ", "SC", "Chapecó", "  texto  ")
-    assert created == {"id": "institution-001", "name": "Escola Nova", "state": "SC", "city": "Chapecó", "description": "texto"}
+    assert created == {
+        "id": "institution-001",
+        "name": "Escola Nova",
+        "state": "SC",
+        "city": "Chapecó",
+        "description": "texto",
+    }
+
 
 def test_institution_repository_rejects_equivalent_name(tmp_path):
     path = tmp_path / "institutions.json"
-    write_json(path, {"nextId": 2, "institutions": [{"id": "institution-001", "name": "Escola Nova", "state": "SC", "city": "Chapecó", "description": None}]})
+    write_json(
+        path,
+        {
+            "nextId": 2,
+            "institutions": [
+                {
+                    "id": "institution-001",
+                    "name": "Escola Nova",
+                    "state": "SC",
+                    "city": "Chapecó",
+                    "description": None,
+                }
+            ],
+        },
+    )
     with pytest.raises(DuplicateResourceNameError):
         InstitutionRepository(path).create(" ESCOLA   NOVA ", "SC", "Chapecó", None)
 ```
@@ -123,6 +145,7 @@ def test_institution_repository_rejects_equivalent_name(tmp_path):
 @pytest.mark.parametrize("value", ["529.982.247-25", "52998224725"])
 def test_normalize_cpf_accepts_valid_values(value):
     assert normalize_cpf(value) == "52998224725"
+
 
 @pytest.mark.parametrize("value", ["111.111.111-11", "123", "529.982.247-26"])
 def test_normalize_cpf_rejects_invalid_values(value):
@@ -151,9 +174,19 @@ def test_normalize_cpf_rejects_invalid_values(value):
 def test_catalog_routes_require_authentication(client, path):
     assert client.get(path).status_code == status.HTTP_401_UNAUTHORIZED
 
+
 def test_create_participant_returns_normalized_cpf(client, auth_headers):
     institution = client.get("/institutions", headers=auth_headers).json()[0]
-    response = client.post("/participants", headers=auth_headers, json={"name": "Aluno", "cpf": "529.982.247-25", "email": "aluno@example.org", "institutionId": institution["id"]})
+    response = client.post(
+        "/participants",
+        headers=auth_headers,
+        json={
+            "name": "Aluno",
+            "cpf": "529.982.247-25",
+            "email": "aluno@example.org",
+            "institutionId": institution["id"],
+        },
+    )
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["cpf"] == "52998224725"
 ```

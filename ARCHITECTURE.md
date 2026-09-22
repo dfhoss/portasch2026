@@ -57,18 +57,19 @@ de domínio são convertidos em `HTTPException` somente na fronteira HTTP.
 
 ### 3.2 Página pública
 
-`/site/` entrega a página pública e seus assets build-free. Ela usa os dados públicos
-expostos pela aplicação e mantém seus tokens em `static/site/DESIGN.md`.
+`/` entrega a página pública e seus assets build-free. Nesta fase, o HTML inicial é
+renderizado sem consumir a API; a integração do site com os dados públicos fica para
+uma etapa posterior. Os tokens permanecem em `static/site/DESIGN.md`.
 
 ### 3.3 Painel administrativo
 
 ```text
-login -> /auth/token -> sessionStorage.adminToken
-      -> /auth/users/me/ -> /api/* com Bearer JWT
+login -> /api/auth/token -> sessionStorage.adminToken
+      -> /api/auth/users/me/ -> /api/* com Bearer JWT
       -> router -> client -> catálogo JSON
 ```
 
-`/home` entrega somente o shell público; o navegador valida a identidade antes de
+`/admin` entrega somente o shell público; o navegador valida a identidade antes de
 buscar dados protegidos. O HTML inicial não deve conter agenda, catálogos, credenciais,
 hashes ou IDs persistidos.
 
@@ -117,9 +118,9 @@ propagado para as sessões da agenda.
 
 ## 5. Deployment e configuração
 
-O ambiente local executa a aplicação com Uvicorn. A API é servida em `/api`; a página
-pública é servida em `/site/`; o painel é servido em `/home`, com assets em
-`/home/static`. Os catálogos JSON são substituíveis
+O ambiente local executa a aplicação com Uvicorn. A API é servida em `/api`, com
+documentação em `/api/docs`; a página pública é servida em `/`; o painel é servido
+em `/admin`, com assets em `/admin/static`. Os catálogos JSON são substituíveis
 por caminhos de ambiente para testes e deployments isolados.
 
 O `TOKEN_JWT` já está configurado em `.env`. O segredo deve permanecer fora do Git e o

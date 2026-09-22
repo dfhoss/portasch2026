@@ -27,6 +27,13 @@ def pytest_unconfigure() -> None:
     _remove_pytest_artifacts()
 
 
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Execute os testes síncronos do site antes dos testes E2E do painel."""
+    site_items = [item for item in items if item.nodeid.startswith("tests/site/")]
+    other_items = [item for item in items if not item.nodeid.startswith("tests/site/")]
+    items[:] = [*site_items, *other_items]
+
+
 @dataclass(frozen=True)
 class TemporaryDatabase:
     schedule: Path

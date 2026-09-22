@@ -36,10 +36,23 @@ Criar servidor HTTP temporário dentro do harness (ThreadingHTTPServer, SimpleHT
 - [ ] Escrever harness unittest/Playwright e testes de resultado no navegador antes de CSS. Padrão de asserções:
 ```python
 self.page.goto(self.base_url + "/frontend/")
-self.assertEqual(self.page.locator("body").evaluate("(e) => getComputedStyle(e).backgroundColor"), "rgb(210, 222, 207)")
-self.assertEqual(self.page.locator(".activity-card").first.evaluate("(e) => getComputedStyle(e).backgroundColor"), "rgb(255, 255, 255)")
-self.assertIn("Open Sans", self.page.locator("body").evaluate("(e) => getComputedStyle(e).fontFamily"))
-self.assertEqual(self.page.locator(".carousel-btn.next").evaluate("(e) => getComputedStyle(e).backgroundColor"), "rgb(57, 58, 237)")
+self.assertEqual(
+    self.page.locator("body").evaluate("(e) => getComputedStyle(e).backgroundColor"),
+    "rgb(210, 222, 207)",
+)
+self.assertEqual(
+    self.page.locator(".activity-card").first.evaluate(
+        "(e) => getComputedStyle(e).backgroundColor"
+    ),
+    "rgb(255, 255, 255)",
+)
+self.assertIn(
+    "Open Sans", self.page.locator("body").evaluate("(e) => getComputedStyle(e).fontFamily")
+)
+self.assertEqual(
+    self.page.locator(".carousel-btn.next").evaluate("(e) => getComputedStyle(e).backgroundColor"),
+    "rgb(57, 58, 237)",
+)
 ```
 Adicionar comportamento selecionado/finalizado e troca via atributo legado em elementos reais. Verificar que faces solicitadas retornam FontFace carregada e que não há PENDENTE em stylesheets runtime.
 - [ ] Executar comando unittest acima, registrar falhas de cor/fonte esperadas (RED). Evitar falha por dependência/configuração como evidência.
@@ -63,7 +76,9 @@ hero = self.page.locator(".hero-image")
 self.assertEqual(hero.count(), 1, "A home precisa de um único hero")
 self.assertTrue(hero.evaluate("(e) => e.currentSrc").endswith("/hero-desktop.jpg"))
 self.page.set_viewport_size({"width": 390, "height": 844})
-self.page.wait_for_function("document.querySelector('.hero-image')?.currentSrc.endsWith('/hero-mobile.png')")
+self.page.wait_for_function(
+    "document.querySelector('.hero-image')?.currentSrc.endsWith('/hero-mobile.png')"
+)
 self.assertEqual(hero.evaluate("(e) => e.naturalWidth"), 1080)
 ```
 Testar razão natural versus renderizada com tolerância de 1px, ausência de overflow em 390/768/1440, h1 único, carregamento de imagens/fontes/agenda e console sem erros próprios da aplicação. Adicionar checks de controles por teclado, swipe curto versus >50px, resize 3/2/1 e estados dos controles. Usar relógio determinístico para autoplay se testar o timer. Testar falha de rede da agenda preservando conteúdo de fallback/interação existente, sem exigir nova UX.

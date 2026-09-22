@@ -61,9 +61,7 @@ class IdentityTokensTest(BrowserTestCase):
             "rgb(20, 21, 43)",
         )
 
-        self.page.locator("html").evaluate(
-            "element => element.setAttribute('data-theme', 'dark')"
-        )
+        self.page.locator("html").evaluate("element => element.setAttribute('data-theme', 'dark')")
         self.assertEqual(self.computed("body", "background-color"), "rgb(20, 21, 43)")
 
     def test_required_local_font_faces_load(self):

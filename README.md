@@ -19,11 +19,40 @@ Defina um valor seguro para `TOKEN_JWT` em `.env` e inicie o servidor:
 uv run uvicorn app:app --reload --env-file .env
 ```
 
+## Deploy com Docker
+
+O `Dockerfile` usa build multi-stage com Python 3.14 e instala somente as
+dependências de produção a partir do `uv.lock`. O `docker-compose.yml` publica o
+backend e as interfaces estáticas pelo mesmo serviço e mantém os catálogos JSON
+em um volume persistente.
+
+Copie o arquivo de ambiente, defina um segredo seguro e inicie o serviço:
+
+```powershell
+Copy-Item .env.example .env
+docker compose up -d --build
+```
+
+O serviço fica disponível em <http://localhost:8000>. Para acompanhar os logs:
+
+```powershell
+docker compose logs -f app
+```
+
+As alterações feitas no painel são armazenadas no volume Docker
+`portasch2026_portas-abertas-data`. Para remover o container sem apagar os
+dados, use `docker compose down`. Remova o volume somente quando quiser
+recriar os catálogos persistidos:
+
+```powershell
+docker compose down -v
+```
+
 Endereços locais:
 
 - API: <http://localhost:8000/api/docs>
-- Site público: <http://localhost:8000/site/>
-- Painel administrativo: <http://localhost:8000/home>
+- Site público: <http://localhost:8000/>
+- Painel administrativo: <http://localhost:8000/admin>
 
 O painel exige login e mantém o token somente no `sessionStorage`. As alterações são
 validadas pela API e persistidas nos arquivos JSON configurados.
@@ -51,9 +80,9 @@ possui seu próprio contrato visual junto aos arquivos que ela governa.
 
 O site é estático e não possui `package.json`, bundler ou dependências próprias. Seus
 arquivos principais são `static/site/index.html`, `static/site/css/`,
-`static/site/js/` e `static/site/assets/`. A agenda, os eixos e os locais continuam
-tendo os JSONs do diretório `db/` como fonte de verdade; não replique dados de negócio
-nos scripts JavaScript.
+`static/site/js/` e `static/site/assets/`. O HTML inicial funciona sem consumir a API;
+a integração da agenda, dos eixos e dos locais com os dados do backend será feita
+posteriormente.
 
 As fontes locais usam `font-display: swap`. O hero usa as artes desktop e mobile via
 `picture`, com breakpoint móvel em 600px. O carrossel é responsivo, circular, suporta

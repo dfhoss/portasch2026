@@ -28,7 +28,8 @@ def test_catalogos_iniciais_contem_instituicoes_e_feira_de_ciencias(
     assert len(institutions["institutions"]) == 11
     assert {item["state"] for item in institutions["institutions"]} == {"SC"}
     assert {item["city"] for item in institutions["institutions"]} == {"Chapecó"}
-    assert participants == {"nextId": 1, "participants": []}
+    assert participants["nextId"] == 2
+    assert [item["id"] for item in participants["participants"]] == ["participant-001"]
 
 
 def test_institution_repository_normalizes_values_and_generates_id(tmp_path):
@@ -57,7 +58,7 @@ def test_institution_repository_supports_crud_and_defensive_copies(tmp_path):
         '{"nextId": 1, "participants": []}', encoding="utf-8"
     )
     path.write_text('{"nextId": 1, "institutions": []}', encoding="utf-8")
-    repository = InstitutionRepository(path)
+    repository = InstitutionRepository(path, tmp_path / "participants.json")
 
     created = repository.create("Escola Nova", "SC", "Chapecó", None)
     created["name"] = "Alterada"

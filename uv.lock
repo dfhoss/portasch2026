@@ -836,6 +836,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "loguru" },
     { name = "pyjwt", extra = ["crypto"] },
+    { name = "starlette" },
     { name = "tzdata" },
     { name = "uvicorn" },
 ]
@@ -855,6 +856,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.141.1" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.13.0" },
+    { name = "starlette", specifier = ">=1.6.0" },
     { name = "tzdata", specifier = ">=2026.3" },
     { name = "uvicorn", specifier = ">=0.52.4" },
 ]

@@ -3,7 +3,7 @@ import textwrap
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parents[1]
-ADMIN_SCRIPT = PROJECT_ROOT / "static" / "home" / "home.js"
+ADMIN_SCRIPT = PROJECT_ROOT / "static" / "admin" / "home.js"
 
 
 NODE_HARNESS = r"""
@@ -139,7 +139,7 @@ def run_node_case(case: str) -> None:
 
 def test_editor_contains_every_required_control(client):
     """Removing any required editor action from the rendered shell must make this fail."""
-    html = client.get("/home").text
+    html = client.get("/admin").text
     required = ["add-section", "add-session", "save-schedule"]
     for control_id in required:
         assert f'id="{control_id}"' in html
@@ -249,7 +249,7 @@ def test_institution_catalog_has_independent_states_and_async_retry():
           {id: "i-2", name: "Nova", city: "C", state: "SC"},
         ];
         let retryCalls = 0;
-        context.fetch = async (path) => path === "/institutions"
+        context.fetch = async (path) => path === "/api/institutions"
           ? {ok: true, status: 200, json: async () => responses}
           : {ok: true, status: 200, json: async () => []};
         const retryEvent = {target: {closest: () => retry}};
@@ -282,7 +282,7 @@ def test_participant_catalog_has_independent_states_and_async_retry():
         assert.match(elementFor("#editor-content").innerHTML, /Tentar novamente/);
 
         const retry = elementFor("#retry-participants"); retry.dataset = {action: "retry-admin-data"};
-        context.fetch = async (path) => path === "/participants"
+        context.fetch = async (path) => path === "/api/participants"
           ? {ok: true, status: 200, json: async () => [{id: "p-2", name: "Bia", cpf: "12345678901", email: "b@e.org", institutionId: null}]}
           : {ok: true, status: 200, json: async () => []};
         await api.handleEditorClick({target: {closest: () => retry}});
@@ -326,7 +326,7 @@ def test_participant_edit_loads_authenticated_detail_when_list_cpf_is_masked():
         const calls = [];
         context.fetch = async (path) => { calls.push(path); return {ok: true, status: 200, json: async () => ({id: "p-1", name: "Ana", cpf: "52998224725", email: "a@e.org", institutionId: "i-1"})}; };
         await api.openAdminCatalogEditor("participant", api.state.participants[0], elementFor("#form"));
-        assert.deepEqual(calls, ["/participants/p-1"]);
+        assert.deepEqual(calls, ["/api/participants/p-1"]);
         assert.match(elementFor("#modal-content").innerHTML, /52998224725/);
         """
     )
@@ -608,12 +608,12 @@ def test_parking_locations_are_listed_without_an_intermediate_group():
 
 
 def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client):
-    html = client.get("/home").text
+    html = client.get("/admin").text
     assert 'id="add-session"' in html
     assert 'id="modal-apply"' in html
     assert 'id="modal-close"' not in html
     assert ">Salvar<" in html
-    script = client.get("/home/static/home.js").text
+    script = client.get("/admin/static/home.js").text
     assert 'editorModal.addEventListener("click"' in script
     assert 'classList?.add("modal-open")' in script
     assert 'classList?.remove("modal-open")' in script
@@ -621,7 +621,7 @@ def test_modal_footer_places_activity_actions_and_supports_backdrop_close(client
 
 def test_editor_script_uses_portuguese_error_messages(client):
     """Replacing the required user-facing failures with generic or English text must fail."""
-    script = client.get("/home/static/home.js").text
+    script = client.get("/admin/static/home.js").text
     assert "O horário final deve ser posterior ao inicial" in script
     assert "Não foi possível salvar a programação" in script
 
@@ -792,7 +792,7 @@ def test_save_schedule_sends_idless_draft_and_adopts_canonical_response():
 
         await api.saveSchedule();
 
-        assert.equal(sent.path, "/schedule");
+        assert.equal(sent.path, "/api/schedule");
         assert.equal(sent.options.method, "PUT");
         assert.equal("id" in sent.body.sections[0], false);
         assert.equal("id" in sent.body.sections[0].groups[0], false);

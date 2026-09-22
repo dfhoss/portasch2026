@@ -17,7 +17,10 @@ class CarouselTest(BrowserTestCase):
         )
 
     def settle(self):
-        self.page.wait_for_timeout(600)
+        self.page.wait_for_function(
+            """() => !document.querySelector('.carousel-track')
+                .style.getPropertyValue('--carousel-transition-duration')"""
+        )
 
     def test_desktop_next_and_dot_select_the_same_page(self):
         self.assertEqual(self.page.locator(".carousel-dots .dot").count(), 2)
@@ -36,7 +39,9 @@ class CarouselTest(BrowserTestCase):
         active = self.page.locator(".carousel-dots .dot.active")
         self.assertEqual(active.evaluate("e => getComputedStyle(e).transform"), "none")
         self.assertEqual(active.evaluate("e => getComputedStyle(e).filter"), "none")
-        self.assertEqual(active.bounding_box()["width"] % 1, 0)
+        active_box = active.bounding_box()
+        assert active_box is not None
+        self.assertEqual(active_box["width"] % 1, 0)
 
     def test_wrap_keeps_moving_forward_then_restores_first_page(self):
         for width in (1440, 390):
@@ -66,9 +71,13 @@ class CarouselTest(BrowserTestCase):
         self.assertEqual(self.page.locator(".dot.active").count(), 1)
         self.page.locator(".carousel-btn.next").click()
         self.assertEqual(self.active_page(), 0)
-        clones = self.page.locator('[data-carousel-clone]')
+        clones = self.page.locator("[data-carousel-clone]")
         self.assertGreater(clones.count(), 0)
-        self.assertTrue(clones.evaluate_all("items => items.every(e => e.inert && e.getAttribute('aria-hidden') === 'true')"))
+        self.assertTrue(
+            clones.evaluate_all(
+                "items => items.every(e => e.inert && e.getAttribute('aria-hidden') === 'true')"
+            )
+        )
         self.assertEqual(self.page.locator(".activity-card:not([data-carousel-clone])").count(), 5)
 
     def test_resize_with_same_page_size_preserves_selection_and_focus(self):
@@ -77,7 +86,9 @@ class CarouselTest(BrowserTestCase):
         self.page.set_viewport_size({"width": 1300, "height": 1000})
         self.page.wait_for_timeout(200)
         self.assertEqual(self.active_page(), 1)
-        self.assertTrue(self.page.locator(".dot.active").evaluate("e => e === document.activeElement"))
+        self.assertTrue(
+            self.page.locator(".dot.active").evaluate("e => e === document.activeElement")
+        )
 
     def test_autoplay_waits_five_seconds_and_restarts_after_keyboard(self):
         from datetime import datetime, timezone
@@ -102,6 +113,8 @@ class CarouselTest(BrowserTestCase):
         button.dispatch_event("pointerdown", {"pointerType": "touch"})
         button.dispatch_event("pointerup", {"pointerType": "touch"})
         self.page.wait_for_timeout(100)
-        styles = button.evaluate("e => ({background: getComputedStyle(e).backgroundColor, transform: getComputedStyle(e).transform})")
+        styles = button.evaluate(
+            "e => ({background: getComputedStyle(e).backgroundColor, transform: getComputedStyle(e).transform})"
+        )
         self.assertEqual(styles["background"], "rgb(57, 58, 237)")
         self.assertEqual(styles["transform"], "none")

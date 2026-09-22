@@ -1,0 +1,15 @@
+.env
+.env.*
+.git
+.gitignore
+.pytest_cache
+.ruff_cache
+.ty_cache
+.venv
+.worktrees
+.superpowers
+.vscode
+__pycache__
+*.py[cod]
+tests
+docs

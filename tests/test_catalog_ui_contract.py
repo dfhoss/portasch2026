@@ -10,7 +10,7 @@ ADMIN_DESIGN = PROJECT_ROOT / "static" / "admin" / "DESIGN.md"
 
 
 def test_location_form_only_asks_for_name(client):
-    html = client.get("/home").text
+    html = client.get("/admin").text
     fragment = html.split('id="location-form"', 1)[1].split("</form>", 1)[0]
     assert 'name="name"' in fragment
     assert 'name="block"' not in fragment
@@ -18,14 +18,14 @@ def test_location_form_only_asks_for_name(client):
 
 
 def test_axis_form_only_asks_for_name(client):
-    html = client.get("/home").text
+    html = client.get("/admin").text
     fragment = html.split('id="knowledge-axis-form"', 1)[1].split("</form>", 1)[0]
     assert 'name="name"' in fragment
     assert 'name="id"' not in fragment
 
 
 def test_catalog_script_exposes_crud_and_safe_in_use_feedback(client):
-    script = client.get("/home/static/home.js").text
+    script = client.get("/admin/static/home.js").text
     for function_name in (
         "renderLocations",
         "saveLocation",
@@ -41,7 +41,7 @@ def test_catalog_script_exposes_crud_and_safe_in_use_feedback(client):
 
 
 def test_admin_catalog_script_exposes_institution_and_participant_views(client):
-    script = client.get("/home/static/home.js").text
+    script = client.get("/admin/static/home.js").text
     for function_name in (
         "renderInstitutions",
         "renderParticipants",
@@ -58,10 +58,16 @@ def test_admin_catalog_script_exposes_institution_and_participant_views(client):
 
 
 def test_catalog_markup_escapes_participant_institution_id(client):
-    script = client.get("/home/static/home.js").text
+    script = client.get("/admin/static/home.js").text
     assert 'option value="${escapeHtml(item.id)}"' in script
     assert "renderCatalogLoading" in script
-    for dead_name in ("legacyMaskCpf", "legacyParticipantRow", "legacyInstitutionRow", "legacyRenderInstitutions", "legacyRenderParticipants"):
+    for dead_name in (
+        "legacyMaskCpf",
+        "legacyParticipantRow",
+        "legacyInstitutionRow",
+        "legacyRenderInstitutions",
+        "legacyRenderParticipants",
+    ):
         assert dead_name not in script
 
 
@@ -132,7 +138,7 @@ def test_location_create_adopts_canonical_and_sends_name_only():
         let request;
         context.fetch = async (path, options) => { request = {path, options}; return {ok: true, status: 201, json: async () => ({id: "loc-secret", name: "Auditório novo"})}; };
         await api.saveLocation(form);
-        assert.equal(request.path, "/locations");
+        assert.equal(request.path, "/api/locations");
         assert.equal(request.options.method, "POST");
         assert.deepEqual(JSON.parse(request.options.body), {name: "Auditório novo"});
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), [{id: "loc-secret", name: "Auditório novo"}]);
@@ -656,9 +662,10 @@ def test_action_menu_and_select_controls_have_shared_visual_contracts():
         "font-size: var(--font-size-sm);",
     ):
         assert declaration in item_css
-    assert "border-top: var(--border-width) solid var(--color-border);" in css.split(
-        ".menu-panel .danger-action", 1
-    )[1].split("}", 1)[0]
+    assert (
+        "border-top: var(--border-width) solid var(--color-border);"
+        in css.split(".menu-panel .danger-action", 1)[1].split("}", 1)[0]
+    )
     assert ".menu-panel .danger-action:hover" in css
     menu_item_override = css.split(".menu-panel .menu-item", 1)[1].split("}", 1)[0]
     assert "border-radius: var(--space-0);" in menu_item_override
@@ -701,11 +708,11 @@ def test_location_rename_refreshes_schedule_and_locations_atomically():
           return {ok: true, status: 200, json: async () => refreshedSchedule};
         };
         await api.saveLocation(form);
-        assert.equal(calls[0].path, "/locations/loc-secret");
+        assert.equal(calls[0].path, "/api/locations/loc-secret");
         assert.equal(calls[0].options.method, "PUT");
         assert.deepEqual(JSON.parse(calls[0].options.body), {name: "Novo"});
-        assert.equal(calls.some((call) => call.path === "/locations"), true);
-        assert.equal(calls.some((call) => call.path === "/schedule"), true);
+        assert.equal(calls.some((call) => call.path === "/api/locations"), true);
+        assert.equal(calls.some((call) => call.path === "/api/schedule"), true);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), refreshedSchedule);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), refreshedLocations);
         """
@@ -777,7 +784,7 @@ def test_axis_crud_adopts_canonical_records_and_uses_private_id_for_paths():
           return {ok: true, status: 201, json: async () => ({id: "axis-secret", name: "Novo eixo"})};
         };
         await api.saveKnowledgeAxis(createForm);
-        assert.equal(request.path, "/knowledge-axes");
+        assert.equal(request.path, "/api/knowledge-axes");
         assert.equal(request.options.method, "POST");
         assert.deepEqual(JSON.parse(request.options.body), {name: "Novo eixo"});
         const record = api.state.knowledgeAxes[0];
@@ -788,13 +795,13 @@ def test_axis_crud_adopts_canonical_records_and_uses_private_id_for_paths():
           return {ok: true, status: 200, json: async () => ({id: "axis-secret", name: "Eixo atualizado"})};
         };
         await api.saveKnowledgeAxis(renameForm);
-        assert.equal(request.path, "/knowledge-axes/axis-secret");
+        assert.equal(request.path, "/api/knowledge-axes/axis-secret");
         assert.equal(request.options.method, "PUT");
         assert.deepEqual(JSON.parse(request.options.body), {name: "Eixo atualizado"});
         assert.equal(api.state.knowledgeAxes[0].name, "Eixo atualizado");
         context.fetch = async (path, options) => { request = {path, options}; return {ok: true, status: 204}; };
         await api.deleteKnowledgeAxis(api.state.knowledgeAxes[0]);
-        assert.equal(request.path, "/knowledge-axes/axis-secret");
+        assert.equal(request.path, "/api/knowledge-axes/axis-secret");
         assert.equal(request.options.method, "DELETE");
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), []);
         """

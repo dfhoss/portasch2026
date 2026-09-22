@@ -628,9 +628,7 @@ def test_repository_seed_catalogs_and_schedule_are_canonical(tmp_path: Path):
     assert locations["nextId"] > len(used_locations)
     assert list(axes) == ["knowledgeAxes"]
     assert [(item["id"], item["name"]) for item in axes["knowledgeAxes"]] == AXIS_PAIRS
-    assert used_axes == {
-        axis_id for axis_id, _ in AXIS_PAIRS if axis_id != "ciencias-biologicas"
-    }
+    assert used_axes == {axis_id for axis_id, _ in AXIS_PAIRS if axis_id != "ciencias-biologicas"}
 
 
 def test_location_group_can_be_renamed_without_changing_its_id(tmp_path: Path):

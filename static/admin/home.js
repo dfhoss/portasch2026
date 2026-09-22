@@ -14,6 +14,7 @@ const modalContent = document.querySelector("#modal-content");
 const addSessionButton = document.querySelector("#add-session");
 const modalApplyButton = document.querySelector("#modal-apply");
 const ADMIN_VIEW_STATE_KEY = "adminViewState";
+const API_BASE_PATH = "/api";
 const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes", "institutions", "participants", "account"]);
 
 const state = {
@@ -208,7 +209,10 @@ async function apiFetch(path, options = {}) {
   const token = sessionStorage.getItem("adminToken");
   const headers = new Headers(options.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(path, { ...options, headers });
+  const apiPath = path.startsWith(`${API_BASE_PATH}/`)
+    ? path
+    : `${API_BASE_PATH}${path.startsWith("/") ? path : `/${path}`}`;
+  const response = await fetch(apiPath, { ...options, headers });
   if (response.status === 401) {
     sessionStorage.removeItem("adminToken");
     showLogin("Sua sessão expirou. Entre novamente.");
@@ -1818,7 +1822,7 @@ loginForm.addEventListener("submit", async (event) => {
   loginMessage.textContent = "";
   const credentials = new URLSearchParams(new FormData(loginForm));
   clearLoginCredentials();
-  const response = await fetch("/auth/token", {
+  const response = await fetch("/api/auth/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: credentials,

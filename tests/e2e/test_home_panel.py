@@ -205,7 +205,7 @@ def test_malformed_token_is_removed_and_returns_to_login(live_server_url: str, b
     page.add_init_script("sessionStorage.setItem('adminToken', 'malformed-token')")
     requests: list[str] = []
     page.on("request", lambda request: requests.append(request.url))
-    page.goto(f"{live_server_url}/home", wait_until="networkidle")
+    page.goto(f"{live_server_url}/admin", wait_until="networkidle")
     expect(page.locator("#login-view")).to_be_visible()
     expect(page.get_by_text("Sua sessão expirou. Entre novamente.")).to_be_visible()
     assert page.evaluate("Object.keys(sessionStorage)") == []
@@ -227,7 +227,7 @@ def test_expired_token_is_removed_and_never_loads_admin_data(live_server_url: st
     page.add_init_script(f"sessionStorage.setItem('adminToken', {json.dumps(expired_token)})")
     requests: list[str] = []
     page.on("request", lambda request: requests.append(request.url))
-    page.goto(f"{live_server_url}/home", wait_until="networkidle")
+    page.goto(f"{live_server_url}/admin", wait_until="networkidle")
     expect(page.locator("#login-view")).to_be_visible()
     expect(page.get_by_text("Sua sessão expirou. Entre novamente.")).to_be_visible()
     assert page.evaluate("Object.keys(sessionStorage)") == []
@@ -499,7 +499,6 @@ def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page
     admin_page.keyboard.press("Escape")
     expect(admin_page.locator("body")).not_to_contain_text("Cancelado")
 
-
     admin_page.get_by_role("button", name="Eixos").click()
     admin_page.get_by_role("button", name="Adicionar eixo").click()
     admin_page.get_by_label("Nome do eixo").fill("Eixo E2E")
@@ -562,7 +561,9 @@ def test_institutions_and_participants_crud_and_reference_conflict(admin_page: P
     click_catalog_action(admin_page, participant, "Editar")
     admin_page.get_by_label("Nome").fill("Participante visual E2E editado")
     admin_page.get_by_role("button", name="Salvar", exact=True).click()
-    participant = admin_page.locator(".participant-row").filter(has_text="Participante visual E2E editado")
+    participant = admin_page.locator(".participant-row").filter(
+        has_text="Participante visual E2E editado"
+    )
     expect(participant).to_be_visible()
 
     admin_page.get_by_role("button", name="Instituições", exact=True).click()
@@ -572,7 +573,9 @@ def test_institutions_and_participants_crud_and_reference_conflict(admin_page: P
     expect(admin_page.get_by_text("Este registro ainda está em uso.")).to_be_visible()
     expect(card).to_be_visible()
     admin_page.get_by_role("button", name="Participantes", exact=True).click()
-    participant = admin_page.locator(".participant-row").filter(has_text="Participante visual E2E editado")
+    participant = admin_page.locator(".participant-row").filter(
+        has_text="Participante visual E2E editado"
+    )
     admin_page.once("dialog", accept_dialog)
     click_catalog_action(admin_page, participant, "Excluir")
     expect(admin_page.get_by_text("Cadastro excluído com sucesso.")).to_be_visible()

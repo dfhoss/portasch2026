@@ -4,7 +4,7 @@
 
 - `uv sync --dev` — instala o ambiente e as ferramentas travadas em `uv.lock`.
 - `uv run uvicorn app:app --reload --env-file .env` — inicia a API local; a documentação fica em `/api/docs`.
-- Para testar o painel em um Android conectado por USB, confirme o aparelho com `adb devices -l`, execute `adb reverse tcp:8000 tcp:8000` e abra `http://localhost:8000/home` no celular. O `adb` deve estar no `PATH`; nesta máquina, o fallback é `C:\Users\Administrador\AppData\Local\Microsoft\WinGet\Packages\Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe\platform-tools\adb.exe`.
+- Para testar o painel em um Android conectado por USB, confirme o aparelho com `adb devices -l`, execute `adb reverse tcp:8000 tcp:8000` e abra `http://localhost:8000/admin` no celular. O `adb` deve estar no `PATH`; nesta máquina, o fallback é `C:\Users\Administrador\AppData\Local\Microsoft\WinGet\Packages\Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe\platform-tools\adb.exe`.
 - `uv run pytest` — executa a suíte unitária e de contrato.
 - `uv run pytest tests/e2e` — executa E2E; requer `uv run playwright install chromium` previamente.
 - Ao terminar os testes, o `tests/conftest.py` remove `.pytest_cache`, `.pytest-tmp-unit` e `.pytest-tmp-*`; não mantenha esses artefatos no workspace.
@@ -38,7 +38,7 @@ O `TOKEN_JWT` já está configurado em `.env`; mantenha o arquivo fora do versio
 
 ### Painel e segurança
 
-- `/home` entrega somente o shell público; o navegador valida o JWT antes de buscar os catálogos protegidos em `/api/*`.
+- `/admin` entrega somente o shell público; o navegador valida o JWT antes de buscar os catálogos protegidos em `/api/*`.
 - Dados de usuários e hashes são sensíveis. Não embuta catálogos ou credenciais no HTML inicial nem em fixtures versionadas.
 
 ## Convenções
