@@ -164,8 +164,17 @@ assert.equal(
 assert.equal(
   api.statusForActivity(
     [{startTime: "10:00", endTime: "11:00"}],
+    "2026-09-23",
+    new Date("2026-09-22T13:30:00.000Z"),
+    timeZone,
+  ),
+  "AO VIVO",
+);
+assert.equal(
+  api.statusForActivity(
+    [{startTime: "10:00", endTime: "11:00"}],
     "2026-09-21",
-    new Date("2026-09-21T12:00:00.000Z"),
+    new Date("2026-09-22T12:00:00.000Z"),
     timeZone,
   ),
   "EM BREVE",
@@ -193,6 +202,30 @@ const idsByShift = Object.fromEntries(
 assert.deepEqual(JSON.parse(JSON.stringify(idsByShift.morning)), ["morning-only"]);
 assert.deepEqual(JSON.parse(JSON.stringify(idsByShift.afternoon)), ["afternoon-only"]);
 assert.deepEqual(JSON.parse(JSON.stringify(idsByShift.evening)), ["evening-only"]);
+        """
+    )
+
+
+def test_carousel_prioritizes_time_statuses_without_event_date_gate():
+    run_node_case(
+        """
+const now = new Date("2026-09-22T13:30:00.000Z");
+const activities = [
+  {id: "soon", sessions: [{startTime: "11:00", endTime: "12:00"}]},
+  {id: "live", sessions: [{startTime: "10:00", endTime: "11:00"}]},
+  {id: "past", sessions: [{startTime: "08:00", endTime: "09:00"}]},
+];
+const selected = api.selectCarouselActivities(
+  activities,
+  "2027-01-01",
+  now,
+  "America/Sao_Paulo",
+);
+assert.deepEqual(JSON.parse(JSON.stringify(selected.map((activity) => activity.id))), [
+  "live",
+  "soon",
+  "past",
+]);
         """
     )
 

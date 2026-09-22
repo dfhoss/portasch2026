@@ -169,15 +169,17 @@ Essa entrega é somente leitura: o site não usa `/api/`, não envia métodos mu
 mantém cópia da agenda no HTML inicial. O painel autenticado continua sendo a única interface
 que grava dados.
 
-`eventDate` pertence exclusivamente a `settings.json`. A agenda, os eixos e os locais são
-normalizados pelo `schedule.js` a partir dos quatro documentos, preservando a ordem e os
-grupos desconhecidos. O shell inicial contém somente mounts vazios; em sucesso, os títulos,
-descrições, horários, locais e links chegam dos JSONs e são inseridos no DOM como texto ou
-atributo. Os estados `AO VIVO`, `EM BREVE` e `FINALIZADA` aparecem como rótulos textuais,
-além das cores e contornos semânticos.
+`eventDate` pertence exclusivamente a `settings.json` e valida o contrato do documento, mas
+não bloqueia nem oculta a programação. A agenda, os eixos e os locais são normalizados pelo
+`schedule.js` a partir dos quatro documentos, preservando a ordem e os grupos desconhecidos.
+O shell inicial contém somente mounts vazios; em sucesso, os títulos, descrições, horários,
+locais e links chegam dos JSONs e são inseridos no DOM como texto ou atributo. Os estados
+`AO VIVO`, `EM BREVE` e `FINALIZADA` consideram somente a hora local atual em relação às
+sessões, ignorando a data do evento; aparecem como rótulos textuais, além das cores e
+contornos semânticos.
 
-Para simular o dia do evento sem alterar a agenda, testes e ambientes isolados podem apontar
-`SETTINGS_PATH` para um arquivo que contenha somente `{"eventDate":"2026-09-22"}`. Não
+Para testar o valor de `eventDate` sem alterar a agenda, testes e ambientes isolados podem
+apontar `SETTINGS_PATH` para um arquivo que contenha somente `{"eventDate":"2026-09-22"}`. Não
 criar cópia de `schedule.json`, token administrativo ou componente de edição no site público.
 Em qualquer falha de rede, HTTP ou parse, o mount da agenda e o carrossel permanecem vazios,
 `aria-busy` é liberado e hero, regulamento, mapas e demais conteúdos estáticos continuam
