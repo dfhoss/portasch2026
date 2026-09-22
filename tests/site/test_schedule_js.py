@@ -11,7 +11,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 const scheduleModule = {{exports: {{}}}};
 const script = fs.readFileSync(process.argv[2], "utf8");
-vm.runInNewContext(script, {{module: scheduleModule, exports: scheduleModule.exports, console}});
+vm.runInNewContext(script, {{module: scheduleModule, exports: scheduleModule.exports, console, URL}});
 const api = scheduleModule.exports;
 {case}
 """
@@ -48,7 +48,12 @@ def test_load_public_documents_requires_successful_json_responses():
         """
 (async () => {
 const files = ["schedule.json", "knowledge_axes.json", "locations.json", "settings.json"];
-const payloads = files.map((file) => ({file}));
+const payloads = [
+  {sections: []},
+  {knowledgeAxes: []},
+  {locations: []},
+  {eventDate: "2026-09-22"},
+];
 const fetchImpl = async (url) => {
   const index = files.indexOf(url.pathname.split("/").at(-1));
   return {ok: true, json: async () => payloads[index]};
@@ -108,7 +113,10 @@ const normalized = api.normalizeScheduleDocument(
 );
 assert.equal(normalized.eventDate, "2026-09-22");
 assert.equal(normalized.section.groups[0].knowledgeAxis, null);
-assert.equal(normalized.section.groups[0].items[0].sessions[0].location, "Sala A · Sala B");
+assert.equal(
+  normalized.section.groups[0].items[0].sessions[0].location,
+  `Sala A ${String.fromCodePoint(0x00b7)} Sala B`,
+);
 assert.equal(normalized.section.groups[1].knowledgeAxis, "axis-secret");
 assert.deepEqual(schedule, original);
 assert.deepEqual(schedule.sections[0].groups[0].items[0].sessions[0].locations, [
@@ -171,9 +179,9 @@ const views = api.deriveShiftView(
 const idsByShift = Object.fromEntries(
   views.map((view) => [view.id, view.courses.flatMap((course) => course.items.map((entry) => entry.item.id))]),
 );
-assert.deepEqual(idsByShift.morning, ["morning-only"]);
-assert.deepEqual(idsByShift.afternoon, ["afternoon-only"]);
-assert.deepEqual(idsByShift.evening, ["evening-only"]);
+assert.deepEqual(JSON.parse(JSON.stringify(idsByShift.morning)), ["morning-only"]);
+assert.deepEqual(JSON.parse(JSON.stringify(idsByShift.afternoon)), ["afternoon-only"]);
+assert.deepEqual(JSON.parse(JSON.stringify(idsByShift.evening)), ["evening-only"]);
         """
     )
 
@@ -193,9 +201,9 @@ const groups = api.deriveAxisView(
   new Date("2026-09-22T13:30:00.000Z"),
   "America/Sao_Paulo",
 );
-assert.deepEqual(groups.map((group) => group.label), ["Eixo real", "Sem eixo"]);
-assert.deepEqual(groups[0].courses.map((course) => course.id), ["real-group"]);
-assert.deepEqual(groups[1].courses.map((course) => course.id), ["no-axis", "unknown-axis"]);
+assert.deepEqual(JSON.parse(JSON.stringify(groups.map((group) => group.label))), ["Eixo real", "Sem eixo"]);
+assert.deepEqual(JSON.parse(JSON.stringify(groups[0].courses.map((course) => course.id))), ["real-group"]);
+assert.deepEqual(JSON.parse(JSON.stringify(groups[1].courses.map((course) => course.id))), ["no-axis", "unknown-axis"]);
         """
     )
 
@@ -220,7 +228,7 @@ const selected = api.selectCarouselActivities(
   now,
   "America/Sao_Paulo",
 );
-assert.deepEqual(selected.map((activity) => activity.id), [
+assert.deepEqual(JSON.parse(JSON.stringify(selected.map((activity) => activity.id))), [
   "live-1",
   "live-2",
   "next-1",
