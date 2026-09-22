@@ -24,7 +24,7 @@ uv run uvicorn app:app --reload --env-file .env
 O `Dockerfile` usa build multi-stage com Python 3.14 e instala somente as
 dependências de produção a partir do `uv.lock`. O `docker-compose.yml` publica o
 backend e as interfaces estáticas pelo mesmo serviço e mantém os catálogos JSON
-em um volume persistente.
+da pasta `db/` do workspace montados em `/app/db`.
 
 Copie o arquivo de ambiente, defina um segredo seguro e inicie o serviço:
 
@@ -39,13 +39,11 @@ O serviço fica disponível em <http://localhost:8000>. Para acompanhar os logs:
 docker compose logs -f app
 ```
 
-As alterações feitas no painel são armazenadas no volume Docker
-`portasch2026_portas-abertas-data`. Para remover o container sem apagar os
-dados, use `docker compose down`. Remova o volume somente quando quiser
-recriar os catálogos persistidos:
+As alterações feitas no painel são armazenadas diretamente nos arquivos da pasta
+`db/` do workspace. Para remover o container sem apagar os dados, use:
 
 ```powershell
-docker compose down -v
+docker compose down
 ```
 
 Endereços locais:

@@ -134,6 +134,11 @@ documentação em `/api/docs`; a página pública é servida em `/`; o painel é
 em `/admin`, com assets em `/admin/static`. Os catálogos JSON são substituíveis
 por caminhos de ambiente para testes e deployments isolados.
 
+No Docker Compose, a pasta `./db` do workspace é montada diretamente em `/app/db`.
+Assim, os catálogos usados pela API e pelos JSONs públicos permanecem disponíveis
+quando a imagem é recriada e as alterações feitas pelo painel ficam no workspace;
+não há volume nomeado separado para essa persistência.
+
 O `TOKEN_JWT` já está configurado em `.env`. O segredo deve permanecer fora do Git e o
 lifespan deve validar apenas configurações exigidas pela aplicação inteira.
 
