@@ -167,10 +167,12 @@ main {
 
 .activity-card {
     flex: 0 0 calc((100% - 40px) / 3);
+    min-width: 0;
     padding: 22px 22px 20px;
     display: flex;
     flex-direction: column;
     min-height: 260px;
+    overflow-wrap: anywhere;
 }
 
 .activity-card:hover,
@@ -207,6 +209,11 @@ main {
 .status-badge.soon {
     background: var(--color-status-soon-surface);
     color: var(--color-status-soon-text);
+}
+
+.status-badge.finalized {
+    background: var(--color-finalized-badge);
+    color: var(--color-finalized-badge-text);
 }
 
 .card-time {

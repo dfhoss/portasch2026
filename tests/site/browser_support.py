@@ -3,13 +3,27 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
+from urllib.parse import urlsplit
 
 from playwright.sync_api import sync_playwright
 
 
 class _QuietHandler(SimpleHTTPRequestHandler):
+    public_json_paths = {
+        "/db/schedule.json": "schedule.json",
+        "/db/knowledge_axes.json": "knowledge_axes.json",
+        "/db/locations.json": "locations.json",
+        "/db/settings.json": "settings.json",
+    }
+
     def log_message(self, format, *args):
         pass
+
+    def translate_path(self, path):
+        public_name = self.public_json_paths.get(urlsplit(path).path)
+        if public_name:
+            return str(Path(__file__).resolve().parents[2] / "db" / public_name)
+        return super().translate_path(path)
 
     def copyfile(self, source, outputfile):
         try:

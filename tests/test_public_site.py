@@ -11,6 +11,17 @@ def test_public_site_is_served_from_root(client):
     assert "UFFS de Portas Abertas" in response.text
 
 
+def test_public_site_shell_does_not_embed_persisted_schedule_data(client):
+    html = client.get("/").text
+
+    assert "Recepção nos Auditórios dos Blocos A e B" not in html
+    assert "eventDate" not in html
+    assert "data-schedule-item" not in html
+    assert 'class="activity-card"' not in html
+    assert 'aria-busy="true"' in html
+    assert "<noscript>" in html
+
+
 @pytest.mark.parametrize(
     "file_name",
     ["schedule.json", "knowledge_axes.json", "locations.json", "settings.json"],

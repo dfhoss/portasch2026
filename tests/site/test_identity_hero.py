@@ -104,11 +104,42 @@ class HeroIdentityTests(BrowserTestCase):
             self.page.locator(".carousel-track").evaluate("e => e.style.transform"), before
         )
 
-    def test_agenda_failure_keeps_static_content_and_carousel_usable(self):
+    def test_repeated_carousel_initialization_does_not_duplicate_cards_or_dots(self):
+        self.page.evaluate(
+            """
+            () => {
+              const track = document.querySelector('.carousel-track');
+              const card = document.createElement('article');
+              card.className = 'activity-card';
+              card.setAttribute('data-schedule-item', 'fixture-card');
+              card.textContent = 'Fixture';
+              track.replaceChildren(card);
+              window.initializeCarousel();
+              window.initializeCarousel();
+              if (track.querySelectorAll('[data-carousel-clone]').length !== 0) {
+                throw new Error('clones inesperados');
+              }
+              if (track.querySelectorAll('.activity-card:not([data-carousel-clone])').length !== 1) {
+                throw new Error('cards duplicados');
+              }
+              if (document.querySelectorAll('.carousel-dots .dot').length !== 1) {
+                throw new Error('dots duplicados');
+              }
+            }
+            """
+        )
+
+    def test_agenda_failure_keeps_static_content_and_carousel_empty(self):
         self.page.route("**/db/schedule.json", lambda route: route.abort())
         self.page.reload(wait_until="networkidle")
-        self.assertGreater(self.page.locator(".activity-card").count(), 0)
+        self.assertEqual(self.page.locator(".activity-card").count(), 0)
         self.assertGreater(self.page.locator(".carousel-btn").count(), 0)
+        self.assertEqual(
+            self.page.locator("[data-schedule-root]").get_attribute("aria-busy"), "false"
+        )
+        self.assertGreater(self.page.locator(".hero-image").count(), 0)
+        self.assertGreater(self.page.locator(".rule-btn").count(), 0)
+        self.assertGreater(self.page.locator(".campus-map-img").count(), 0)
         self.assertIn("ROLANDO AGORA", self.page.locator("main").inner_text().upper())
 
     def test_successful_loads_have_no_application_page_errors_and_capture_viewports(self):

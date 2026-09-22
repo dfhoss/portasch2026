@@ -30,10 +30,8 @@ class IdentityTokensTest(BrowserTestCase):
         item.evaluate(
             """element => {
                 element.classList.add('schedule-item--finalized');
-                const status = document.createElement('span');
-                status.className = 'schedule-item__status';
+                const status = element.querySelector('.schedule-item__status');
                 status.textContent = 'Finalizada';
-                element.prepend(status);
             }"""
         )
         self.assertEqual(
@@ -41,7 +39,7 @@ class IdentityTokensTest(BrowserTestCase):
             "rgb(233, 231, 255)",
         )
         self.assertEqual(
-            item.locator(".schedule-item__status").evaluate(
+            item.locator(".schedule-item__status").first.evaluate(
                 "element => getComputedStyle(element).color"
             ),
             "rgb(255, 255, 255)",

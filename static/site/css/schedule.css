@@ -499,6 +499,21 @@
   text-transform: uppercase;
 }
 
+.schedule-item--live .schedule-item__status {
+  color: var(--color-status-live-text);
+  background: var(--color-status-live-surface);
+}
+
+.schedule-item--soon .schedule-item__status {
+  color: var(--color-status-soon-text);
+  background: var(--color-status-soon-surface);
+}
+
+.schedule-item--finalized .schedule-item__status {
+  color: var(--color-finalized-badge-text);
+  background: var(--color-finalized-badge);
+}
+
 /* ==========================================================================
    10. Responsividade & Acessibilidade
    ========================================================================== */

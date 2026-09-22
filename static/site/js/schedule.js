@@ -14,7 +14,7 @@ const SHIFTS = Object.freeze([
 const STATUS_CLASSES = Object.freeze({
   "AO VIVO": "live",
   "EM BREVE": "soon",
-  FINALIZADA: "finished",
+  FINALIZADA: "finalized",
 });
 
 const STATUS_PRIORITIES = Object.freeze(["AO VIVO", "EM BREVE", "FINALIZADA"]);
