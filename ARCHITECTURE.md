@@ -11,8 +11,10 @@ modelos de domínio, persistência e os dois domínios visuais.
 ```mermaid
 flowchart LR
     Browser[ navegador / site público ] --> Site[ static/site/ ]
+    Browser --> PublicData[ GET /db/{file_name} ]
     Browser --> Admin[ static/admin/ ]
     Site --> App[ app.py ]
+    PublicData --> App
     Admin --> App
     Client[ cliente HTTP ] --> App
     App --> Routes[ routes/ ]
@@ -30,9 +32,11 @@ flowchart LR
 | ----------------- | -------------------------------------------------------- | -------------------------------------- |
 | `app.py`          | Compor a aplicação, lifespan, logging, saúde e routers   | HTTP / composição FastAPI              |
 | `routes/`         | Validar requisições, autenticar e orquestrar respostas   | Endpoints FastAPI                      |
+| `routes/site.py`  | Entregar somente os quatro JSONs públicos por allowlist | `GET /db/{file_name}`                  |
 | `dependencies.py` | JWT, autorização, configuração e recursos compartilhados | `Depends` / aliases `Annotated`        |
 | `models/`         | Contratos e validações de domínio reutilizáveis          | Pydantic                               |
 | `clients/`        | Ler, validar e persistir dados; encapsular erros         | Dicionários, listas e erros de domínio |
+| `clients/settings.py` | Caminho, leitura e persistência de `settings.json`   | `SETTINGS_PATH` / `SettingsDocument`   |
 | `db/*.json`       | Catálogos de desenvolvimento persistidos                 | Arquivos JSON                          |
 | `static/site/`    | Página pública, assets e scripts da agenda                | HTML, CSS e JavaScript                 |
 | `static/admin/`   | Shell build-free do painel administrativo                | HTML, CSS e JavaScript                 |
@@ -57,9 +61,13 @@ de domínio são convertidos em `HTTPException` somente na fronteira HTTP.
 
 ### 3.2 Página pública
 
-`/` entrega a página pública e seus assets build-free. Nesta fase, o HTML inicial é
-renderizado sem consumir a API; a integração do site com os dados públicos fica para
-uma etapa posterior. Os tokens permanecem em `static/site/DESIGN.md`.
+`/` entrega o shell público e seus assets build-free. Depois do carregamento, `schedule.js`
+faz somente quatro requisições `GET /db/{file_name}` para `schedule.json`,
+`knowledge_axes.json`, `locations.json` e `settings.json`. `routes/site.py` resolve cada
+caminho em tempo de requisição, aplica allowlist e não participa da API administrativa. O
+HTML inicial não contém agenda persistida; se a rede, o HTTP ou o parse falhar, a agenda e o
+carrossel ficam vazios e o restante da página continua utilizável. Os tokens permanecem em
+`static/site/DESIGN.md`.
 
 ### 3.3 Painel administrativo
 
@@ -67,6 +75,7 @@ uma etapa posterior. Os tokens permanecem em `static/site/DESIGN.md`.
 login -> /api/auth/token -> sessionStorage.adminToken
       -> /api/auth/users/me/ -> /api/* com Bearer JWT
       -> router -> client -> catálogo JSON
+      -> /api/settings -> clients.settings -> settings.json
 ```
 
 `/admin` entrega somente o shell público; o navegador valida a identidade antes de
@@ -88,11 +97,13 @@ propagado para as sessões da agenda.
 
 ### Persistência JSON
 
-- Caminhos `DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH` e
+- Caminhos `DATABASE_PATH`, `SCHEDULE_PATH`, `SETTINGS_PATH`, `LOCATIONS_PATH` e
   `KNOWLEDGE_AXES_PATH` são resolvidos em tempo de chamada, nunca cacheados no import.
 - Escritas usam arquivo temporário, `fsync` e `os.replace`; repositórios expõem falhas
   de filesystem como `PersistenceError`, não como detalhes HTTP.
 - A agenda valida referências antes de salvar; `null` para local ou eixo é válido.
+- `settings.json` mantém `eventDate` separado de `schedule.json`; `/api/settings` é a fronteira
+  autenticada de leitura e gravação, enquanto `/db/settings.json` é somente leitura pública.
 - Dados de usuários e hashes são sensíveis e nunca devem ser incluídos em código,
   HTML inicial ou fixtures versionadas.
 

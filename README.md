@@ -57,6 +57,19 @@ Endereços locais:
 O painel exige login e mantém o token somente no `sessionStorage`. As alterações são
 validadas pela API e persistidas nos arquivos JSON configurados.
 
+O site público lê, somente por `GET`, `schedule.json`, `knowledge_axes.json`, `locations.json`
+e `settings.json` em `/db/{file_name}`. Ele não usa `/api/` nem possui permissão de escrita.
+`eventDate` é mantido exclusivamente em `settings.json`; para simular uma data em um ambiente
+isolado, crie um arquivo que contenha somente `{"eventDate":"2026-09-22"}` e execute:
+
+```powershell
+$env:SETTINGS_PATH = "C:\caminho\settings-simulacao.json"
+uv run uvicorn app:app --reload --env-file .env
+```
+
+A agenda continua no caminho definido por `SCHEDULE_PATH`; a simulação não copia nem altera
+`schedule.json`.
+
 ## Estrutura
 
 | Caminho | Responsabilidade |
@@ -80,9 +93,10 @@ possui seu próprio contrato visual junto aos arquivos que ela governa.
 
 O site é estático e não possui `package.json`, bundler ou dependências próprias. Seus
 arquivos principais são `static/site/index.html`, `static/site/css/`,
-`static/site/js/` e `static/site/assets/`. O HTML inicial funciona sem consumir a API;
-a integração da agenda, dos eixos e dos locais com os dados do backend será feita
-posteriormente.
+`static/site/js/` e `static/site/assets/`. O HTML inicial contém apenas o shell da agenda e
+do carrossel; `schedule.js` consulta os quatro JSONs públicos em `/db/` e renderiza os dados
+reais sem usar a API administrativa. Se a rede falhar, o shell, o hero, o regulamento e os
+mapas continuam utilizáveis e a programação permanece vazia.
 
 As fontes locais usam `font-display: swap`. O hero usa as artes desktop e mobile via
 `picture`, com breakpoint móvel em 600px. O carrossel é responsivo, circular, suporta
@@ -110,7 +124,8 @@ uv run ty check
 ```
 
 Os testes E2E usam diretórios temporários e podem receber caminhos isolados por
-`DATABASE_PATH`, `SCHEDULE_PATH`, `LOCATIONS_PATH` e `KNOWLEDGE_AXES_PATH`. O
+`DATABASE_PATH`, `SCHEDULE_PATH`, `SETTINGS_PATH`, `LOCATIONS_PATH` e
+`KNOWLEDGE_AXES_PATH`. O
 `TOKEN_JWT` também deve estar configurado.
 
 ## Desenvolvimento visual
