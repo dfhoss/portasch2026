@@ -71,6 +71,7 @@ app.include_router(locations.router, prefix=API_PREFIX)
 app.include_router(knowledge_axes.router, prefix=API_PREFIX)
 app.include_router(institutions.router, prefix=API_PREFIX)
 app.include_router(participants.router, prefix=API_PREFIX)
+app.include_router(site.router)
 app.mount(
     "/admin/static",
     home.AdminStaticFiles(directory=home.ADMIN_STATIC_DIR),
