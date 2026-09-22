@@ -37,6 +37,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 @dataclass(frozen=True)
 class TemporaryDatabase:
     schedule: Path
+    settings: Path
     locations: Path
     knowledge_axes: Path
     users: Path
@@ -48,6 +49,7 @@ class TemporaryDatabase:
 def temporary_database(tmp_path: Path) -> TemporaryDatabase:
     paths = TemporaryDatabase(
         schedule=tmp_path / "schedule.json",
+        settings=tmp_path / "settings.json",
         locations=tmp_path / "locations.json",
         knowledge_axes=tmp_path / "knowledge_axes.json",
         users=tmp_path / "users.json",
@@ -56,6 +58,7 @@ def temporary_database(tmp_path: Path) -> TemporaryDatabase:
     )
     for source_name, destination in (
         ("schedule.json", paths.schedule),
+        ("settings.json", paths.settings),
         ("locations.json", paths.locations),
         ("knowledge_axes.json", paths.knowledge_axes),
         ("users.json", paths.users),
@@ -72,6 +75,7 @@ def configured_environment(
 ) -> TemporaryDatabase:
     monkeypatch.setenv("TOKEN_JWT", TEST_JWT_SECRET)
     monkeypatch.setenv("SCHEDULE_PATH", str(temporary_database.schedule))
+    monkeypatch.setenv("SETTINGS_PATH", str(temporary_database.settings))
     monkeypatch.setenv("LOCATIONS_PATH", str(temporary_database.locations))
     monkeypatch.setenv("KNOWLEDGE_AXES_PATH", str(temporary_database.knowledge_axes))
     monkeypatch.setenv("DATABASE_PATH", str(temporary_database.users))
