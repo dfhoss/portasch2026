@@ -210,3 +210,4 @@ ideas.md
 .pytest-tmp-*/
 .uv-cache/
 .uv-cache-menu/
+/db/participants.json
