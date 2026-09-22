@@ -79,6 +79,17 @@ await assert.rejects(
     "https://example.test/",
   ),
 );
+await assert.rejects(
+  api.loadPublicDocuments(
+    async (url) => ({
+      ok: true,
+      json: async () => url.pathname.endsWith("settings.json")
+        ? {eventDate: "2026-02-30"}
+        : {},
+    }),
+    "https://example.test/",
+  ),
+);
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;

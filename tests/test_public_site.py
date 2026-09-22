@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,22 @@ def test_public_site_shell_does_not_embed_persisted_schedule_data(client):
     assert 'class="activity-card"' not in html
     assert 'aria-busy="true"' in html
     assert "<noscript>" in html
+
+
+def test_public_site_shell_has_unique_label_targets_and_decorative_arrow_icons(client):
+    html = client.get("/").text
+    ids = re.findall(r'\bid="([^"]+)"', html)
+    labelled_by = re.findall(r'aria-labelledby="([^"]+)"', html)
+    arrow_svgs = re.findall(
+        r'<button class="carousel-btn (?:prev|next)"[^>]*>(.*?)</button>',
+        html,
+        flags=re.DOTALL,
+    )
+
+    assert len(ids) == len(set(ids))
+    assert all(target in ids for target in labelled_by)
+    assert len(arrow_svgs) == 2
+    assert all('aria-hidden="true"' in svg for svg in arrow_svgs)
 
 
 @pytest.mark.parametrize(

@@ -27,6 +27,14 @@ function publicDataError() {
   return new Error("Falha ao carregar os dados públicos");
 }
 
+function isValidEventDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth[month - 1];
+}
+
 async function loadPublicDocuments(fetchImpl = fetch, baseURI = document.baseURI) {
   const files = ["schedule.json", "knowledge_axes.json", "locations.json", "settings.json"];
   const responses = await Promise.all(
@@ -43,7 +51,7 @@ async function loadPublicDocuments(fetchImpl = fetch, baseURI = document.baseURI
   const documents = await Promise.all(responses.map((response) => response.json()));
   if (documents.some((document) => !isRecord(document))) throw publicDataError();
   const settings = documents[3];
-  if (typeof settings.eventDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(settings.eventDate)) {
+  if (!isValidEventDate(settings.eventDate)) {
     throw publicDataError();
   }
 
@@ -119,7 +127,7 @@ function normalizeKnowledgeAxes(document) {
 
 function normalizeScheduleDocument(schedule, axisDocument, locationDocument, settings) {
   const section = findCompleteProgramSection(schedule);
-  if (!section || !isRecord(settings) || typeof settings.eventDate !== "string") return null;
+  if (!section || !isRecord(settings) || !isValidEventDate(settings.eventDate)) return null;
 
   const locationMap = createLocationMap(locationDocument);
   return {
