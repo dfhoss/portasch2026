@@ -564,3 +564,67 @@ a,
   outline-offset: 2px;
 }
 
+/* ===== SEÇÃO REDES SOCIAIS ===== */
+/* ===== SEÇÃO REDES SOCIAIS ===== */
+.social-section {
+    text-align: center; /* Mantém o título centralizado */
+    margin: 48px auto;
+    padding: 0 16px;
+}
+
+.social-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: clamp(24px, 5vw, 32px);
+    color: var(--color-brand);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+}
+
+/* Alinhamento à esquerda dos links */
+.social-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alinha todos os itens internos à esquerda */
+    gap: 16px;
+}
+
+.social-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: fit-content;
+    margin: 0 auto;
+    gap: 16px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: var(--color-text-dark, #333333);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+    transform: translateX(4px);
+    opacity: 0.8;
+}
+
+.social-icon {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    display: block;
+}
+
+.footer-text {
+    display: inline-block;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 0.35em 0.75em;
+    border-radius: 20px;
+}
+
