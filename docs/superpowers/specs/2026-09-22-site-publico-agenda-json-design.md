@@ -1,13 +1,18 @@
-# Site público — agenda orientada por JSON e somente leitura
+# Site público — agenda e configurações orientadas por JSON
 
 Data: 2026-09-22  
-Status: aprovado para especificação; a implementação depende de plano posterior.
+Status: revisado para especificação; a implementação depende de plano posterior.
 
 ## Objetivo
 
-Fazer o site público consumir a agenda persistida nos JSONs do backend como sua única fonte
-de conteúdo de programação. O navegador não deverá manter uma cópia da agenda no HTML, não
-deverá gravar arquivos em `db/` e não deverá usar a API administrativa para editar dados.
+Fazer o site público consumir a agenda e a data do evento persistidas nos JSONs do backend como
+suas únicas fontes de conteúdo de programação e de estado temporal. O navegador não deverá
+manter uma cópia da agenda no HTML, não deverá gravar arquivos em `db/` e não deverá usar a API
+administrativa para editar dados.
+
+A data do evento sairá de `db/schedule.json` e passará a ser mantida exclusivamente em
+`db/settings.json`. Alterar `settings.json` deverá permitir simular o dia do evento e verificar
+os estados `AO VIVO`, `EM BREVE` e `FINALIZADA` sem modificar a agenda.
 
 O painel `/admin` permanece separado: ele continua sendo a interface autenticada que edita os
 catálogos por meio da API existente. Esta especificação trata somente de `static/site/` e da
@@ -21,6 +26,10 @@ atividades que não estão em `db/schedule.json`. O `schedule.js` já tenta busc
 não alcança os arquivos reais do backend. Além disso, a normalização atual mantém eixos
 codificados no JavaScript e não usa integralmente os catálogos recebidos.
 
+Hoje `eventDate` também está dentro de `schedule.json` e o painel o edita junto com o rascunho
+da programação. Isso mistura metadado de configuração com o documento de agenda e torna a
+simulação temporal dependente de uma alteração no payload inteiro da agenda.
+
 Essa combinação permite que o HTML, o JavaScript e os JSONs apresentem agendas divergentes.
 Também mistura duas responsabilidades diferentes: o site público precisa exibir dados, enquanto
 o painel administrativo precisa validar e persistir alterações.
@@ -33,16 +42,41 @@ em `GET /db/{file_name}`. O site buscará somente:
 - `GET /db/schedule.json`;
 - `GET /db/knowledge_axes.json`;
 - `GET /db/locations.json`.
+- `GET /db/settings.json`.
 
 Essa entrega não será um endpoint de edição e não ficará sob o prefixo `/api`. Ela deve retornar
 os arquivos reais apontados pelas configurações do processo, resolvendo os caminhos no momento
 de cada requisição. O arquivo `db/users.json` e qualquer outro caminho não listado nunca serão
 publicados.
 
-O HTML passará a conter apenas o shell sem dados persistidos. `schedule.js` carregará os três
-JSONs, derivará as visões por turno e por eixo e renderizará a programação completa. O carrossel
-“Rolando agora” também será alimentado por atividades reais da agenda. A inicialização do
-carrossel será idempotente e ocorrerá depois que os cards tiverem sido montados.
+O documento canônico de agenda passará a conter `version` e `sections`; `eventDate` não fará
+mais parte de `schedule.json`. `settings.json` terá, no mínimo, este formato:
+
+```json
+{
+  "eventDate": "2026-10-26"
+}
+```
+
+Para simular o evento durante o desenvolvimento, uma cópia isolada de `settings.json` poderá
+receber a data do dia que se deseja testar, por exemplo:
+
+```json
+{
+  "eventDate": "2026-09-22"
+}
+```
+
+O processo de teste poderá apontar `SETTINGS_PATH` para essa cópia. Os horários das sessões
+continuarão vindo de `schedule.json`; basta combinar a data configurada com um relógio de teste
+posicionado dentro de uma sessão para obter `AO VIVO`. A simulação não deve alterar a agenda
+real, criar cópia de `schedule.json` nem usar a API pública para gravar configurações.
+
+O HTML passará a conter apenas o shell sem dados persistidos. `schedule.js` carregará os quatro
+JSONs, usará `settings.eventDate` para derivar os estados temporais, derivará as visões por turno
+e por eixo e renderizará a programação completa. O carrossel “Rolando agora” também será
+alimentado por atividades reais da agenda. A inicialização do carrossel será idempotente e
+ocorrerá depois que os cards tiverem sido montados.
 
 ## Alternativas descartadas
 
@@ -83,6 +117,7 @@ O módulo de site deverá oferecer uma função de resolução com allowlist exp
 - `schedule.json` usa `clients.schedule.get_schedule_path()`;
 - `locations.json` usa `clients.locations.get_locations_path()`;
 - `knowledge_axes.json` usa `clients.knowledge_axes.get_knowledge_axes_path()`.
+- `settings.json` usa `clients.settings.get_settings_path()`.
 
 Os factories são chamados dentro do handler, nunca avaliados uma única vez no import. O
 handler deve rejeitar nomes fora da allowlist com `404`, verificar que o arquivo existe e é
@@ -93,11 +128,16 @@ feita no painel deve aparecer no próximo carregamento do site.
 O handler não aceita corpo, não implementa `PUT`, `POST`, `PATCH` ou `DELETE` e não chama os
 clients de gravação. A rota não precisa aparecer na documentação OpenAPI administrativa.
 
+O backend terá um `SettingsDocument` explícito e um client de configurações com caminho
+`SETTINGS_PATH`, resolvido em tempo de chamada. A API autenticada ganhará `GET /api/settings` e
+`PUT /api/settings`; somente essa fronteira poderá alterar `settings.json`. A API de agenda
+deixará de receber ou devolver `eventDate`.
+
 ### Leitura e normalização no navegador
 
 `schedule.js` deverá expor funções pequenas e testáveis para:
 
-1. carregar os três documentos em paralelo, exigindo `response.ok` e JSON válido;
+1. carregar os quatro documentos em paralelo, exigindo `response.ok` e JSON válido;
 2. localizar a seção `complete-program` sem alterar o documento original;
 3. criar mapas de eixos e locais a partir dos catálogos;
 4. manter nomes de locais como texto seguro, juntando vários locais com ` · `;
@@ -105,9 +145,11 @@ clients de gravação. A rota não precisa aparecer na documentação OpenAPI ad
 6. derivar eixos usando os IDs do JSON, sem `GUIDING_AXES` ou `COURSE_AXIS_MAP` fixos;
 7. preservar todos os grupos, inclusive grupos sem eixo ou com referência desconhecida, em uma
    categoria textual equivalente a “Sem eixo”;
-8. calcular o estado temporal com `America/Sao_Paulo` e exibir sempre um rótulo textual:
+8. obter `eventDate` exclusivamente de `settings.json`, calcular o estado temporal com
+   `America/Sao_Paulo` e exibir sempre um rótulo textual:
    `AO VIVO`, `EM BREVE` ou `FINALIZADA`;
-9. renderizar títulos, descrições, horários, locais e links usando `textContent` e atributos
+9. permitir que os testes forneçam uma data de “agora” determinística e renderizar títulos,
+   descrições, horários, locais e links usando `textContent` e atributos
    DOM, nunca interpolação de HTML com conteúdo vindo dos JSONs.
 
 O modo por turno mostra os grupos que têm sessões sobrepostas ao intervalo do turno. O modo por
@@ -134,7 +176,7 @@ marcadas com `data-carousel-clone`, `aria-hidden="true"` e `inert`.
 - a seção `complete-program` com título, seletor acessível e mount vazio;
 - o carrossel com controles e trilho vazio enquanto os dados não chegam;
 - um `<noscript>` informando que JavaScript é necessário para consultar a programação;
-- nenhum título, descrição, horário, local, eixo, ID ou card de atividade copiado de `db/`.
+- nenhum título, descrição, horário, local, eixo, data, ID ou card de atividade copiado de `db/`.
 
 O estado inicial usará `aria-busy="true"` somente durante o carregamento. Em sucesso, o
 script atualiza o shell e marca os mounts como não ocupados. Em falha de rede, HTTP ou parse,
@@ -145,7 +187,7 @@ não fará retry infinito, não exibirá stack trace e não tentará usar `/api`
 
 O contrato deve ser explícito e verificável:
 
-- `static/site/js/` só poderá fazer requisições `GET` aos três arquivos públicos;
+- `static/site/js/` só poderá fazer requisições `GET` aos quatro arquivos públicos;
 - nenhum script do site poderá chamar `/api/schedule`, `/api/locations` ou
   `/api/knowledge-axes`;
 - nenhum script do site poderá emitir método mutável para `/db/` ou `/api/`;
@@ -178,55 +220,67 @@ A implementação deverá preservar os contratos já vigentes em `static/site/DE
 
 ### Incluído
 
-- nova entrega pública read-only para os três JSONs;
+- nova entrega pública read-only para os quatro JSONs;
+- novo documento `db/settings.json`, modelo, client, rota autenticada e integração do painel;
 - reescrita de `static/site/js/schedule.js` e adaptação de `carousel.js`;
 - remoção da cópia de agenda e dos cards fictícios de `static/site/index.html`;
 - testes do handler público, da normalização/renderização e dos fluxos no navegador;
 - atualização de `static/site/DESIGN.md`, `ARCHITECTURE.md` e `README.md`;
-- preservação dos formatos dos JSONs e da API administrativa existente.
+- preservação do formato estrutural da agenda, com a data movida para configurações, e
+  preservação da autenticação e das validações administrativas existentes.
 
 ### Fora do escopo
 
-- alterar o schema de `schedule.json`, `locations.json` ou `knowledge_axes.json`;
-- mudar o CRUD, autenticação ou autorização de `/admin`;
+- alterar o schema de `locations.json` ou `knowledge_axes.json`;
+- remover ou desproteger o CRUD, a autenticação ou a autorização de `/admin`;
 - permitir edição, exportação ou upload pelo site público;
 - criar bundler, `package.json`, dependência de runtime ou cópia gerada dos JSONs;
 - substituir a identidade visual, os assets do hero ou o layout do regulamento;
 - criar uma nova identidade de alto contraste ou ativar placeholders existentes.
 
+A mudança de contrato de `schedule.json` e a criação de `settings.json` são parte explícita
+deste escopo; não devem ser tratadas como alteração incidental.
+
 ## Estratégia de testes
 
 Os testes devem provar tanto o comportamento quanto a fronteira de segurança:
 
-1. **Rota pública:** verifica que os três arquivos configurados são entregues, que nomes não
+1. **Rota pública:** verifica que os quatro arquivos configurados são entregues, que nomes não
    permitidos retornam `404`, que `users.json` não é exposto e que as configurações são lidas
    no momento da chamada.
-2. **JavaScript:** cobre normalização dos catálogos, grupos sem eixo, múltiplos locais,
-   intervalos nos limites dos turnos, estados temporais, seleção do carrossel e falhas de
-   resposta/parse. O teste deve observar uma execução vermelha antes da implementação e verde
-   depois dela.
-3. **Contrato de rede no navegador:** carrega o site com os JSONs reais ou fixture explicitamente
+2. **Configurações e API administrativa:** cobre leitura e persistência de `settings.json`,
+   rejeição de datas inválidas, autorização, caminho `SETTINGS_PATH`, ausência de `eventDate`
+   no payload canônico da agenda e manutenção da data quando a agenda é salva separadamente.
+3. **JavaScript:** cobre normalização dos catálogos, grupos sem eixo, múltiplos locais,
+   intervalos nos limites dos turnos, estados temporais usando datas fornecidas por
+   `settings.json`, seleção do carrossel e falhas de resposta/parse. O teste deve observar uma
+   execução vermelha antes da implementação e verde depois dela.
+4. **Contrato de rede no navegador:** carrega o site com os JSONs reais ou fixture explicitamente
    interceptada, confirma que um título existente no `db/schedule.json` aparece e que os cards
-   fictícios atuais não aparecem. Registra as requisições e garante ausência de métodos mutáveis
-   e de chamadas `/api` pelo site público.
-4. **Falha de rede:** aborta os JSONs, confirma que hero, regulamento, mapa, headings e
+   fictícios atuais não aparecem. Altera a fixture de `settings.json` para o dia atual e usa uma
+   sessão conhecida para confirmar o rótulo `AO VIVO`. Registra as requisições e garante ausência
+   de métodos mutáveis e de chamadas `/api` pelo site público.
+5. **Falha de rede:** aborta os JSONs, confirma que hero, regulamento, mapa, headings e
    estrutura da página permanecem disponíveis e que não há erro de aplicação no console.
-5. **Regressão visual e de interação:** executa a suíte existente para desktop, tablet e
+6. **Regressão visual e de interação:** executa a suíte existente para desktop, tablet e
    celular, incluindo teclado, toque, resize, loop, foco, zoom fracionado, imagens, fontes,
    ausência de overflow e movimento reduzido.
-6. **Qualidade do repositório:** executa `uv run pytest`, `uv run ruff check .`,
+7. **Qualidade do repositório:** executa `uv run pytest`, `uv run ruff check .`,
    `uv run ruff format --check .` e `uv run ty check`, removendo os artefatos temporários
    previstos em `tests/conftest.py`.
 
 ## Critérios de aceite
 
 - A programação pública renderizada corresponde ao JSON configurado, sem cópia de dados de
-  agenda no HTML ou em um segundo arquivo de runtime.
+  agenda ou data no HTML ou em um segundo arquivo de runtime.
+- `eventDate` existe somente em `settings.json` no formato canônico; alterá-lo em uma fixture ou
+  cópia isolada permite simular uma atividade ao vivo sem editar `schedule.json`.
 - O site público funciona sem autenticação e não utiliza a API administrativa para leitura ou
   escrita da agenda.
-- Apenas os três JSONs públicos são entregues; usuários, hashes e outros arquivos não são
+- Apenas os quatro JSONs públicos são entregues; usuários, hashes e outros arquivos não são
   acessíveis por essa rota.
-- O painel autenticado continua podendo editar e persistir os JSONs pela API existente.
+- O painel autenticado continua podendo editar a agenda pela API existente e passa a editar a
+  data separadamente por `/api/settings`.
 - Turnos, eixos, locais, horários, status, foco, teclado, toque e responsividade permanecem
   funcionais.
 - Falhas de carregamento não apagam o restante da página nem exibem erro técnico ao público.
@@ -235,16 +289,18 @@ Os testes devem provar tanto o comportamento quanto a fronteira de segurança:
 
 ## Tarefas de implementação previstas
 
-1. Criar a entrega pública allowlisted dos JSONs e seus testes, sem expor outros arquivos.
-2. Escrever os testes vermelhos da normalização e da renderização orientadas pelos dados.
-3. Reescrever `schedule.js`, incluindo a programação completa, estados e carrossel dinâmico.
-4. Simplificar `index.html`, adaptar a inicialização de `carousel.js` e preservar os contratos
+1. Criar `settings.json`, seu modelo, client, caminho configurável, rota autenticada e testes;
+   mover `eventDate` para esse documento sem expor outros arquivos.
+2. Atualizar o contrato da agenda, o painel e os testes para salvar configurações separadamente.
+3. Criar a entrega pública allowlisted dos quatro JSONs e seus testes, sem expor outros arquivos.
+4. Escrever os testes vermelhos da normalização e da renderização orientadas pelos dados.
+5. Reescrever `schedule.js`, incluindo a programação completa, estados e carrossel dinâmico.
+6. Simplificar `index.html`, adaptar a inicialização de `carousel.js` e preservar os contratos
    de acessibilidade e responsividade.
-5. Atualizar `static/site/DESIGN.md`, `ARCHITECTURE.md`, `README.md` e os testes de navegador.
-6. Executar a suíte completa, revisar o diff e registrar evidências de verificação.
-7. **Revisar contratos de design** — comparar a implementação com cada contrato aplicável de
+7. Atualizar `static/site/DESIGN.md`, `ARCHITECTURE.md`, `README.md` e os testes de navegador.
+8. Executar a suíte completa, revisar o diff e registrar evidências de verificação.
+9. **Revisar contratos de design** — comparar a implementação com cada contrato aplicável de
    `static/site/DESIGN.md` e confirmar que `static/admin/DESIGN.md` não foi alterado nem teve
    sua fronteira violada; revisar tokens semânticos, ícones, acessibilidade, foco,
    responsividade e animações reduzidas, registrar as evidências e concluir esta tarefa antes
    do commit final.
-
