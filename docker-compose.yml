@@ -9,7 +9,7 @@ services:
     ports:
       - "127.0.0.1:${PORT:-8000}:8000"
     volumes:
-      - portas-abertas-data:/app/db
+      - ./db:/app/db
     init: true
     restart: unless-stopped
     healthcheck:
@@ -24,6 +24,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-
-volumes:
-  portas-abertas-data:
