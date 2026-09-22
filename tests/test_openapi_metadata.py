@@ -1,5 +1,5 @@
 def test_openapi_metadata_matches_portas_abertas_project(client):
-    """Restoring inherited GeoGIS/OCR metadata must make this fail."""
+    """Restoring inherited metadata must make this fail."""
     response = client.get("/api/openapi.json")
 
     assert response.status_code == 200
@@ -9,6 +9,13 @@ def test_openapi_metadata_matches_portas_abertas_project(client):
         "API do evento Portas Abertas para gerenciamento da programação, "
         "locais, eixos de conhecimento e painel administrativo."
     )
+
+
+def test_health_identifies_portas_abertas_service(client):
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json()["service"] == "Portas Abertas API"
 
 
 def test_root_serves_public_site(client):

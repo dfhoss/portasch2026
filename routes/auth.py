@@ -71,10 +71,10 @@ def get_user(username: str):
 
 
 def authenticate_user(username: str, password: str, session=None):
-    """Authenticate a user using optional SQLAlchemy session.
+    """Authenticate a user against the local JSON user store.
 
-    When called from a route, pass the injected RDS session to reuse the
-    connection (same pattern used in other routers).
+    The optional ``session`` parameter is retained for compatibility with
+    callers from the previous backend implementation.
     """
     user = get_user(username=username)
     if not user:

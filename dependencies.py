@@ -6,9 +6,8 @@ seguindo o padrão Annotated do FastAPI (versão 0.95.0+).
 
 Dependências incluem:
 - Autenticação e autorização de usuários
-- Validação de configurações de fila SQS
-- Validação de configuração de bucket S3
-- Serviços de banco de dados
+- Validação da configuração do JWT
+- Acesso ao armazenamento local de usuários em JSON
 """
 
 import os
@@ -76,13 +75,13 @@ async def validate_database_configured() -> str:
 
 async def get_db_service():
     """
-    Dependency: Retorna instância do serviço DynamoDB.
+    Dependency: Retorna os dados do banco local de usuários.
 
     Yields:
-        AsyncDynamoDBJobService: Serviço de gerenciamento de jobs
+        dict: Conteúdo do arquivo JSON de usuários
 
     Usage:
-        db_service: Annotated[AsyncDynamoDBJobService, Depends(get_db_service)]
+        db_data: Annotated[dict, Depends(get_db_service)]
     """
     with database_connection(DATABASE_PATH) as db_service:
         yield db_service
@@ -90,16 +89,16 @@ async def get_db_service():
 
 def get_db_client():
     """
-    Dependency: Retorna instância do cliente RDS.
+    Dependency: Retorna os dados carregados do banco local de usuários.
 
     Raises:
         HTTPException: Se DATABASE_PATH não estiver configurada
 
     Returns:
-        RDS: Cliente RDS para operações de banco de dados
+        dict: Conteúdo do arquivo JSON de usuários
 
     Usage:
-        rds: Annotated[RDS, Depends(get_rds_client)]
+        db_data: Annotated[dict, Depends(get_db_client)]
     """
     return load_database(DATABASE_PATH)
 

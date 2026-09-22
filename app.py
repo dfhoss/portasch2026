@@ -90,7 +90,7 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": get_brazil_time(),
-        "service": "GeoGIS AI Backend Orchestrator",
+        "service": "Portas Abertas API",
     }
 
 
