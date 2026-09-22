@@ -1,0 +1,36 @@
+/* Estilos para a Seção do Mapa do Campus */
+
+.campus-map-section {
+  width: 100%;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.campus-map-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.campus-map-img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  object-fit: contain;
+}
+
+/* Responsividade adicional */
+@media (max-width: 768px) {
+  .campus-map-container {
+    gap: 1rem;
+  }
+
+  .campus-map-img {
+    border-radius: 4px;
+  }
+}

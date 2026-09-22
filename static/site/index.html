@@ -17,7 +17,7 @@
   <meta property="og:description"
     content="Confira a programação, as atividades e o regulamento do UFFS de Portas Abertas no Campus Chapecó.">
   <meta property="og:url" content="/">
-  <meta property="og:image" content="/static/assets/images/hero-desktop.jpg">
+  <meta property="og:image" content="/site/assets/images/hero-desktop.jpg">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="5938">
   <meta property="og:image:height" content="1250">
@@ -27,12 +27,13 @@
   <meta name="twitter:title" content="UFFS de Portas Abertas — Campus Chapecó">
   <meta name="twitter:description"
     content="Confira a programação, as atividades e o regulamento do UFFS de Portas Abertas no Campus Chapecó.">
-  <meta name="twitter:image" content="/static/assets/images/hero-desktop.jpg">
+  <meta name="twitter:image" content="/site/assets/images/hero-desktop.jpg">
   <meta name="twitter:image:alt" content="Banner do UFFS de Portas Abertas no Campus Chapecó">
-  <link rel="stylesheet" href="static/css/fonts.css">
-  <link rel="stylesheet" href="static/css/tokens.css">
-  <link rel="stylesheet" href="static/css/main.css">
-  <link rel="stylesheet" href="./static/css/schedule.css">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="./css/schedule.css">
+  <link rel="stylesheet" href="./css/map.css">
 </head>
 
 <body>
@@ -40,8 +41,8 @@
   <header class="banner" role="banner" aria-label="UFFS de Portas Abertas">
     <h1 class="visually-hidden">UFFS de Portas Abertas</h1>
     <picture class="hero-picture">
-      <source media="(max-width: 600px)" srcset="static/assets/images/hero-mobile.png" width="1080" height="437">
-      <img class="hero-image" src="static/assets/images/hero-desktop.jpg" width="5938" height="1250"
+      <source media="(max-width: 600px)" srcset="assets/images/hero-mobile.png" width="1080" height="437">
+      <img class="hero-image" src="assets/images/hero-desktop.jpg" width="5938" height="1250"
         alt="Campus Chapecó. 27 de outubro, das 08h30 às 21h." fetchpriority="high">
     </picture>
   </header>
@@ -59,127 +60,127 @@
 
       <div class="carousel-stage">
         <div class="carousel-wrapper">
-        <button class="carousel-btn prev" aria-label="Atividade anterior" type="button">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
+          <button class="carousel-btn prev" aria-label="Atividade anterior" type="button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
 
-        <div class="carousel" role="region" aria-label="Carrossel de atividades ao vivo" tabindex="0">
-          <div class="carousel-track">
+          <div class="carousel" role="region" aria-label="Carrossel de atividades ao vivo" tabindex="0">
+            <div class="carousel-track">
 
-            <!-- Card 1 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">14:00 – 15:30</span>
-              </div>
-              <h3 class="card-title">Visita guiada ao Campus</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Ponto de encontro: Hall Principal
-              </p>
-              <p class="card-desc">Conheça os laboratórios, salas e espaços de convivência da UFFS com alunos e
-                professores.</p>
-              <div class="card-footer">
-                <span class="card-tag">Presencial</span>
-              </div>
-            </article>
+              <!-- Card 1 -->
+              <article class="activity-card">
+                <div class="card-top">
+                  <span class="status-badge live">AO VIVO</span>
+                  <span class="card-time">14:00 – 15:30</span>
+                </div>
+                <h3 class="card-title">Visita guiada ao Campus</h3>
+                <p class="card-location">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  Ponto de encontro: Hall Principal
+                </p>
+                <p class="card-desc">Conheça os laboratórios, salas e espaços de convivência da UFFS com alunos e
+                  professores.</p>
+                <div class="card-footer">
+                  <span class="card-tag">Presencial</span>
+                </div>
+              </article>
 
-            <!-- Card 2 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">14:30 – 16:00</span>
-              </div>
-              <h3 class="card-title">Oficina de Fotografia Analógica</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Sala 203 – Bloco B
-              </p>
-              <p class="card-desc">Aprenda a revelar fotos e explorar técnicas clássicas com o coletivo Contraste.</p>
-              <div class="card-footer">
-                <span class="card-tag">Workshop</span>
-              </div>
-            </article>
+              <!-- Card 2 -->
+              <article class="activity-card">
+                <div class="card-top">
+                  <span class="status-badge live">AO VIVO</span>
+                  <span class="card-time">14:30 – 16:00</span>
+                </div>
+                <h3 class="card-title">Oficina de Fotografia Analógica</h3>
+                <p class="card-location">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  Sala 203 – Bloco B
+                </p>
+                <p class="card-desc">Aprenda a revelar fotos e explorar técnicas clássicas com o coletivo Contraste.</p>
+                <div class="card-footer">
+                  <span class="card-tag">Workshop</span>
+                </div>
+              </article>
 
-            <!-- Card 3 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">15:00 – 16:30</span>
-              </div>
-              <h3 class="card-title">Mesa: Ciência & Sociedade</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Auditório Central
-              </p>
-              <p class="card-desc">Pesquisadores debatem o impacto da universidade pública na transformação social da
-                região.</p>
-              <div class="card-footer">
-                <span class="card-tag">Palestra</span>
-              </div>
-            </article>
+              <!-- Card 3 -->
+              <article class="activity-card">
+                <div class="card-top">
+                  <span class="status-badge live">AO VIVO</span>
+                  <span class="card-time">15:00 – 16:30</span>
+                </div>
+                <h3 class="card-title">Mesa: Ciência & Sociedade</h3>
+                <p class="card-location">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  Auditório Central
+                </p>
+                <p class="card-desc">Pesquisadores debatem o impacto da universidade pública na transformação social da
+                  região.</p>
+                <div class="card-footer">
+                  <span class="card-tag">Palestra</span>
+                </div>
+              </article>
 
-            <!-- Card 4 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge soon">EM BREVE</span>
-                <span class="card-time">16:00 – 17:00</span>
-              </div>
-              <h3 class="card-title">Show de Talentos UFFS</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Área de Convivência
-              </p>
-              <p class="card-desc">Apresentações musicais, teatro e performances dos estudantes do campus.</p>
-              <div class="card-footer">
-                <span class="card-tag">Cultural</span>
-              </div>
-            </article>
+              <!-- Card 4 -->
+              <article class="activity-card">
+                <div class="card-top">
+                  <span class="status-badge soon">EM BREVE</span>
+                  <span class="card-time">16:00 – 17:00</span>
+                </div>
+                <h3 class="card-title">Show de Talentos UFFS</h3>
+                <p class="card-location">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  Área de Convivência
+                </p>
+                <p class="card-desc">Apresentações musicais, teatro e performances dos estudantes do campus.</p>
+                <div class="card-footer">
+                  <span class="card-tag">Cultural</span>
+                </div>
+              </article>
 
-            <!-- Card 5 -->
-            <article class="activity-card">
-              <div class="card-top">
-                <span class="status-badge live">AO VIVO</span>
-                <span class="card-time">14:00 – 17:00</span>
-              </div>
-              <h3 class="card-title">Feira de Projetos de Extensão</h3>
-              <p class="card-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Pátio Externo
-              </p>
-              <p class="card-desc">Conheça os projetos que a universidade desenvolve junto à comunidade.</p>
-              <div class="card-footer">
-                <span class="card-tag">Exposição</span>
-              </div>
-            </article>
+              <!-- Card 5 -->
+              <article class="activity-card">
+                <div class="card-top">
+                  <span class="status-badge live">AO VIVO</span>
+                  <span class="card-time">14:00 – 17:00</span>
+                </div>
+                <h3 class="card-title">Feira de Projetos de Extensão</h3>
+                <p class="card-location">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  Pátio Externo
+                </p>
+                <p class="card-desc">Conheça os projetos que a universidade desenvolve junto à comunidade.</p>
+                <div class="card-footer">
+                  <span class="card-tag">Exposição</span>
+                </div>
+              </article>
 
+            </div>
           </div>
-        </div>
 
-        <button class="carousel-btn next" aria-label="Próxima atividade" type="button">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
+          <button class="carousel-btn next" aria-label="Próxima atividade" type="button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
 
         <!-- Indicadores (dots) -->
@@ -1783,8 +1784,8 @@
       <noscript>Ative o JavaScript para consultar a programação atualizada.</noscript>
     </section>
     <div class="program-images-container">
-      <img src="static/assets/images/prog1.png" alt="Programação - Parte 1" class="program-img">
-      <img src="static/assets/images/prog2.png" alt="Programação - Parte 2" class="program-img">
+      <img src="assets/images/prog1.png" alt="Programação - Parte 1" class="program-img">
+      <img src="assets/images/prog2.png" alt="Programação - Parte 2" class="program-img">
     </div>
 
     <section class="rules-section" id="regulamento" aria-labelledby="regulamento-title">
@@ -1839,9 +1840,8 @@
         <a href="https://www.uffs.edu.br/uffs/conteudo/Campus%20Chapec%C3%B3/SAE%20-%20CH/Modelos%20de%20documentos%20/REGULAMENTO%20DA%20GINCANA%20-%20Documentos%20Google.pdf"
           class="rule-btn" target="_blank" rel="noopener noreferrer" type="application/pdf"
           aria-label="Abrir regulamento em PDF para visualização em uma nova aba">
-          <svg class="rule-btn__icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            aria-hidden="true" focusable="false">
+          <svg class="rule-btn__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
             <path d="M12 3v12"></path>
             <path d="m7 10 5 5 5-5"></path>
             <path d="M5 21h14"></path>
@@ -1856,14 +1856,31 @@
       <article class="schedule-section schedule-section--complete-program" data-schedule-section="complete-program"
         aria-labelledby="schedule-heading-1">
         <h2 class="schedule-section__title" id="schedule-heading-1">Mapa do Campus</h2>
+        <div class="campus-map-container" aria-labelledby="map-heading">
+          <img src="assets/images/01_map1.png" alt="Mapa Geral do Campus" class="campus-map-img">
+          <img src="assets/images/02_block1.png" alt="Mapa Local dos Blocos" class="campus-map-img">
+          <img src="assets/images/03_block2.png" alt="Mapa das Estandes - Bloco A" class="campus-map-img">
+          <img src="assets/images/04_block3.png" alt="Mapa das Estandes - Bloco B" class="campus-map-img">
+          <img src="assets/images/05_block4.png" alt="Visão Geral do Campus" class="campus-map-img">
+          <img src="assets/images/06_block5.png" alt="Visão Local do Campus" class="campus-map-img">
+        </div>
+        </div>
+      </article>
+    </section>
+
+    <br>
+    <section>
+      <article class="schedule-section schedule-section--complete-program" data-schedule-section="complete-program"
+        aria-labelledby="schedule-heading-1">
+        <h2 class="schedule-section__title" id="schedule-heading-1">Siga a UFFS nas redes</h2>
 
         </div>
       </article>
     </section>
   </main>
 
-  <script src="static/js/carousel.js" defer></script>
-  <script src="./static/js/schedule.js" defer></script>
+  <script src="js/carousel.js" defer></script>
+  <script src="./js/schedule.js" defer></script>
 
 </body>
 
