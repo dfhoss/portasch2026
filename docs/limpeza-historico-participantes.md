@@ -73,10 +73,15 @@ As verificações finais confirmaram que:
 ## Estado do remoto
 
 O `git-filter-repo` removeu automaticamente o remote `origin` durante a
-reescrita como medida de segurança. A URL foi restaurada localmente, mas não
-foi executado `fetch` nem `force-push`.
+reescrita como medida de segurança. A URL chegou a ser restaurada localmente,
+mas um mecanismo automático de `fetch` recriou `refs/remotes/origin/*` e tornou
+os commits antigos alcançáveis novamente no clone local.
 
-Consequentemente, o repositório local está limpo, mas o remoto ainda pode
-conter os commits antigos. Antes de sincronizar o remoto, é necessário
-coordenar um force-push apenas das branches desejadas. Um `fetch` antes dessa
-limpeza pode trazer novamente as refs antigas para o repositório local.
+Para concluir a limpeza local, removi novamente `origin` da configuração,
+expirei os reflogs e executei `git gc --prune=now`. Não foi executado
+`force-push`.
+
+Consequentemente, o repositório local está limpo e sem remote configurado, mas
+o remoto ainda contém os commits antigos. Antes de sincronizar, é necessário
+coordenar um force-push apenas das branches desejadas. Não faça `fetch` antes
+dessa operação: ele pode trazer novamente as refs antigas para o clone local.
