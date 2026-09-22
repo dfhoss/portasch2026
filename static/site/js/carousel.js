@@ -123,7 +123,7 @@
     function resetAutoplay() {
       clearInterval(autoplayTimer);
       if (autoplayPaused) return;
-      if (pageStarts.length > 1) autoplayTimer = setInterval(() => move(1), 5000);
+      if (pageStarts.length > 1) autoplayTimer = setInterval(() => move(1), 8000);
     }
 
     function pauseAutoplayForCard() {

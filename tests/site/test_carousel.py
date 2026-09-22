@@ -90,19 +90,19 @@ class CarouselTest(BrowserTestCase):
             self.page.locator(".dot.active").evaluate("e => e === document.activeElement")
         )
 
-    def test_autoplay_waits_five_seconds_and_restarts_after_keyboard(self):
+    def test_autoplay_waits_eight_seconds_and_restarts_after_keyboard(self):
         from datetime import datetime, timezone
 
         self.page.clock.install(time=datetime(2026, 1, 1, tzinfo=timezone.utc))
         self.page.clock.pause_at(datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc))
         self.page.reload(wait_until="load")
-        self.page.clock.run_for(4999)
+        self.page.clock.run_for(7999)
         self.assertEqual(self.active_page(), 0)
         self.page.clock.run_for(1)
         self.assertEqual(self.active_page(), 1)
         self.page.clock.run_for(600)
         self.page.locator(".carousel").press("ArrowLeft")
-        self.page.clock.run_for(4999)
+        self.page.clock.run_for(7999)
         self.assertEqual(self.active_page(), 0)
         self.page.clock.run_for(1)
         self.assertEqual(self.active_page(), 1)

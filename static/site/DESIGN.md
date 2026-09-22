@@ -137,7 +137,7 @@ A passagem entre última e primeira página continua no sentido da navegação, 
 visuais com `aria-hidden` e `inert`. Após a transição, o trilho volta à posição equivalente sem
 animação perceptível. Os controles permanecem disponíveis nos dois extremos; só são desabilitados
 quando todos os cartões cabem em uma página. Movimento reduzido torna a troca imediata, mantendo
-o autoplay existente de 5s. Resize preserva uma página próxima e o foco do indicador após 150ms.
+o autoplay existente de 8s. Resize preserva uma página próxima e o foco do indicador após 150ms.
 
 A duração da transição é proporcional à distância percorrida. O retorno contínuo pelas cópias do
 trilho pode atravessar mais cartões que uma página normal, mas deve manter a mesma velocidade

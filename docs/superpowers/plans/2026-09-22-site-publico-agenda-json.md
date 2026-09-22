@@ -723,7 +723,7 @@ O `rebuild()` deve:
 3. gerar páginas conforme os breakpoints existentes;
 4. desabilitar setas e deixar dots vazios quando não houver cards;
 5. preservar página próxima e foco do indicador após resize;
-6. manter gap de 20px, medição fracionada, duração proporcional, loop, swipe, setas, teclado, autoplay de 5s e `prefers-reduced-motion`.
+6. manter gap de 20px, medição fracionada, duração proporcional, loop, swipe, setas, teclado, autoplay de 8s e `prefers-reduced-motion`.
 
 Cada clone deve continuar com `data-carousel-clone`, `aria-hidden="true"`, `inert` e sem IDs. Expor a função em `window.initializeCarousel` e manter uma inicialização automática que não falhe quando o trilho ainda estiver vazio.
 
