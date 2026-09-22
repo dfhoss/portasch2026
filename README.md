@@ -59,8 +59,8 @@ validadas pela API e persistidas nos arquivos JSON configurados.
 
 O site público lê, somente por `GET`, `schedule.json`, `knowledge_axes.json`, `locations.json`
 e `settings.json` em `/db/{file_name}`. Ele não usa `/api/` nem possui permissão de escrita.
-`eventDate` é mantido exclusivamente em `settings.json`; para simular uma data em um ambiente
-isolado, crie um arquivo que contenha somente `{"eventDate":"2026-09-22"}` e execute:
+`eventDate` é mantido exclusivamente em `settings.json`; para fornecer um valor específico em
+um ambiente isolado, crie um arquivo que contenha somente `{"eventDate":"2026-09-22"}` e execute:
 
 ```powershell
 $env:SETTINGS_PATH = "C:\caminho\settings-simulacao.json"
@@ -68,7 +68,8 @@ uv run uvicorn app:app --reload --env-file .env
 ```
 
 A agenda continua no caminho definido por `SCHEDULE_PATH`; a simulação não copia nem altera
-`schedule.json`.
+`schedule.json`. A programação pública é exibida independentemente da data atual; os rótulos
+`AO VIVO`, `EM BREVE` e `FINALIZADA` são calculados apenas pela hora atual nas sessões.
 
 ## Estrutura
 

@@ -202,10 +202,8 @@ function overlapsShift(session, shift) {
   );
 }
 
-function statusForActivity(sessions, eventDate, now, timeZone = "America/Sao_Paulo") {
-  const localNow = localDateAndMinutes(now, timeZone);
-  if (localNow.date < eventDate) return "EM BREVE";
-  if (localNow.date > eventDate) return "FINALIZADA";
+function statusForActivity(sessions, _eventDate, now, timeZone = "America/Sao_Paulo") {
+  const {minutes} = localDateAndMinutes(now, timeZone);
 
   const validSessions = (Array.isArray(sessions) ? sessions : []).filter(
     (session) => session?.startTime && session?.endTime,
@@ -214,14 +212,14 @@ function statusForActivity(sessions, eventDate, now, timeZone = "America/Sao_Pau
     validSessions.some((session) => {
       const interval = sessionInterval(session);
       return (
-        interval.startMinutes <= localNow.minutes &&
-        localNow.minutes < interval.endMinutes
+        interval.startMinutes <= minutes &&
+        minutes < interval.endMinutes
       );
     })
   ) {
     return "AO VIVO";
   }
-  if (validSessions.some((session) => timeToMinutes(session.startTime) > localNow.minutes)) {
+  if (validSessions.some((session) => timeToMinutes(session.startTime) > minutes)) {
     return "EM BREVE";
   }
   return validSessions.length ? "FINALIZADA" : "EM BREVE";
@@ -531,11 +529,10 @@ function flattenActivities(section, eventDate, now, timeZone = "America/Sao_Paul
 
 function selectCarouselActivities(
   activities,
-  eventDate,
+  _eventDate,
   now,
   timeZone = "America/Sao_Paulo",
 ) {
-  const localNow = localDateAndMinutes(now, timeZone);
   const unique = new Set();
   const byPriority = new Map(STATUS_PRIORITIES.map((status) => [status, []]));
   for (const activity of activities || []) {
@@ -543,21 +540,14 @@ function selectCarouselActivities(
     unique.add(activity.id);
     const status = statusForActivity(
       activity.sessions || activity.item?.sessions,
-      eventDate,
+      _eventDate,
       now,
       timeZone,
     );
     if (byPriority.has(status)) byPriority.get(status).push(activity);
   }
 
-  let candidates;
-  if (localNow.date < eventDate) {
-    candidates = byPriority.get("EM BREVE");
-  } else if (localNow.date > eventDate) {
-    candidates = byPriority.get("FINALIZADA");
-  } else {
-    candidates = STATUS_PRIORITIES.flatMap((status) => byPriority.get(status));
-  }
+  const candidates = STATUS_PRIORITIES.flatMap((status) => byPriority.get(status));
   return candidates.slice(0, 5);
 }
 
