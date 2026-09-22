@@ -6,7 +6,17 @@ from clients.db import load_database
 from dependencies import validate_jwt_configured
 from fastapi import FastAPI
 from loguru import logger
-from routes import auth, home, institutions, knowledge_axes, locations, participants, schedule, site
+from routes import (
+    auth,
+    home,
+    institutions,
+    knowledge_axes,
+    locations,
+    participants,
+    schedule,
+    settings,
+    site,
+)
 from utils import brazil_time_formatter, get_brazil_time
 
 logger.configure(
@@ -56,6 +66,7 @@ API_PREFIX = "/api"
 
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(schedule.router, prefix=API_PREFIX)
+app.include_router(settings.router, prefix=API_PREFIX)
 app.include_router(locations.router, prefix=API_PREFIX)
 app.include_router(knowledge_axes.router, prefix=API_PREFIX)
 app.include_router(institutions.router, prefix=API_PREFIX)

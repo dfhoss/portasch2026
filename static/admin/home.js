@@ -19,6 +19,7 @@ const EDITOR_SECTIONS = new Set(["schedule", "locations", "axes", "institutions"
 
 const state = {
   schedule: null,
+  settings: null,
   locations: [],
   locationGroups: [],
   knowledgeAxes: [],
@@ -31,6 +32,7 @@ const draftKeys = new WeakMap();
 let nextDraftKey = 1;
 let expandedGroups = new WeakSet();
 let savedScheduleSnapshot = null;
+let savedSettingsSnapshot = null;
 let modalOpener = null;
 let modalOpenerTarget = null;
 let modalContext = null;
@@ -138,6 +140,18 @@ function scheduleIsDirty() {
   return savedScheduleSnapshot !== null && scheduleSnapshot() !== savedScheduleSnapshot;
 }
 
+function settingsSnapshot(settings = state.settings) {
+  return JSON.stringify(settings || null);
+}
+
+function settingsIsDirty() {
+  return savedSettingsSnapshot !== null && settingsSnapshot() !== savedSettingsSnapshot;
+}
+
+function editorIsDirty() {
+  return scheduleIsDirty() || settingsIsDirty();
+}
+
 function updateScheduleSaveState() {
   const saveButton = editorContent.querySelector?.("#save-schedule");
   const status = editorContent.querySelector?.("#schedule-save-status");
@@ -153,6 +167,23 @@ function updateScheduleSaveState() {
 
 function markScheduleChanged() {
   updateScheduleSaveState();
+}
+
+function updateSettingsSaveState() {
+  const saveButton = editorContent.querySelector?.("#save-settings");
+  const status = editorContent.querySelector?.("#settings-save-status");
+  const warning = editorContent.querySelector?.("#settings-unsaved-warning");
+  const dirty = settingsIsDirty();
+  if (saveButton) saveButton.disabled = !dirty;
+  if (status) {
+    status.textContent = dirty ? "Alterações não salvas" : "Tudo salvo";
+    status.classList?.toggle("is-dirty", dirty);
+  }
+  if (warning) warning.hidden = !dirty;
+}
+
+function markSettingsChanged() {
+  updateSettingsSaveState();
 }
 
 function catalogKey(record) {
@@ -651,18 +682,22 @@ function renderSettings() {
     <header class="content-header">
       <div><p class="eyebrow">Preferências do evento</p><h2>Configurações</h2></div>
       <div class="toolbar-actions">
-        <button type="button" class="primary-action" data-action="save-schedule">Salvar configurações</button>
+        <div class="save-status-group">
+          <span id="settings-save-status" class="save-status" role="status"></span>
+          <button id="save-settings" type="button" class="primary-action" data-action="save-settings" disabled>Salvar configurações</button>
+        </div>
       </div>
     </header>
     <section class="settings-panel" aria-labelledby="settings-title">
       <h3 id="settings-title">Identificação do evento</h3>
       <div class="schedule-metadata">
         <label for="schedule-version">Edição do evento</label>
-        <input id="schedule-version" name="version" type="number" min="1" inputmode="numeric" value="${escapeHtml(state.schedule.version)}">
+        <input id="schedule-version" name="version" type="number" min="1" inputmode="numeric" value="${escapeHtml(state.schedule?.version)}">
         <label for="schedule-date">Data do evento</label>
-        <input id="schedule-date" name="eventDate" type="date" value="${escapeHtml(state.schedule.eventDate)}">
+        <input id="schedule-date" name="eventDate" type="date" value="${escapeHtml(state.settings?.eventDate)}">
       </div>
     </section>`;
+  updateSettingsSaveState();
 }
 
 function renderEditorSection(section) {
@@ -979,7 +1014,6 @@ function isCanonicalSchedule(schedule) {
     typeof schedule !== "object" ||
     !Number.isInteger(schedule.version) ||
     schedule.version < 1 ||
-    !isValidDate(schedule.eventDate) ||
     !Array.isArray(schedule.sections)
   ) {
     return false;
@@ -1028,6 +1062,14 @@ function isCanonicalSchedule(schedule) {
       });
     });
   });
+}
+
+function isCanonicalSettings(settings) {
+  return Boolean(
+    settings &&
+    typeof settings === "object" &&
+    isValidDate(settings.eventDate),
+  );
 }
 
 async function reloadLocationDependencies() {
@@ -1359,9 +1401,6 @@ function validateDraft(schedule) {
   if (!Number.isInteger(Number(schedule?.version)) || Number(schedule.version) < 1) {
     errors.push("A versão deve ser um número inteiro maior ou igual a 1.");
   }
-  if (!isValidDate(schedule?.eventDate || "")) {
-    errors.push("Informe uma data válida para o evento.");
-  }
 
   const locationNames = new Set(state.locations.map((location) => location.name));
   const axisIds = new Set(state.knowledgeAxes.map((axis) => axis.id));
@@ -1411,16 +1450,26 @@ function validateDraft(schedule) {
   return errors;
 }
 
+function validateSettings(settings) {
+  const errors = [];
+  if (!isValidDate(settings?.eventDate || "")) {
+    errors.push("Informe uma data válida para o evento.");
+  }
+  return errors;
+}
+
 async function saveSchedule() {
   const errors = validateDraft(state.schedule);
   if (errors.length) return showErrors(errors);
 
   const selectedIndex = (state.schedule?.sections || []).indexOf(selectedSection());
   try {
+    const schedulePayload = {...state.schedule};
+    delete schedulePayload.eventDate;
     const response = await apiFetch("/schedule", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(state.schedule),
+      body: JSON.stringify(schedulePayload),
     });
     if (!response.ok) {
       await showApiError(response, "Não foi possível salvar a programação");
@@ -1441,12 +1490,43 @@ async function saveSchedule() {
   }
 }
 
+async function saveSettings() {
+  const errors = validateSettings(state.settings);
+  if (errors.length) return showErrors(errors);
+
+  try {
+    const response = await apiFetch("/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(state.settings),
+    });
+    if (!response.ok) {
+      await showApiError(response, "Não foi possível salvar as configurações");
+      return;
+    }
+    const canonicalSettings = await response.json();
+    if (!isCanonicalSettings(canonicalSettings)) {
+      announce("Não foi possível salvar as configurações");
+      return;
+    }
+    state.settings = canonicalSettings;
+    savedSettingsSnapshot = settingsSnapshot();
+    renderSettings();
+    announce("Configurações salvas com sucesso.");
+  } catch (error) {
+    if (error.message !== "unauthorized") {
+      announce("Não foi possível salvar as configurações");
+    }
+  }
+}
+
 async function loadAdminData() {
   if (["institutions", "participants"].includes(activeEditorSection)) renderCatalogLoading();
   const viewState = readEditorViewState();
-  const [scheduleResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse, institutionsResponse, participantsResponse] =
+  const [scheduleResponse, settingsResponse, locationsResponse, locationGroupsResponse, knowledgeAxesResponse, institutionsResponse, participantsResponse] =
     await Promise.all([
       apiFetch("/schedule"),
+      apiFetch("/settings"),
       apiFetch("/locations"),
       apiFetch("/locations/groups"),
       apiFetch("/knowledge-axes"),
@@ -1455,14 +1535,16 @@ async function loadAdminData() {
     ]);
   if (
     !scheduleResponse.ok ||
+    !settingsResponse.ok ||
     !locationsResponse.ok ||
     !locationGroupsResponse.ok ||
     !knowledgeAxesResponse.ok || !institutionsResponse.ok || !participantsResponse.ok
   ) {
     throw new Error("load-failed");
   }
-  const [schedule, locations, locationGroups, knowledgeAxes, institutions, participants] = await Promise.all([
+  const [schedule, settings, locations, locationGroups, knowledgeAxes, institutions, participants] = await Promise.all([
     scheduleResponse.json(),
+    settingsResponse.json(),
     locationsResponse.json(),
     locationGroupsResponse.json(),
     knowledgeAxesResponse.json(),
@@ -1471,6 +1553,7 @@ async function loadAdminData() {
   ]);
   if (
     !isCanonicalSchedule(schedule) ||
+    !isCanonicalSettings(settings) ||
     !isCanonicalCatalogList(locations) ||
     !isCanonicalLocationGroupList(locationGroups) ||
     !isCanonicalCatalogList(knowledgeAxes) || !isCanonicalCatalogList(institutions) || !isCanonicalCatalogList(participants)
@@ -1479,6 +1562,8 @@ async function loadAdminData() {
   }
   state.schedule = schedule;
   savedScheduleSnapshot = scheduleSnapshot();
+  state.settings = settings;
+  savedSettingsSnapshot = settingsSnapshot();
   state.locations = locations;
   state.locationGroups = locationGroups;
   state.knowledgeAxes = knowledgeAxes;
@@ -1525,6 +1610,7 @@ async function handleEditorClick(event) {
   button.closest(".menu")?.removeAttribute("open");
 
   if (action === "save-schedule") return saveSchedule();
+  if (action === "save-settings") return saveSettings();
   if (action === "retry-admin-data") return loadAdminData().catch(renderCatalogError);
   if (action === "add-section") {
     if (!state.schedule) {
@@ -1701,10 +1787,14 @@ editorContent.addEventListener("keydown", (event) => {
   menu.querySelector(".menu-trigger")?.focus();
 });
 editorContent.addEventListener("change", (event) => {
-  if (!state.schedule) return;
-  if (event.target.id === "schedule-version") state.schedule.version = Number(event.target.value);
-  if (event.target.id === "schedule-date") state.schedule.eventDate = event.target.value;
-  markScheduleChanged();
+  if (event.target.id === "schedule-version" && state.schedule) {
+    state.schedule.version = Number(event.target.value);
+    markScheduleChanged();
+  }
+  if (event.target.id === "schedule-date" && state.settings) {
+    state.settings.eventDate = event.target.value;
+    markSettingsChanged();
+  }
 });
 editorContent.addEventListener("input", (event) => {
   if (!["location-search", "knowledge-axis-search", "institution-search", "participant-search"].includes(event.target.id)) return;
@@ -1736,7 +1826,7 @@ globalThis.addEventListener?.("pagehide", () => {
 });
 
 globalThis.addEventListener?.("beforeunload", (event) => {
-  if (!scheduleIsDirty()) return;
+  if (!editorIsDirty()) return;
   event.preventDefault?.();
   event.returnValue = "";
 });

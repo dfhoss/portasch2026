@@ -68,3 +68,91 @@ def test_replace_settings_converts_replace_failure_and_preserves_previous_file(
         "eventDate": "2026-10-26"
     }
     assert not list(Path(tmp_path).glob("*.tmp"))
+
+
+def test_settings_routes_require_authentication(client):
+    assert client.get("/api/settings").status_code == 401
+    assert client.put("/api/settings", json={"eventDate": "2026-09-22"}).status_code == 401
+
+
+def test_settings_api_persists_and_returns_iso_date(client, auth_headers, temporary_database):
+    response = client.put(
+        "/api/settings",
+        json={"eventDate": "2026-09-22"},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"eventDate": "2026-09-22"}
+    assert json.loads(temporary_database.settings.read_text(encoding="utf-8")) == response.json()
+
+
+def test_schedule_api_never_returns_event_date(client, auth_headers):
+    response = client.get("/api/schedule", headers=auth_headers)
+
+    assert response.status_code == 200
+    assert "eventDate" not in response.json()
+
+
+@pytest.mark.parametrize("event_date", ["0000-01-01", "2026-02-30"])
+def test_settings_api_rejects_invalid_event_dates(client, auth_headers, event_date):
+    response = client.put(
+        "/api/settings",
+        json={"eventDate": event_date},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("payload", ['{"eventDate":', '{"eventDate": "not-a-date"}'])
+def test_settings_api_read_failures_are_structured_and_non_leaking(
+    client, auth_headers, temporary_database, payload
+):
+    temporary_database.settings.write_text(payload, encoding="utf-8")
+
+    response = client.get("/api/settings", headers=auth_headers)
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": {"message": "Não foi possível carregar as configurações", "references": []}
+    }
+    assert str(temporary_database.settings) not in response.text
+
+
+def test_settings_api_missing_file_is_structured_and_non_leaking(
+    client, auth_headers, temporary_database
+):
+    temporary_database.settings.unlink()
+
+    response = client.get("/api/settings", headers=auth_headers)
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": {"message": "Não foi possível carregar as configurações", "references": []}
+    }
+    assert str(temporary_database.settings) not in response.text
+
+
+def test_settings_api_persistence_failure_is_structured_and_non_leaking(
+    client, auth_headers
+):
+    from app import app
+    from routes.settings import get_settings_replacer
+
+    def fail_replace(document, path):
+        raise PersistenceError("filesystem path and internal secret")
+
+    app.dependency_overrides[get_settings_replacer] = lambda: fail_replace
+
+    response = client.put(
+        "/api/settings",
+        json={"eventDate": "2026-09-22"},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": {"message": "Não foi possível salvar as configurações", "references": []}
+    }
+    assert "filesystem" not in response.text

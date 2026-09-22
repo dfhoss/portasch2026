@@ -1,7 +1,7 @@
 import re
 import unicodedata
 from copy import deepcopy
-from datetime import date, time
+from datetime import time
 from typing import Any, Self
 from urllib.parse import urlsplit
 
@@ -110,7 +110,6 @@ class Section(BaseModel):
 
 class ScheduleDocument(BaseModel):
     version: int = Field(ge=1)
-    event_date: date = Field(alias="eventDate")
     sections: list[Section]
 
     model_config = ConfigDict(populate_by_name=True)

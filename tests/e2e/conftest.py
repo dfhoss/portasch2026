@@ -55,6 +55,7 @@ def temporary_databases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict
         for name in (
             "users.json",
             "schedule.json",
+            "settings.json",
             "locations.json",
             "knowledge_axes.json",
             "institutions.json",
@@ -83,6 +84,7 @@ def temporary_databases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict
     )
     monkeypatch.setenv("DATABASE_PATH", str(paths["users.json"]))
     monkeypatch.setenv("SCHEDULE_PATH", str(paths["schedule.json"]))
+    monkeypatch.setenv("SETTINGS_PATH", str(paths["settings.json"]))
     monkeypatch.setenv("LOCATIONS_PATH", str(paths["locations.json"]))
     monkeypatch.setenv("KNOWLEDGE_AXES_PATH", str(paths["knowledge_axes.json"]))
     monkeypatch.setenv("INSTITUTIONS_PATH", str(paths["institutions.json"]))

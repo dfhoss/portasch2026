@@ -52,13 +52,12 @@ def write_json(path: Path, payload: dict) -> None:
 
 
 def empty_schedule() -> dict:
-    return {"version": 1, "eventDate": "2026-10-26", "sections": []}
+    return {"version": 1, "sections": []}
 
 
 def referenced_schedule(location: str | None = "Auditório", axis: str | None = "educacao") -> dict:
     return {
         "version": 1,
-        "eventDate": "2026-10-26",
         "sections": [
             {
                 "id": "secao",
@@ -150,7 +149,7 @@ def test_schedule_round_trip_uses_json_aliases(tmp_path: Path):
 
     loaded = load_schedule(path)
     assert loaded == document
-    assert read_json(path)["eventDate"] == "2026-10-26"
+    assert "eventDate" not in read_json(path)
     assert read_json(path)["sections"][0]["groups"][0]["knowledgeAxis"] == "educacao"
 
 

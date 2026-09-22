@@ -693,12 +693,12 @@ def test_action_menu_and_select_controls_have_shared_visual_contracts():
 def test_location_rename_refreshes_schedule_and_locations_atomically():
     run_node_case(
         """
-        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const oldSchedule = {version: 1, sections: [{id: "secao", title: "Seção", groups: []}]};
         api.state.schedule = oldSchedule;
         api.state.locations = [{id: "loc-secret", name: "Antigo"}];
         api.openLocationEditor(api.state.locations[0]);
         const form = {elements: {namedItem: (name) => name === "name" ? {value: "Novo"} : null}};
-        const refreshedSchedule = {version: 2, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const refreshedSchedule = {version: 2, sections: [{id: "secao", title: "Seção", groups: []}]};
         const refreshedLocations = [{id: "loc-secret", name: "Novo"}];
         const calls = [];
         context.fetch = async (path, options = {}) => {
@@ -850,7 +850,7 @@ def test_malformed_successful_catalog_response_preserves_state_and_is_safe():
 def test_malformed_location_refresh_response_preserves_both_catalog_dependencies():
     run_node_case(
         """
-        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const oldSchedule = {version: 1, sections: [{id: "secao", title: "Seção", groups: []}]};
         const oldLocations = [{id: "loc-secret", name: "Antigo"}];
         api.state.schedule = oldSchedule;
         api.state.locations = oldLocations;
@@ -861,7 +861,7 @@ def test_malformed_location_refresh_response_preserves_both_catalog_dependencies
           call += 1;
           if (call === 1) return {ok: true, status: 200, json: async () => ({id: "loc-secret", name: "Novo"})};
           if (path.endsWith("/locations")) return {ok: true, status: 200, json: async () => [{id: "loc-secret"}]};
-        return {ok: true, status: 200, json: async () => ({version: 2, eventDate: "2026-10-26", sections: []})};
+        return {ok: true, status: 200, json: async () => ({version: 2, sections: null})};
         };
         await api.saveLocation(form);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), oldSchedule);
@@ -874,7 +874,7 @@ def test_malformed_location_refresh_response_preserves_both_catalog_dependencies
 def test_malformed_schedule_refresh_response_preserves_schedule_and_locations():
     run_node_case(
         """
-        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const oldSchedule = {version: 1, sections: [{id: "secao", title: "Seção", groups: []}]};
         const oldLocations = [{id: "loc-secret", name: "Antigo"}];
         api.state.schedule = oldSchedule;
         api.state.locations = oldLocations;
@@ -885,7 +885,7 @@ def test_malformed_schedule_refresh_response_preserves_schedule_and_locations():
           call += 1;
           if (call === 1) return {ok: true, status: 200, json: async () => ({id: "loc-secret", name: "Novo"})};
           if (path.endsWith("/locations")) return {ok: true, status: 200, json: async () => oldLocations};
-          return {ok: true, status: 200, json: async () => ({sections: [], version: 2})};
+          return {ok: true, status: 200, json: async () => ({sections: null, version: 2})};
         };
         await api.saveLocation(form);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), oldSchedule);
@@ -898,7 +898,7 @@ def test_malformed_schedule_refresh_response_preserves_schedule_and_locations():
 def test_malformed_schedule_initial_response_preserves_existing_state():
     run_node_case(
         """
-        const oldSchedule = {version: 1, eventDate: "2026-10-26", sections: [{id: "secao", title: "Seção", groups: []}]};
+        const oldSchedule = {version: 1, sections: [{id: "secao", title: "Seção", groups: []}]};
         const oldLocations = [{id: "loc-secret", name: "Antigo"}];
         const oldAxes = [{id: "axis-secret", name: "Geral"}];
         api.state.schedule = oldSchedule;

@@ -35,7 +35,6 @@ def canonical_schedule(
         group["knowledgeAxis"] = axis
     return {
         "version": 1,
-        "eventDate": "2026-10-26",
         "sections": [{"id": "secao", "title": "Seção", "groups": [group]}],
     }
 
@@ -83,7 +82,7 @@ def test_get_schedule_returns_public_json(client, auth_headers):
     assert response.status_code == status.HTTP_200_OK
     payload = response.json()
     assert payload["version"] == 1
-    assert payload["eventDate"] == "2026-10-26"
+    assert "eventDate" not in payload
     assert "event_date" not in payload
     group = payload["sections"][0]["groups"][0]
     assert group["knowledgeAxis"] == "geral"
@@ -104,7 +103,7 @@ def test_get_schedule_maps_read_failures_to_structured_non_leaking_500(
         temporary_database.schedule.write_text('{"private filesystem detail":', encoding="utf-8")
     else:
         temporary_database.schedule.write_text(
-            json.dumps({"version": 0, "eventDate": "not-a-date", "sections": []}),
+            json.dumps({"version": 0, "sections": []}),
             encoding="utf-8",
         )
 

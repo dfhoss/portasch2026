@@ -88,14 +88,13 @@ vm.createContext(context);
 const source = fs.readFileSync(process.argv[2], "utf8");
 vm.runInContext(source + `\n;globalThis.editorUnderTest = {
   state, loadAdminData, renderEditorSection, renderSections, renderGroups, renderSettings, renderKnowledgeAxes, openActivityEditor,
-  addSession, validateDraft, saveSchedule, applyModalDraft, openSectionEditor, announce,
+  addSession, validateDraft, saveSchedule, saveSettings, applyModalDraft, openSectionEditor, announce,
   openGroupEditor, handleEditorClick, showApiError, logout, participantRow, renderInstitutions, renderParticipants, renderCatalogLoading, renderCatalogError, saveAdminCatalog, deleteAdminCatalog, openAdminCatalogEditor
 };`, context, {filename: "admin.js"});
 
 const api = context.editorUnderTest;
 const validSchedule = () => ({
   version: 1,
-  eventDate: "2026-10-26",
   sections: [{
     id: "secao",
     title: "Seção",
@@ -426,7 +425,7 @@ def test_schedule_save_feedback_only_highlights_unsaved_draft_and_protects_exit(
         assert.equal(cleanBeforeUnload.defaultPrevented, false);
         assert.equal(cleanBeforeUnload.returnValue, undefined);
 
-        api.state.schedule.eventDate = "2026-11-26";
+        api.state.schedule.version = 2;
         api.renderSections();
         assert.equal(status.textContent, "Alterações não salvas");
         assert.equal(warning.hidden, false);
@@ -528,6 +527,7 @@ def test_settings_contains_event_metadata_outside_schedule_workspace():
     run_node_case(
         """
         api.state.schedule = validSchedule();
+        api.state.settings = {eventDate: "2026-10-26"};
         api.renderEditorSection("account");
         assert.match(elementFor("#editor-content").innerHTML, /Configurações/);
         assert.match(elementFor("#editor-content").innerHTML, /Edição do evento/);
@@ -631,12 +631,13 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
     run_node_case(
         """
         const schedule = validSchedule();
+        const settings = {eventDate: "2026-10-26"};
         const locations = [{id: "loc-1", name: "Auditório"}];
         const groups = [{id: "group-1", name: "Bloco C", category: "blocos"}];
         const axes = [{id: "geral", name: "Geral"}];
         const institutions = [{id: "institution-1", name: "Escola", city: "Chapecó", state: "SC"}];
         const participants = [{id: "participant-1", name: "Aluno", cpf: "52998224725", email: "a@e.org", institutionId: "institution-1"}];
-        const responses = [schedule, locations, groups, axes, institutions, participants].map((payload) => ({
+        const responses = [schedule, settings, locations, groups, axes, institutions, participants].map((payload) => ({
           ok: true,
           status: 200,
           json: async () => payload,
@@ -646,6 +647,7 @@ def test_load_admin_data_populates_all_state_and_renders_selected_section():
         await api.loadAdminData();
 
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.schedule)), schedule);
+        assert.deepEqual(JSON.parse(JSON.stringify(api.state.settings)), settings);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locations)), locations);
         assert.deepEqual(JSON.parse(JSON.stringify(api.state.locationGroups)), groups);
             assert.deepEqual(JSON.parse(JSON.stringify(api.state.knowledgeAxes)), axes);
@@ -672,6 +674,31 @@ def test_switching_editor_sections_does_not_create_status_message():
         assert.equal(elementFor("#editor-message").textContent, "");
         api.renderEditorSection("schedule");
         assert.equal(elementFor("#editor-message").textContent, "");
+        """
+    )
+
+
+def test_save_settings_uses_its_own_authenticated_endpoint_and_state():
+    run_node_case(
+        """
+        api.state.schedule = {version: 1, sections: []};
+        api.state.settings = {eventDate: "2026-10-26"};
+        api.state.locations = [];
+        api.state.knowledgeAxes = [];
+        let sent;
+        context.fetch = async (path, options) => {
+          sent = {path, options, body: JSON.parse(options.body)};
+          return {ok: true, status: 200, json: async () => ({eventDate: "2026-09-22"})};
+        };
+
+        api.state.settings.eventDate = "2026-09-22";
+        await api.saveSettings();
+
+        assert.equal(sent.path, "/api/settings");
+        assert.equal(sent.options.method, "PUT");
+        assert.deepEqual(sent.body, {eventDate: "2026-09-22"});
+        assert.equal(api.state.schedule.eventDate, undefined);
+        assert.deepEqual(api.state.settings, {eventDate: "2026-09-22"});
         """
     )
 
@@ -714,7 +741,6 @@ def test_validate_draft_rejects_invalid_required_duplicates_references_and_times
         api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
         const schedule = validSchedule();
         schedule.version = 0;
-        schedule.eventDate = "2026-02-30";
         schedule.sections[0].title = "   ";
         schedule.sections[0].groups[0].id = "secao";
         schedule.sections[0].groups[0].knowledgeAxis = "inexistente";
@@ -725,7 +751,6 @@ def test_validate_draft_rejects_invalid_required_duplicates_references_and_times
 
         const errors = Array.from(api.validateDraft(schedule));
         assert.ok(errors.some((item) => item.includes("versão")));
-        assert.ok(errors.some((item) => item.includes("data")));
         assert.ok(errors.some((item) => item.includes("título")));
         assert.ok(errors.some((item) => item.includes("duplicado")));
         assert.ok(errors.some((item) => item.includes("eixo")));
@@ -811,7 +836,7 @@ def test_save_schedule_preserves_draft_on_validation_http_and_network_failures()
         api.state.knowledgeAxes = [{id: "geral", name: "Geral"}];
 
         const invalid = validSchedule();
-        invalid.eventDate = "";
+        invalid.version = 0;
         api.state.schedule = invalid;
         let fetchCalls = 0;
         context.fetch = async () => { fetchCalls += 1; };
@@ -886,7 +911,7 @@ def test_apply_restores_focus_to_equivalent_opener_after_rerender():
     """Applying a modal must restore focus even when rerender disconnected its opener."""
     run_node_case(
         """
-        api.state.schedule = {version: 1, eventDate: "2026-10-26", sections: []};
+        api.state.schedule = {version: 1, sections: []};
         const opener = new FakeElement("add-section");
         const replacement = new FakeElement("add-section-replacement");
         const content = elementFor("#editor-content");
