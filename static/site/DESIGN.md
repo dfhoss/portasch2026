@@ -161,9 +161,29 @@ informações sem repetir o título do `h1`. Não inferir ano ou alterar agenda 
 Os assets atualmente usados pela home são o JPG desktop e o PNG móvel descritos acima. Preservar
 bytes dos assets, suas proporções e caminhos locais.
 
-A agenda, eixos e locais vêm diretamente dos JSONs em `db/`; não manter cópia local.
-Na falha de rede, preservar o conteúdo estático e a interação existentes.
-“Ao vivo”, “Em breve” e “Finalizada” precisam de rótulos textuais, além das cores.
+### Dados públicos e agenda dinâmica
+
+`schedule.json`, `knowledge_axes.json`, `locations.json` e `settings.json` chegam por
+`GET /db/{file_name}`, com allowlist explícita, `application/json` e cache revalidável.
+Essa entrega é somente leitura: o site não usa `/api/`, não envia métodos mutáveis e não
+mantém cópia da agenda no HTML inicial. O painel autenticado continua sendo a única interface
+que grava dados.
+
+`eventDate` pertence exclusivamente a `settings.json`. A agenda, os eixos e os locais são
+normalizados pelo `schedule.js` a partir dos quatro documentos, preservando a ordem e os
+grupos desconhecidos. O shell inicial contém somente mounts vazios; em sucesso, os títulos,
+descrições, horários, locais e links chegam dos JSONs e são inseridos no DOM como texto ou
+atributo. Os estados `AO VIVO`, `EM BREVE` e `FINALIZADA` aparecem como rótulos textuais,
+além das cores e contornos semânticos.
+
+Para simular o dia do evento sem alterar a agenda, testes e ambientes isolados podem apontar
+`SETTINGS_PATH` para um arquivo que contenha somente `{"eventDate":"2026-09-22"}`. Não
+criar cópia de `schedule.json`, token administrativo ou componente de edição no site público.
+Em qualquer falha de rede, HTTP ou parse, o mount da agenda e o carrossel permanecem vazios,
+`aria-busy` é liberado e hero, regulamento, mapas e demais conteúdos estáticos continuam
+utilizáveis sem mensagem técnica intrusiva.
+
+Novas animações devem respeitar movimento reduzido.
 Novas animações devem respeitar movimento reduzido. O autoplay existente não pausa em hover/foco;
 mudar essa política exige decisão explícita de acessibilidade.
 

@@ -9,7 +9,6 @@ def test_rejects_session_when_end_is_not_after_start():
     """Removing chronological validation must make this test fail."""
     payload = {
         "version": 1,
-        "eventDate": "2026-10-26",
         "sections": [
             {
                 "id": "s",
@@ -62,7 +61,6 @@ def test_rejects_duplicate_ids_anywhere_in_the_document():
     """Removing document-wide ID validation must make this test fail."""
     payload = {
         "version": 1,
-        "eventDate": "2026-10-26",
         "sections": [
             {
                 "id": "duplicado",
@@ -86,7 +84,6 @@ def test_canonicalizes_missing_ids_with_document_wide_collision_suffixes():
     """Removing missing-ID generation or collision handling must make this test fail."""
     payload = {
         "version": 1,
-        "eventDate": "2026-10-26",
         "sections": [
             {
                 "id": "",
@@ -113,7 +110,6 @@ def test_accepts_json_aliases_and_defaults_optional_activity_fields():
     document = ScheduleDocument.model_validate(
         {
             "version": 1,
-            "eventDate": "2026-10-26",
             "sections": [
                 {
                     "id": "secao",
@@ -133,12 +129,11 @@ def test_accepts_json_aliases_and_defaults_optional_activity_fields():
 
     group = document.sections[0].groups[0]
     activity = group.items[0]
-    assert document.event_date.isoformat() == "2026-10-26"
     assert group.knowledge_axis == "education"
     assert activity.description is None
     assert activity.sessions == []
     assert activity.link is None
-    assert document.model_dump(by_alias=True, mode="json")["eventDate"] == "2026-10-26"
+    assert "eventDate" not in document.model_dump(by_alias=True, mode="json")
     assert (
         document.model_dump(by_alias=True, mode="json")["sections"][0]["groups"][0]["knowledgeAxis"]
         == "education"
@@ -149,7 +144,6 @@ def test_migrates_legacy_location_and_accepts_multiple_locations_per_session():
     document = ScheduleDocument.model_validate(
         {
             "version": 1,
-            "eventDate": "2026-10-26",
             "sections": [
                 {
                     "id": "s",
@@ -209,7 +203,6 @@ def test_round_trips_a_temporary_copy_of_the_current_schedule_without_field_loss
 def test_activity_link_accepts_bare_domains_and_rejects_incomplete_urls():
     payload = {
         "version": 1,
-        "eventDate": "2026-10-26",
         "sections": [
             {
                 "id": "s",

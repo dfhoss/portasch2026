@@ -468,6 +468,39 @@ def test_year_zero_is_rejected_without_put_request(admin_page: Page) -> None:
         "Informe uma data válida para o evento."
     )
     assert not any(request.startswith("PUT ") and "/schedule" in request for request in requests)
+    assert not any(request.startswith("PUT ") and "/settings" in request for request in requests)
+
+
+def test_event_date_saves_separately_without_changing_schedule(admin_page: Page) -> None:
+    login(admin_page)
+    before_schedule = admin_page.evaluate(
+        """async () => {
+          const token = sessionStorage.getItem('adminToken');
+          const response = await fetch('/api/schedule', {headers: {Authorization: `Bearer ${token}`}});
+          return response.json();
+        }"""
+    )
+    requests: list[str] = []
+    admin_page.on("request", lambda request: requests.append(request.method + " " + request.url))
+    open_settings(admin_page)
+    admin_page.locator("#schedule-date").fill("2026-09-22")
+    admin_page.get_by_role("button", name="Salvar configurações").click()
+    expect(admin_page.get_by_text("Configurações salvas com sucesso.")).to_be_visible()
+    assert any(request.startswith("PUT ") and "/settings" in request for request in requests)
+    assert not any(request.startswith("PUT ") and "/schedule" in request for request in requests)
+
+    admin_page.reload(wait_until="networkidle")
+    open_settings(admin_page)
+    expect(admin_page.locator("#schedule-date")).to_have_value("2026-09-22")
+    after_schedule = admin_page.evaluate(
+        """async () => {
+          const token = sessionStorage.getItem('adminToken');
+          const response = await fetch('/api/schedule', {headers: {Authorization: `Bearer ${token}`}});
+          return response.json();
+        }"""
+    )
+    assert after_schedule == before_schedule
+    assert "eventDate" not in after_schedule
 
 
 def test_catalog_crud_rename_reference_conflict_cancel_and_hidden_ids(admin_page: Page) -> None:

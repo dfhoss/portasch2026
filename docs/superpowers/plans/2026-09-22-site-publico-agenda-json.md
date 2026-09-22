@@ -83,9 +83,7 @@ def test_settings_document_uses_event_date_alias_and_serializes_iso_date():
     document = SettingsDocument.model_validate({"eventDate": "2026-10-26"})
 
     assert document.event_date.isoformat() == "2026-10-26"
-    assert document.model_dump(by_alias=True, mode="json") == {
-        "eventDate": "2026-10-26"
-    }
+    assert document.model_dump(by_alias=True, mode="json") == {"eventDate": "2026-10-26"}
 
 
 def test_settings_path_is_resolved_at_call_time(tmp_path, monkeypatch):
@@ -102,9 +100,7 @@ def test_replace_settings_persists_only_the_canonical_document(tmp_path):
     document = SettingsDocument.model_validate({"eventDate": "2026-09-22"})
 
     assert replace_settings(document, path) == document
-    assert json.loads(path.read_text(encoding="utf-8")) == {
-        "eventDate": "2026-09-22"
-    }
+    assert json.loads(path.read_text(encoding="utf-8")) == {"eventDate": "2026-09-22"}
 ```
 
 Também cobrir `eventDate` inválido com `pytest.raises(ValidationError)` e converter uma falha de `os.replace` em `PersistenceError`, mantendo o arquivo anterior intacto.
@@ -156,9 +152,7 @@ def save_settings(document: SettingsDocument, path: Path) -> None:
     )
 
 
-def replace_settings(
-    document: SettingsDocument, path: Path | None = None
-) -> SettingsDocument:
+def replace_settings(document: SettingsDocument, path: Path | None = None) -> SettingsDocument:
     destination = path or get_settings_path()
     try:
         save_settings(document, destination)
@@ -799,7 +793,12 @@ assert {
     ("GET", "settings.json"),
 }
 assert not any("/api/" in request.url for request in requests)
-assert page.locator(".schedule-item").filter(has_text="Voz e Ação: conhecendo o curso de Administração").count() > 0
+assert (
+    page.locator(".schedule-item")
+    .filter(has_text="Voz e Ação: conhecendo o curso de Administração")
+    .count()
+    > 0
+)
 assert page.locator(".activity-card").filter(has_text="Visita guiada ao Campus").count() == 0
 ```
 

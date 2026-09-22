@@ -29,3 +29,10 @@ def test_unprefixed_api_route_is_not_publicly_available(client):
     response = client.get("/schedule")
 
     assert response.status_code == 404
+
+
+def test_public_json_route_is_not_in_openapi(client):
+    response = client.get("/api/openapi.json")
+
+    assert response.status_code == 200
+    assert "/db/{file_name}" not in response.json()["paths"]
