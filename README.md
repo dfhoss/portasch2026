@@ -20,12 +20,18 @@ automaticamente ao iniciar; variáveis já definidas no ambiente têm prioridade
 uv run uvicorn app:app --reload
 ```
 
+A opção `[tool.uv] compile-bytecode = false` em `pyproject.toml` impede que o `uv`
+pré-compile dependências durante a sincronização. Ela não controla o cache que o
+interpretador Python pode criar ao importar módulos durante a execução local.
+
 ## Deploy com Docker
 
 O `Dockerfile` usa build multi-stage com Python 3.14 e instala somente as
 dependências de produção a partir do `uv.lock`. O `docker-compose.yml` publica o
 backend e as interfaces estáticas pelo mesmo serviço e mantém os catálogos JSON
-da pasta `db/` do workspace montados em `/app/db`.
+da pasta `db/` do workspace montados em `/app/db`. A imagem não inclui arquivos da
+pasta `db/`; os dados são fornecidos pelo volume do Compose. O contexto de build
+contém somente manifests, código e assets usados em runtime.
 
 Copie o arquivo de ambiente, defina um segredo seguro e inicie o serviço:
 

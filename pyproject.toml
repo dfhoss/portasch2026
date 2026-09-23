@@ -15,6 +15,9 @@ dependencies = [
     "uvicorn>=0.52.4",
 ]
 
+[tool.uv]
+compile-bytecode = false
+
 [tool.ruff]
 src = ["src"]
 line-length = 100
