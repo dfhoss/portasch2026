@@ -13,10 +13,11 @@ uv sync
 Copy-Item .env.example .env
 ```
 
-Defina um valor seguro para `TOKEN_JWT` em `.env` e inicie o servidor:
+Defina um valor seguro para `TOKEN_JWT` em `.env`. A aplicação carrega esse arquivo
+automaticamente ao iniciar; variáveis já definidas no ambiente têm prioridade:
 
 ```powershell
-uv run uvicorn app:app --reload --env-file .env
+uv run uvicorn app:app --reload
 ```
 
 ## Deploy com Docker
@@ -62,7 +63,7 @@ um ambiente isolado, crie um arquivo que contenha somente `{"eventDate":"2026-09
 
 ```powershell
 $env:SETTINGS_PATH = "C:\caminho\settings-simulacao.json"
-uv run uvicorn app:app --reload --env-file .env
+uv run uvicorn app:app --reload
 ```
 
 A agenda continua no caminho definido por `SCHEDULE_PATH`; a simulação não copia nem altera

@@ -1,11 +1,18 @@
+# ruff: noqa: E402
+
 import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
-from clients.db import load_database
-from dependencies import validate_jwt_configured
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from loguru import logger
+
+load_dotenv(Path(__file__).resolve().with_name(".env"), override=False)
+
+from clients.db import load_database
+from dependencies import validate_jwt_configured
 from routes import (
     auth,
     home,
