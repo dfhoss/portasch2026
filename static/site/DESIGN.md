@@ -163,12 +163,16 @@ sem deslocamento ou transição.
 O hero apresenta Campus Chapecó, “27 de outubro” e “08h30 às 21h”; seu `alt` comunica essas
 informações sem repetir o título do `h1`. Não inferir ano ou alterar agenda a partir da arte.
 Os assets atualmente usados pela home são o JPG desktop e o PNG móvel descritos acima. Preservar
-bytes dos assets, suas proporções e caminhos locais.
+bytes dos assets, suas proporções e caminhos locais. Os quatro mapas do campus ficam fora do
+primeiro viewport e usam `loading="lazy"`; manter o carregamento nativo sob demanda para não
+disputarem a rede inicial com a agenda e o carrossel.
 
 ### Dados públicos e agenda dinâmica
 
 `schedule.json`, `knowledge_axes.json`, `locations.json` e `settings.json` chegam por
 `GET /db/{file_name}`, com allowlist explícita, `application/json` e cache revalidável.
+Os quatro documentos são antecipados por `preload` no `<head>`; o `Promise.all` de
+`schedule.js` consome esses mesmos recursos sem manter outra cópia dos dados no HTML.
 Essa entrega é somente leitura: o site não usa `/api/`, não envia métodos mutáveis e não
 mantém cópia da agenda no HTML inicial. O painel autenticado continua sendo a única interface
 que grava dados.

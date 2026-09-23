@@ -101,6 +101,10 @@ mapas continuam utilizáveis e a programação permanece vazia.
 As fontes locais usam `font-display: swap`. O hero usa as artes desktop e mobile via
 `picture`, com breakpoint móvel em 600px. O carrossel é responsivo, circular, suporta
 teclado e swipe, e respeita `prefers-reduced-motion`.
+Os quatro mapas do campus usam `loading="lazy"` para carregar quando se aproximam da tela,
+liberando a rede inicial para a agenda e o carrossel.
+Os quatro JSONs públicos da agenda usam `preload` no `<head>`, antes da execução de `schedule.js`,
+para que os dados comecem a baixar junto com os recursos do shell.
 
 Para decisões de interface, consulte [`static/site/DESIGN.md`](static/site/DESIGN.md).
 
