@@ -43,6 +43,21 @@ class CarouselTest(BrowserTestCase):
         assert active_box is not None
         self.assertEqual(active_box["width"] % 1, 0)
 
+    def test_schedule_status_styles_do_not_center_carousel_card_content(self):
+        card = self.page.locator(".activity-card:not([data-carousel-clone])").first
+        self.assertEqual(card.evaluate("e => getComputedStyle(e).textAlign"), "start")
+        announcement = self.page.locator(
+            '#complete-program > [data-schedule-status][role="status"]'
+        )
+        self.assertEqual(announcement.evaluate("e => getComputedStyle(e).textAlign"), "center")
+        footer = card.locator(".card-footer")
+        tag = footer.locator(".card-tag")
+        footer_box = footer.bounding_box()
+        tag_box = tag.bounding_box()
+        assert footer_box is not None
+        assert tag_box is not None
+        self.assertAlmostEqual(tag_box["x"], footer_box["x"], delta=1)
+
     def test_wrap_keeps_moving_forward_then_restores_first_page(self):
         for width in (1440, 390):
             with self.subTest(width=width):

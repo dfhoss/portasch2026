@@ -36,11 +36,11 @@
   font-family: var(--font-body);
 }
 
-[data-schedule-status]:empty {
+#complete-program > [data-schedule-status][role="status"]:empty {
   display: none;
 }
 
-[data-schedule-status] {
+#complete-program > [data-schedule-status][role="status"] {
   margin-block-end: 1rem;
   font-family: var(--font-mono);
   font-size: 0.9rem;

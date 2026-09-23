@@ -102,7 +102,8 @@ data e horário pelo `alt`.
 Cada cartão apresenta, nesta ordem: status (`AO VIVO` ou `EM BREVE`), horário, título, local,
 descrição e tag. O cartão cresce para preencher a altura da faixa e não deve esconder o texto por
 causa de um título mais longo. O hover pode elevar o cartão apenas como reforço secundário; o
-estado precisa continuar compreensível sem apontador.
+estado precisa continuar compreensível sem apontador. Os textos permanecem alinhados à esquerda,
+e a tag fica no rodapé do cartão.
 
 Os cabeçalhos dos cartões de regulamento alinham o número e o título pela baseline tipográfica
 (`align-items: baseline`). O número usa `inline-block`, `line-height` explícito e padding próprio;
@@ -176,7 +177,9 @@ O shell inicial contém somente mounts vazios; em sucesso, os títulos, descriç
 locais e links chegam dos JSONs e são inseridos no DOM como texto ou atributo. Os estados
 `AO VIVO`, `EM BREVE` e `FINALIZADA` consideram somente a hora local atual em relação às
 sessões, ignorando a data do evento; aparecem como rótulos textuais, além das cores e
-contornos semânticos.
+contornos semânticos. No carrossel, cada cartão mostra somente a sessão em andamento ou, quando
+nenhuma estiver ativa, a próxima sessão por horário. Se todas já tiverem terminado, mostra a
+última sessão encerrada, mantendo um horário visível no cartão.
 
 Para testar o valor de `eventDate` sem alterar a agenda, testes e ambientes isolados podem
 apontar `SETTINGS_PATH` para um arquivo que contenha somente `{"eventDate":"2026-09-22"}`. Não

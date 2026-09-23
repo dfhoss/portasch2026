@@ -225,6 +225,40 @@ function statusForActivity(sessions, _eventDate, now, timeZone = "America/Sao_Pa
   return validSessions.length ? "FINALIZADA" : "EM BREVE";
 }
 
+function carouselSessionForTime(sessions, now, timeZone) {
+  const {minutes} = localDateAndMinutes(now, timeZone);
+  const validSessions = (Array.isArray(sessions) ? sessions : []).filter(
+    (session) => session?.startTime && session?.endTime,
+  );
+  const currentSessions = validSessions
+    .filter((session) => {
+      const interval = sessionInterval(session);
+      return interval.startMinutes <= minutes && minutes < interval.endMinutes;
+    })
+    .sort(
+      (left, right) =>
+        sessionInterval(left).startMinutes - sessionInterval(right).startMinutes,
+    );
+  if (currentSessions.length) return currentSessions[0];
+
+  const nextSession = validSessions.reduce((nextSession, session) => {
+    const startMinutes = timeToMinutes(session.startTime);
+    if (startMinutes <= minutes) return nextSession;
+    return !nextSession || startMinutes < timeToMinutes(nextSession.startTime)
+      ? session
+      : nextSession;
+  }, null);
+  if (nextSession) return nextSession;
+
+  return validSessions.reduce((previousSession, session) => {
+    const endMinutes = timeToMinutes(session.endTime);
+    if (endMinutes > minutes) return previousSession;
+    return !previousSession || endMinutes > timeToMinutes(previousSession.endTime)
+      ? session
+      : previousSession;
+  }, null);
+}
+
 function makeActivityEntry(sourceGroup, item, sessions, eventDate, now, timeZone) {
   const status = statusForActivity(sessions, eventDate, now, timeZone);
   return {
@@ -538,13 +572,16 @@ function selectCarouselActivities(
   for (const activity of activities || []) {
     if (!activity || unique.has(activity.id)) continue;
     unique.add(activity.id);
+    const sessions = activity.sessions || activity.item?.sessions;
     const status = statusForActivity(
-      activity.sessions || activity.item?.sessions,
+      sessions,
       _eventDate,
       now,
       timeZone,
     );
-    if (byPriority.has(status)) byPriority.get(status).push(activity);
+    if (!byPriority.has(status)) continue;
+    const session = carouselSessionForTime(sessions, now, timeZone);
+    byPriority.get(status).push({...activity, sessions: session ? [session] : []});
   }
 
   const candidates = STATUS_PRIORITIES.flatMap((status) => byPriority.get(status));

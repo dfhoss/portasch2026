@@ -230,6 +230,37 @@ assert.deepEqual(JSON.parse(JSON.stringify(selected.map((activity) => activity.i
     )
 
 
+def test_carousel_shows_only_the_current_or_nearest_session():
+    run_node_case(
+        """
+const sessions = [
+  {startTime: "19:00", endTime: "21:00", location: "Noite"},
+  {startTime: "08:30", endTime: "12:00", location: "Manhã"},
+  {startTime: "13:00", endTime: "18:00", location: "Tarde"},
+];
+const selectSessionsAt = (instant) => api.selectCarouselActivities(
+  [{id: "multi-slot", sessions}],
+  "2027-01-01",
+  new Date(instant),
+  "America/Sao_Paulo",
+)[0].sessions;
+
+assert.deepEqual(
+  JSON.parse(JSON.stringify(selectSessionsAt("2026-09-22T14:00:00.000Z"))),
+  [sessions[1]],
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(selectSessionsAt("2026-09-22T15:00:00.000Z"))),
+  [sessions[2]],
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(selectSessionsAt("2026-09-23T00:05:00.000Z"))),
+  [sessions[0]],
+);
+        """
+    )
+
+
 def test_axis_view_keeps_unknown_groups_under_sem_eixo():
     run_node_case(
         """
