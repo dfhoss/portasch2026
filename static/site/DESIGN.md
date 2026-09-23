@@ -157,6 +157,9 @@ overlay sobre o bounding box; o estado pressionado continua sendo comunicado pel
 componente. Essa regra não remove o foco de teclado: `:focus-visible` deve manter seu anel de
 foco visível e distinto do feedback de toque.
 
+Links da seção de redes sociais indicam hover e foco apenas com alteração instantânea de opacidade,
+sem deslocamento ou transição.
+
 O hero apresenta Campus Chapecó, “27 de outubro” e “08h30 às 21h”; seu `alt` comunica essas
 informações sem repetir o título do `h1`. Não inferir ano ou alterar agenda a partir da arte.
 Os assets atualmente usados pela home são o JPG desktop e o PNG móvel descritos acima. Preservar
